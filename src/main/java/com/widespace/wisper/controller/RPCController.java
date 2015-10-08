@@ -90,7 +90,7 @@ public class RPCController
 
     private void handle(JSONObject rpcReq) throws JSONException
     {
-        RPCMessageType messageType = determineMessageType(rpcReq);
+        RPCMessageType messageType = new MessageFactory().determineMessageType(rpcReq);
         switch (messageType)
         {
             case UNKNOWN:
@@ -149,14 +149,17 @@ public class RPCController
 
     private void handleNotificationMessageType(JSONObject rpcReq) throws JSONException
     {
-        RPCNotification notification = new RPCNotification(rpcReq, callback);
+        RPCNotification notification = new RPCNotification(rpcReq);
         handleRPCNotification(notification);
 
     }
 
     protected void handleRPCNotification(RPCNotification notification)
     {
-        notification.handle();
+        if (callback != null)
+        {
+            callback.rpcControllerReceivedNotification(notification);
+        }
     }
 
     private void handleRequestMessageType(JSONObject rpcReq) throws JSONException
@@ -250,33 +253,7 @@ public class RPCController
     }
 
 
-    // Utility
-    private RPCMessageType determineMessageType(JSONObject rpcRequest)
-    {
-        RPCMessageType result = RPCMessageType.UNKNOWN;
 
-        if (rpcRequest.has("method") && rpcRequest.has("params"))
-        {
-            if (rpcRequest.has("id"))
-            {
-                result = RPCMessageType.REQUEST;
-            }
-            else
-            {
-                result = RPCMessageType.NOTIFICATION;
-            }
-        }
-        else if (rpcRequest.has("result") && rpcRequest.has("id"))
-        {
-            result = RPCMessageType.RESPONSE;
-        }
-        else if (rpcRequest.has("error"))
-        {
-            result = RPCMessageType.ERROR;
-        }
-
-        return result;
-    }
 
     private String getIdFromJson(JSONObject json) throws JSONException
     {

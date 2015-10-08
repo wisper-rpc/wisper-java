@@ -29,17 +29,21 @@ public class RPCRequest extends RPCAbstractMessage
         this.jsonForm = new JSONObject();
     }
 
-    public RPCRequest(JSONObject jsonRequest,  ResponseBlock block) throws JSONException
+    public RPCRequest(JSONObject json)
     {
-        this.jsonForm = jsonRequest;
-        this.responseBlock = block;
-
-        if (jsonRequest != null && jsonRequest.has("id"))
+        this.jsonForm = json;
+        if (json != null && json.has("id"))
         {
-            this.identifier = jsonRequest.getString("id");
+            this.identifier = json.getString("id");
         }
 
         determineMethodNameAndParameters();
+    }
+
+    public RPCRequest(JSONObject json, ResponseBlock block) throws JSONException
+    {
+        this(json);
+        this.responseBlock = block;
     }
 
 
