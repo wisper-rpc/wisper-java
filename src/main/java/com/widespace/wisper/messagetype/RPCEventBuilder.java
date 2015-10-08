@@ -16,16 +16,16 @@ public class RPCEventBuilder
     private Object value;
 
 
-    public RPCEvent buildStaticEvent() throws JSONException
+    public Event buildStaticEvent() throws JSONException
     {
         methodName += "!";
-        return new RPCEvent(methodName, instanceIdentifier, name, value);
+        return new Event(methodName, instanceIdentifier, name, value);
     }
 
-    public RPCEvent buildInstanceEvent() throws JSONException
+    public Event buildInstanceEvent() throws JSONException
     {
         methodName += ":!";
-        return new RPCEvent(methodName, instanceIdentifier, name, value);
+        return new Event(methodName, instanceIdentifier, name, value);
     }
 
     public RPCEventBuilder withMethodName(String methodName)

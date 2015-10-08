@@ -11,27 +11,27 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * When an instance handling an RPCRequest has finished, it should generate an instance of this object and fill it with the results.
- * This object is then passed to the other endpoint either through the RPCResponse's responseBlock or through the RPCController.
+ * When an instance handling an Request has finished, it should generate an instance of this object and fill it with the results.
+ * This object is then passed to the other endpoint either through the Response's responseBlock or through the RPCController.
  * <p/>
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class RPCResponse extends RPCAbstractMessage
+public class Response extends AbstractMessage
 {
     private String identifier;
 
-    public RPCResponse(JSONObject jsonRpcResponse, RPCRequest theRequest) throws JSONException
+    public Response(JSONObject jsonRpcResponse, Request theRequest) throws JSONException
     {
         this.jsonForm = jsonRpcResponse;
         setIdentifier(theRequest.getIdentifier());
     }
 
-    public RPCResponse(RPCRequest theRequest) throws JSONException
+    public Response(Request theRequest) throws JSONException
     {
         this(new JSONObject(), theRequest);
     }
 
-    public RPCResponse(JSONObject json)
+    public Response(JSONObject json)
     {
         this.jsonForm = json;
     }

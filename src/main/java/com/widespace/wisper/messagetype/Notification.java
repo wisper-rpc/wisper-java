@@ -1,6 +1,5 @@
 package com.widespace.wisper.messagetype;
 
-import com.widespace.wisper.controller.RPCControllerCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,19 +10,19 @@ import java.util.Arrays;
 /**
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class RPCNotification extends RPCAbstractMessage
+public class Notification extends AbstractMessage
 {
     private String methodName;
     private Object[] params;
 
 
-    public RPCNotification(JSONObject rpcNotification) throws JSONException
+    public Notification(JSONObject rpcNotification) throws JSONException
     {
         this.jsonForm = rpcNotification;
         determineMethodNameAndParameters();
     }
 
-    public RPCNotification()
+    public Notification()
     {
         this.jsonForm = new JSONObject();
     }

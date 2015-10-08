@@ -1,6 +1,6 @@
 package com.widespace.wisper.messagetype.error;
 
-import com.widespace.wisper.messagetype.RPCAbstractMessage;
+import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.RPCMessageType;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,7 +8,7 @@ import org.json.JSONObject;
 /**
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class RPCError extends RPCAbstractMessage
+public class RPCError extends AbstractMessage
 {
     public static String RPC_ANDROID_ERROR_DOMAIN = "20";
     private int code;
