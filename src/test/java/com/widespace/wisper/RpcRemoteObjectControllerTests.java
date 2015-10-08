@@ -1,7 +1,7 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.classrepresentation.RPCClass;
-import com.widespace.wisper.controller.RPCControllerCallback;
+import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.controller.RPCRemoteObjectController;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
@@ -20,13 +20,13 @@ import static org.mockito.Mockito.*;
 public class RpcRemoteObjectControllerTests
 {
     private RPCRemoteObjectController remoteObjectController;
-    private RPCControllerCallback callBackMock;
+    private GatewayCallback callBackMock;
 
 
     @Before
     public void setUp() throws Exception
     {
-        callBackMock = mock(RPCControllerCallback.class);
+        callBackMock = mock(GatewayCallback.class);
         remoteObjectController = new RPCRemoteObjectController(callBackMock);
     }
 
@@ -116,7 +116,7 @@ public class RpcRemoteObjectControllerTests
         remoteObjectController.registerClass(rpcClass);
         remoteObjectController.handle(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject~\", \"params\" : [], \"id\": \"abcd1\" }"), null).toJsonString());
         remoteObjectController.handle(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject~\", \"params\" : [], \"id\": \"abcd2\" }"), null).toJsonString());
-        verify(callBackMock, times(2)).rpcControllerGeneratedMessage(anyString());
+        verify(callBackMock, times(2)).gatewayGeneratedMessage(anyString());
 
         String instanceIdentifier1 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[0];
         String instanceIdentifier2 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[1];
@@ -134,7 +134,7 @@ public class RpcRemoteObjectControllerTests
         // Explanation: this times(3) is due to the weird behavior of Mockito on argument capturing in verify. Verify actually
         // catches all invocations of the mocked stub including the previous ones.
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(callBackMock, times(3)).rpcControllerGeneratedMessage(captor.capture());
+        verify(callBackMock, times(3)).gatewayGeneratedMessage(captor.capture());
         assertEquals("{\\\"id\\\":\\\"abcd3\\\",\\\"result\\\":\\\"value2\\\"}", captor.getValue());
     }
 
@@ -149,7 +149,7 @@ public class RpcRemoteObjectControllerTests
         remoteObjectController.registerClass(rpcClass);
         remoteObjectController.handle(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject~\", \"params\" : [], \"id\": \"abcd1\" }"), null).toJsonString());
         remoteObjectController.handle(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject~\", \"params\" : [], \"id\": \"abcd2\" }"), null).toJsonString());
-        verify(callBackMock, times(2)).rpcControllerGeneratedMessage(anyString());
+        verify(callBackMock, times(2)).gatewayGeneratedMessage(anyString());
 
         String instanceIdentifier1 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[0];
         String instanceIdentifier2 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[1];
@@ -158,7 +158,7 @@ public class RpcRemoteObjectControllerTests
         remoteObjectController.handle(instanceEventRequest.toJsonString());
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(callBackMock, times(2)).rpcControllerGeneratedMessage(captor.capture());
+        verify(callBackMock, times(2)).gatewayGeneratedMessage(captor.capture());
         String arg = captor.getValue();
         JSONObject json = new JSONObject(convertStandardJSONString(arg));
         assertEquals(instanceIdentifier1, json.getString("result"));
