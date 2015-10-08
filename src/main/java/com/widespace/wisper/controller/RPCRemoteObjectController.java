@@ -25,7 +25,7 @@ public class RPCRemoteObjectController extends RPCController
     HashMap<String, RPCClass> classMap;
     HashMap<String, RPCClassInstance> instanceMap;
 
-    public RPCRemoteObjectController(RPCControllerCallback callback)
+    public RPCRemoteObjectController(GatewayCallback callback)
     {
         super(callback);
         classMap = new HashMap<String, RPCClass>();

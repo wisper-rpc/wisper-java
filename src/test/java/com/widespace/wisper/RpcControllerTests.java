@@ -1,7 +1,7 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.controller.RPCController;
-import com.widespace.wisper.controller.RPCControllerCallback;
+import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
 import org.junit.Before;
@@ -20,12 +20,12 @@ public class RpcControllerTests
     private static final String SAMPLE_NOTIFICATION = "{ \"method\" : \"swipeTo\", \"params\" : [\"face\", 2] }";
 
     private RPCController rpcController;
-    private RPCControllerCallback callbackMock;
+    private GatewayCallback callbackMock;
 
     @Before
     public void setUp() throws Exception
     {
-        callbackMock = mock(RPCControllerCallback.class);
+        callbackMock = mock(GatewayCallback.class);
         rpcController = new RPCController(callbackMock);
     }
 
@@ -34,14 +34,14 @@ public class RpcControllerTests
     public void testCallBackRequestReceivedIsCalled() throws Exception
     {
         rpcController.handle(SAMPLE_INSTANCE_METHOD_CALL_REQUEST);
-        verify(callbackMock).rpcControllerReceivedRequest(any(Request.class));
+        verify(callbackMock).gatewayReceivedMessage(any(Request.class));
     }
 
     @Test
     public void testCallBackNotificationReceivedIsCalled() throws Exception
     {
         rpcController.handle(SAMPLE_NOTIFICATION);
-        verify(callbackMock).rpcControllerReceivedNotification(any(Notification.class));
+        verify(callbackMock).gatewayReceivedMessage(any(Notification.class));
     }
 
 }

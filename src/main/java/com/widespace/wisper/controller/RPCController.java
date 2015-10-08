@@ -26,12 +26,12 @@ public class RPCController
     public static final String EXTRA_KEY_ADSPACE = "adspace";
     public static final String EXTRA_KEY_WEBVIEW = "webview";
 
-    protected RPCControllerCallback callback;
+    protected GatewayCallback callback;
     private HashMap<String, Request> requests;
 
     private HashMap<String, Object> extras;
 
-    public RPCController(RPCControllerCallback callback)
+    public RPCController(GatewayCallback callback)
     {
         this.callback = callback;
         requests = new HashMap<String, Request>();
@@ -158,7 +158,7 @@ public class RPCController
     {
         if (callback != null)
         {
-            callback.rpcControllerReceivedNotification(notification);
+            callback.gatewayReceivedMessage(notification);
         }
     }
 
@@ -179,7 +179,7 @@ public class RPCController
 
     protected void handleRPCRequest(Request request)
     {
-        callback.rpcControllerReceivedRequest(request);
+        callback.gatewayReceivedMessage(request);
     }
 
     private void handleResponseMessageType(JSONObject rpcResponse) throws JSONException
@@ -209,7 +209,7 @@ public class RPCController
         }
 
         RPCError RPCError = new RPCError(rpcError);
-        callback.rpcControllerReceivedError(RPCError);
+        callback.gatewayReceivedMessage(RPCError);
     }
 
     // Handlers of outgoing messages
@@ -249,7 +249,7 @@ public class RPCController
     {
         String escapedJson = StringEscapeUtils.escapeJavaScript(jsonString);
         System.out.println("<------------" + escapedJson);
-        callback.rpcControllerGeneratedMessage(escapedJson);
+        callback.gatewayGeneratedMessage(escapedJson);
     }
 
 
