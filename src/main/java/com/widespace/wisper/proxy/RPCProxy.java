@@ -1,8 +1,8 @@
 package com.widespace.wisper.proxy;
 
 import com.widespace.wisper.controller.RPCController;
-import com.widespace.wisper.messagetype.RPCNotification;
-import com.widespace.wisper.messagetype.RPCRequest;
+import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.utils.StringUtils;
 import org.json.JSONException;
 
@@ -30,11 +30,11 @@ public class RPCProxy
      * Takes a request, transforms it and passes it on to the receiver.
      *
      * @param request The request that is trying to reach the other controller
-     * @see com.widespace.wisper.messagetype.RPCRequest
+     * @see Request
      */
-    public void handleRequest(RPCRequest request) throws JSONException
+    public void handleRequest(Request request) throws JSONException
     {
-        RPCRequest proxifiedRequest = new RPCRequest();
+        Request proxifiedRequest = new Request();
         proxifiedRequest.setIdentifier(request.getIdentifier());
         proxifiedRequest.setMethodName(extractMethodName(request.getMethodName()));
         proxifiedRequest.setParams(request.getParams());
@@ -46,11 +46,11 @@ public class RPCProxy
      * Takes a notification, transforms it and passes it on to the receiver.
      *
      * @param notification The notification that is trying to reach the other controller
-     * @see com.widespace.wisper.messagetype.RPCNotification
+     * @see Notification
      */
-    public void handleNotification(RPCNotification notification) throws JSONException
+    public void handleNotification(Notification notification) throws JSONException
     {
-        RPCNotification proxifiedNotification = new RPCNotification();
+        Notification proxifiedNotification = new Notification();
         proxifiedNotification.setMethodName(extractMethodName(notification.getMethodName()));
         proxifiedNotification.setParams(notification.getParams());
         receiver.handle(proxifiedNotification.toJsonString());

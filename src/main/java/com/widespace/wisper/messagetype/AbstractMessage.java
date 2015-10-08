@@ -12,7 +12,7 @@ import java.util.*;
  * This abstract class will contain the json representation of the message which is passed in, for instance, by a request to rpc controller.
  * Created by Ehssan Hoorvash on 23/05/14.
  */
-public abstract class RPCAbstractMessage
+public abstract class AbstractMessage
 {
     protected JSONObject jsonForm;
 

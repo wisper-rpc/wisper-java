@@ -3,7 +3,7 @@ package com.widespace.wisper.base;
 import com.widespace.wisper.classrepresentation.RPCClass;
 import com.widespace.wisper.classrepresentation.RPCClassInstance;
 import com.widespace.wisper.controller.RPCRemoteObjectController;
-import com.widespace.wisper.messagetype.RPCNotification;
+import com.widespace.wisper.messagetype.Notification;
 import org.json.JSONException;
 
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public abstract class RPCObject implements RPCProtocol
      *
      * @param notification The notification carrying the event we want to send. This method will add the instance ID as the first param if the method contains ":!". You only need to have set the method correctly for this to work.
      */
-    public void sendNotification(RPCNotification notification)
+    public void sendNotification(Notification notification)
     {
         if (notification != null)
         {
@@ -71,14 +71,14 @@ public abstract class RPCObject implements RPCProtocol
      * @throws JSONException
      * @see com.widespace.wisper.base.RPCProtocol
      */
-    public RPCNotification createEventNotification(ArrayList<Object> params) throws JSONException
+    public Notification createEventNotification(ArrayList<Object> params) throws JSONException
     {
         if (rpcClassInstance == null)
         {
             return null;
         }
 
-        RPCNotification notification = new RPCNotification();
+        Notification notification = new Notification();
         notification.setParams(params);
         notification.setMethodName(remoteObjectController.getRpcClassForClass(this.getClass()).getMapName() + ":!");
         return notification;
@@ -91,14 +91,14 @@ public abstract class RPCObject implements RPCProtocol
      * @throws JSONException
      * @see com.widespace.wisper.base.RPCProtocol
      */
-    public RPCNotification createClassEventNotification(ArrayList<Object> params) throws JSONException
+    public Notification createClassEventNotification(ArrayList<Object> params) throws JSONException
     {
         if (rpcClassInstance == null)
         {
             return null;
         }
 
-        RPCNotification notification = new RPCNotification();
+        Notification notification = new Notification();
         notification.setParams(params);
         notification.setMethodName(remoteObjectController.getRpcClassForClass(this.getClass()).getMapName() + "!");
         return notification;

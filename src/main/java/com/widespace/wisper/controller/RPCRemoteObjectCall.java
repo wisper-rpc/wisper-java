@@ -1,7 +1,7 @@
 package com.widespace.wisper.controller;
 
-import com.widespace.wisper.messagetype.RPCNotification;
-import com.widespace.wisper.messagetype.RPCRequest;
+import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -18,19 +18,19 @@ public class RPCRemoteObjectCall
 
     private String instanceIdentifier;
 
-    private RPCRequest request;
+    private Request request;
 
-    private RPCNotification notification;
+    private Notification notification;
 
 
     // Constructors
-    public RPCRemoteObjectCall(RPCRequest request)
+    public RPCRemoteObjectCall(Request request)
     {
         this.request = request;
         determineInstanceIdentifier();
     }
 
-    public RPCRemoteObjectCall(RPCNotification notification)
+    public RPCRemoteObjectCall(Notification notification)
     {
         this.notification = notification;
         determineInstanceIdentifier();
@@ -137,7 +137,7 @@ public class RPCRemoteObjectCall
         return RPCRemoteObjectCallType.UNKNOWN;
     }
 
-    public RPCRequest getRequest()
+    public Request getRequest()
     {
         return request;
     }
@@ -279,7 +279,7 @@ public class RPCRemoteObjectCall
         return null;
     }
 
-    public RPCNotification getNotification()
+    public Notification getNotification()
     {
         return notification;
     }

@@ -27,14 +27,14 @@ public class RPCController
     public static final String EXTRA_KEY_WEBVIEW = "webview";
 
     protected RPCControllerCallback callback;
-    private HashMap<String, RPCRequest> requests;
+    private HashMap<String, Request> requests;
 
     private HashMap<String, Object> extras;
 
     public RPCController(RPCControllerCallback callback)
     {
         this.callback = callback;
-        requests = new HashMap<String, RPCRequest>();
+        requests = new HashMap<String, Request>();
         extras = new HashMap<String, Object>();
     }
 
@@ -70,16 +70,16 @@ public class RPCController
      * only method you need to call from the webView delegate to handle RPC
      * Communication.
      *
-     * @param jsonString a string representation of the message, the message is
+     * @param rpcMessage a string representation of the message, the message is
      *                   a JSON object and if it is malformed an error will be returned
      *                   back to the endpoint in form of an RPCError.
      */
-    public void handle(String jsonString)
+    public void handle(String rpcMessage)
     {
         try
         {
-            System.out.println(" --------------> " + jsonString);
-            handle(new JSONObject(jsonString));
+            System.out.println(" --------------> " + rpcMessage);
+            handle(new JSONObject(rpcMessage));
         }
         catch (JSONException e)
         {
@@ -88,26 +88,26 @@ public class RPCController
         }
     }
 
-    private void handle(JSONObject rpcReq) throws JSONException
+    private void handle(JSONObject json) throws JSONException
     {
-        RPCMessageType messageType = new MessageFactory().determineMessageType(rpcReq);
+        RPCMessageType messageType = new MessageFactory().determineMessageType(json);
         switch (messageType)
         {
             case UNKNOWN:
-                RPCError err = new RPCErrorBuilder(ErrorDomain.RPC, RPCErrorCodes.GENERIC_ERROR.getErrorCode()).withMessage("Request Type is unknown.").withId(getIdFromJson(rpcReq)).build();
+                RPCError err = new RPCErrorBuilder(ErrorDomain.RPC, RPCErrorCodes.GENERIC_ERROR.getErrorCode()).withMessage("Request Type is unknown.").withId(getIdFromJson(json)).build();
                 respondToRequest(err);
                 break;
             case REQUEST:
-                handleRequestMessageType(rpcReq);
+                handleRequestMessageType(json);
                 break;
             case RESPONSE:
-                handleResponseMessageType(rpcReq);
+                handleResponseMessageType(json);
                 break;
             case NOTIFICATION:
-                handleNotificationMessageType(rpcReq);
+                handleNotificationMessageType(json);
                 break;
             case ERROR:
-                handleErrorMessageType(rpcReq);
+                handleErrorMessageType(json);
                 break;
         }
     }
@@ -117,7 +117,7 @@ public class RPCController
      *
      * @param message the message to be sent to the other endpoint.
      */
-    public void respondToRequest(RPCAbstractMessage message)
+    public void respondToRequest(AbstractMessage message)
     {
         try
         {
@@ -128,13 +128,13 @@ public class RPCController
                     respondWithError(err);
                     break;
                 case REQUEST:
-                    makeRequest((RPCRequest) message);
+                    makeRequest((Request) message);
                     break;
                 case RESPONSE:
-                    respondWithResponse((RPCResponse) message);
+                    respondWithResponse((Response) message);
                     break;
                 case NOTIFICATION:
-                    respondWithNotification((RPCNotification) message);
+                    respondWithNotification((Notification) message);
                     break;
                 case ERROR:
                     respondWithError((RPCError) message);
@@ -149,12 +149,12 @@ public class RPCController
 
     private void handleNotificationMessageType(JSONObject rpcReq) throws JSONException
     {
-        RPCNotification notification = new RPCNotification(rpcReq);
+        Notification notification = new Notification(rpcReq);
         handleRPCNotification(notification);
 
     }
 
-    protected void handleRPCNotification(RPCNotification notification)
+    protected void handleRPCNotification(Notification notification)
     {
         if (callback != null)
         {
@@ -164,10 +164,10 @@ public class RPCController
 
     private void handleRequestMessageType(JSONObject rpcReq) throws JSONException
     {
-        RPCRequest request = new RPCRequest(rpcReq, new ResponseBlock()
+        Request request = new Request(rpcReq, new ResponseBlock()
         {
             @Override
-            public void perform(RPCResponse response)
+            public void perform(Response response)
             {
                 System.out.println("perform on response callback called");
                 passMessageToCallback(response.toJsonString());
@@ -177,7 +177,7 @@ public class RPCController
         handleRPCRequest(request);
     }
 
-    protected void handleRPCRequest(RPCRequest request)
+    protected void handleRPCRequest(Request request)
     {
         callback.rpcControllerReceivedRequest(request);
     }
@@ -187,9 +187,9 @@ public class RPCController
         String requestId = getIdFromJson(rpcResponse);
         if (requests != null && requests.containsKey(requestId))
         {
-            RPCRequest theRequest = requests.get(requestId);
+            Request theRequest = requests.get(requestId);
             requests.remove(requestId);
-            RPCResponse response = new RPCResponse(rpcResponse, theRequest);
+            Response response = new Response(rpcResponse, theRequest);
             if (theRequest.getResponseBlock() != null)
             {
                 theRequest.getResponseBlock().perform(response);
@@ -203,19 +203,19 @@ public class RPCController
         String requestId = getIdFromJson(rpcError);
         if (requestId != null && requests.containsKey(requestId))
         {
-            RPCRequest theRequest = requests.get(requestId);
+            Request theRequest = requests.get(requestId);
             requests.remove(requestId);
             theRequest.getResponseBlock().perform(theRequest.createResponse());
         }
 
-        RPCError error = new RPCError(rpcError);
-        callback.rpcControllerReceivedError(error);
+        RPCError RPCError = new RPCError(rpcError);
+        callback.rpcControllerReceivedError(RPCError);
     }
 
     // Handlers of outgoing messages
 
     // Handlers of outgoing messages
-    public void makeRequest(RPCRequest request) throws JSONException
+    public void makeRequest(Request request) throws JSONException
     {
         if (request.getIdentifier() == null)
         {
@@ -226,20 +226,20 @@ public class RPCController
         passMessageToCallback(request.toJsonString());
     }
 
-    private void respondWithResponse(RPCResponse response)
+    private void respondWithResponse(Response response)
     {
         passMessageToCallback(response.toJsonString());
     }
 
-    private void respondWithNotification(RPCNotification notification)
+    private void respondWithNotification(Notification notification)
     {
         passMessageToCallback(notification.toJsonString());
     }
 
-    private void respondWithError(RPCError rpcError)
+    private void respondWithError(RPCError rpcRPCError)
     {
         // format json
-        String formatted = rpcError.toJsonString();
+        String formatted = rpcRPCError.toJsonString();
         passMessageToCallback(formatted);
 
 

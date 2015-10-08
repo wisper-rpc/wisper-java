@@ -6,17 +6,17 @@ import org.json.JSONObject;
 public class MessageFactory
 {
 
-    public RPCAbstractMessage createMessage(JSONObject json)
+    public AbstractMessage createMessage(JSONObject json)
     {
         RPCMessageType type = determineMessageType(json);
         switch (type)
         {
             case REQUEST:
-                return new RPCRequest(json);
+                return new Request(json);
             case RESPONSE:
-                return new RPCResponse(json);
+                return new Response(json);
             case NOTIFICATION:
-                return new RPCNotification(json);
+                return new Notification(json);
             case ERROR:
                 return new RPCError(json);
             case UNKNOWN:

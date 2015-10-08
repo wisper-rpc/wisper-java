@@ -1,8 +1,8 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.controller.ResponseBlock;
-import com.widespace.wisper.messagetype.RPCRequest;
-import com.widespace.wisper.messagetype.RPCResponse;
+import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.Response;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.mock;
 public class RpcRequestTests
 {
     private static final String SAMPLE_REQUEST = "{\"method\":\"wisp.ai.TestObject:sampleMethodName\", \"params\":[\"sample_instance_identifier\"],\"id\":\"abcd1\"}";
-    private RPCRequest request;
+    private Request request;
 
     @Before
     public void setUp() throws Exception
@@ -31,7 +31,7 @@ public class RpcRequestTests
 
         ResponseBlock responseBlockMock = mock(ResponseBlock.class);
 
-        request = new RPCRequest(new JSONObject(SAMPLE_REQUEST),  responseBlockMock);
+        request = new Request(new JSONObject(SAMPLE_REQUEST),  responseBlockMock);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class RpcRequestTests
     @Test
     public void testResponseCreationWorks() throws Exception
     {
-        RPCResponse expectedResponse = new RPCResponse(new JSONObject("{\"result\":[],\"id\":\"abcd1\"}"), request);
+        Response expectedResponse = new Response(new JSONObject("{\"result\":[],\"id\":\"abcd1\"}"), request);
         JSONAssert.assertEquals(expectedResponse.toJson(), request.createResponse().toJson(), false);
 
     }
@@ -80,7 +80,7 @@ public class RpcRequestTests
                 " ]" +
                 "}";
 
-        request = new RPCRequest(new JSONObject(requestStr),  mock(ResponseBlock.class));
+        request = new Request(new JSONObject(requestStr),  mock(ResponseBlock.class));
         Object[] requestParams = request.getParams();
 
         //Number of params
@@ -113,7 +113,7 @@ public class RpcRequestTests
                 "]" +
                 "}";
 
-        request = new RPCRequest(new JSONObject(requestStr),  mock(ResponseBlock.class));
+        request = new Request(new JSONObject(requestStr),  mock(ResponseBlock.class));
         Object[] requestParams = request.getParams();
 
         assertEquals(1, requestParams.length);
@@ -139,7 +139,7 @@ public class RpcRequestTests
                 "]" +
                 "}";
 
-        request = new RPCRequest(new JSONObject(requestStr),  mock(ResponseBlock.class));
+        request = new Request(new JSONObject(requestStr),  mock(ResponseBlock.class));
         Object[] requestParams = request.getParams();
 
         assertEquals(1, requestParams.length);

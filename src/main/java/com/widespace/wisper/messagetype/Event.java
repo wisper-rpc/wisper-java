@@ -14,14 +14,14 @@ import java.util.List;
  * <p/>
  * Created by Ehssan Hoorvash on 17/06/14.
  */
-public class RPCEvent extends RPCNotification
+public class Event extends Notification
 {
     private String methodName;
     private String instanceIdentifier;
     private String name;
     private Object value;
 
-    public RPCEvent(String methodName, String instanceIdentifier, String name, Object value) throws JSONException
+    public Event(String methodName, String instanceIdentifier, String name, Object value) throws JSONException
     {
         this.methodName = methodName;
         this.instanceIdentifier = instanceIdentifier;
@@ -31,7 +31,7 @@ public class RPCEvent extends RPCNotification
         fillJsonForm(methodName, instanceIdentifier, name, value);
     }
 
-    public RPCEvent(RPCRemoteObjectCall remoteObjectCall) throws JSONException
+    public Event(RPCRemoteObjectCall remoteObjectCall) throws JSONException
     {
         RPCRemoteObjectCallType callType = remoteObjectCall.getCallType();
         List<Object> parameters = Arrays.asList(remoteObjectCall.getParams());

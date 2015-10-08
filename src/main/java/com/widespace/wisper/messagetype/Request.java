@@ -9,12 +9,12 @@ import java.util.Arrays;
 
 /**
  * Request object that you can either use yourself to request the other RPC endpoint or you will get from the RPC controller when the other endpoint is asking you for it.
- * The WSRPCRequest is a subclass of RPCAbstractMessage.
+ * The WSRPCRequest is a subclass of AbstractMessage.
  *
- * @see com.widespace.wisper.messagetype.RPCNotification
+ * @see Notification
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class RPCRequest extends RPCAbstractMessage
+public class Request extends AbstractMessage
 {
 
     private ResponseBlock responseBlock;
@@ -24,12 +24,12 @@ public class RPCRequest extends RPCAbstractMessage
     private Object[] params;
 
 
-    public RPCRequest()
+    public Request()
     {
         this.jsonForm = new JSONObject();
     }
 
-    public RPCRequest(JSONObject json)
+    public Request(JSONObject json)
     {
         this.jsonForm = json;
         if (json != null && json.has("id"))
@@ -40,7 +40,7 @@ public class RPCRequest extends RPCAbstractMessage
         determineMethodNameAndParameters();
     }
 
-    public RPCRequest(JSONObject json, ResponseBlock block) throws JSONException
+    public Request(JSONObject json, ResponseBlock block) throws JSONException
     {
         this(json);
         this.responseBlock = block;
@@ -102,15 +102,15 @@ public class RPCRequest extends RPCAbstractMessage
      * Creates a response object for you to pass to the responseBlock if you are responding to a request. This response object will have the requestIdentifier already set correctly.
      * A response to this request must have the exact same requestIdentifier.
      *
-     * @return RPCResponse with the same ID and
+     * @return Response with the same ID and
      * @throws JSONException
      */
-    public RPCResponse createResponse() throws JSONException
+    public Response createResponse() throws JSONException
     {
         JSONObject responseJson = new JSONObject();
         responseJson.put("id", this.identifier);
         responseJson.put("result", new JSONArray());
-        return new RPCResponse(responseJson, this);
+        return new Response(responseJson, this);
     }
 
     public String getMethodName()
