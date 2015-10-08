@@ -13,31 +13,21 @@ import java.util.Arrays;
  */
 public class RPCNotification extends RPCAbstractMessage
 {
-    private RPCControllerCallback callback;
     private String methodName;
     private Object[] params;
 
 
-    public RPCNotification(JSONObject rpcNotification, RPCControllerCallback callback) throws JSONException
+    public RPCNotification(JSONObject rpcNotification) throws JSONException
     {
         this.jsonForm = rpcNotification;
-        this.callback = callback;
         determineMethodNameAndParameters();
     }
 
     public RPCNotification()
     {
         this.jsonForm = new JSONObject();
-        this.callback = null;
     }
 
-    public void handle()
-    {
-        if (callback != null)
-        {
-            callback.rpcControllerReceivedNotification(this);
-        }
-    }
 
     public String getMethodName()
     {

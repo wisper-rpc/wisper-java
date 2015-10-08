@@ -1,7 +1,6 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.controller.RPCController;
-import com.widespace.wisper.controller.RPCControllerCallback;
 import com.widespace.wisper.messagetype.RPCNotification;
 import com.widespace.wisper.messagetype.RPCRequest;
 import com.widespace.wisper.proxy.RPCProxy;
@@ -72,7 +71,7 @@ public class RPCProxyTests
         RPCController receiverMock = mock(RPCController.class);
         proxy.setReceiver(receiverMock);
         proxy.setMapName("proxy.map.name");
-        RPCNotification sampleNotification = new RPCNotification(new JSONObject("{ \"method\" : \"proxy.map.name.wisp.ai.MyRPCTestObject:~\", \"params\" : [\"" + SAMPLE_INSTANCE_ID + "\"] }"), mock(RPCControllerCallback.class));
+        RPCNotification sampleNotification = new RPCNotification(new JSONObject("{ \"method\" : \"proxy.map.name.wisp.ai.MyRPCTestObject:~\", \"params\" : [\"" + SAMPLE_INSTANCE_ID + "\"] }"));
 
         String expected = "{\"method\":\"my.receiver.mapname.wisp.ai.MyRPCTestObject:~\",\"params\":[\"1234\"]}";
         proxy.handleNotification(sampleNotification);

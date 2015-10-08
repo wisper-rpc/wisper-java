@@ -19,7 +19,6 @@ import java.util.Map;
 public class RPCResponse extends RPCAbstractMessage
 {
     private String identifier;
-    private Object result;
 
     public RPCResponse(JSONObject jsonRpcResponse, RPCRequest theRequest) throws JSONException
     {
@@ -30,6 +29,11 @@ public class RPCResponse extends RPCAbstractMessage
     public RPCResponse(RPCRequest theRequest) throws JSONException
     {
         this(new JSONObject(), theRequest);
+    }
+
+    public RPCResponse(JSONObject json)
+    {
+        this.jsonForm = json;
     }
 
 

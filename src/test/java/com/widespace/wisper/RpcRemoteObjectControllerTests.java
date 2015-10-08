@@ -122,10 +122,10 @@ public class RpcRemoteObjectControllerTests
         String instanceIdentifier2 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[1];
 
         // Set a test property on both remote objects
-        RPCNotification instanceEventRequest = new RPCNotification(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + instanceIdentifier1 + "\", \"" + MyRPCTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"value1\"] }"), null);
+        RPCNotification instanceEventRequest = new RPCNotification(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + instanceIdentifier1 + "\", \"" + MyRPCTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"value1\"] }"));
         remoteObjectController.handle(instanceEventRequest.toJsonString());
 
-        instanceEventRequest = new RPCNotification(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + instanceIdentifier2 + "\", \"" + MyRPCTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"value2\"] }"), null);
+        instanceEventRequest = new RPCNotification(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + instanceIdentifier2 + "\", \"" + MyRPCTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"value2\"] }"));
         remoteObjectController.handle(instanceEventRequest.toJsonString());
 
         //call method on remote obj1 with remote obj 2 as parameter
@@ -154,7 +154,7 @@ public class RpcRemoteObjectControllerTests
         String instanceIdentifier1 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[0];
         String instanceIdentifier2 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[1];
 
-        RPCNotification instanceEventRequest = new RPCNotification(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + instanceIdentifier1 + "\", \"" + MyRPCTestObject.TEST_INSTANCE_PROPERTY_MAPPING_NAME + "\", \"" + instanceIdentifier2 + "\"] }"), null);
+        RPCNotification instanceEventRequest = new RPCNotification(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + instanceIdentifier1 + "\", \"" + MyRPCTestObject.TEST_INSTANCE_PROPERTY_MAPPING_NAME + "\", \"" + instanceIdentifier2 + "\"] }"));
         remoteObjectController.handle(instanceEventRequest.toJsonString());
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
