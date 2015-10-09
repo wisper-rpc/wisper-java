@@ -4,7 +4,7 @@ import com.widespace.wisper.messagetype.AbstractMessage;
 
 
 /**
- * Callback interface that is used by the RPCController
+ * Callback interface that is used by the Gateway
  * Created by Ehssan Hoorvash on 22/05/14.
  */
 public interface GatewayCallback
