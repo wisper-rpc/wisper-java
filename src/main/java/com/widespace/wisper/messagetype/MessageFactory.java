@@ -26,23 +26,27 @@ public class MessageFactory
     }
 
     // Utility
-    public RPCMessageType determineMessageType(JSONObject rpcRequest)
+    public RPCMessageType determineMessageType(JSONObject jsonMessage)
     {
         RPCMessageType result = RPCMessageType.UNKNOWN;
-
-        if (rpcRequest.has("method") && rpcRequest.has("params"))
+        if(jsonMessage == null)
         {
-            if (rpcRequest.has("id"))
+            return RPCMessageType.UNKNOWN;
+        }
+
+        if (jsonMessage.has("method") && jsonMessage.has("params"))
+        {
+            if (jsonMessage.has("id"))
             {
                 result = RPCMessageType.REQUEST;
             } else
             {
                 result = RPCMessageType.NOTIFICATION;
             }
-        } else if (rpcRequest.has("result") && rpcRequest.has("id"))
+        } else if (jsonMessage.has("result") && jsonMessage.has("id"))
         {
             result = RPCMessageType.RESPONSE;
-        } else if (rpcRequest.has("error"))
+        } else if (jsonMessage.has("error"))
         {
             result = RPCMessageType.ERROR;
         }
