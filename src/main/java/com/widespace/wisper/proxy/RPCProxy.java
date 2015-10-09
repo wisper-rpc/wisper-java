@@ -1,6 +1,6 @@
 package com.widespace.wisper.proxy;
 
-import com.widespace.wisper.controller.RPCController;
+import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.utils.StringUtils;
@@ -15,13 +15,13 @@ public class RPCProxy
      * The object to forward the RPC call to.
      * Do not retain this object!
      */
-    private RPCController receiver;
+    private Gateway receiver;
     /**
      * The name of the resource we want to proxy that is available in the receiver.
      */
     private String receiverMapName;
     /**
-     * The name that this proxy listens to when registerer with an RPCController.
+     * The name that this proxy listens to when registerer with an Gateway.
      */
     private String mapName;
 
@@ -72,12 +72,12 @@ public class RPCProxy
         return null;
     }
 
-    public RPCController getReceiver()
+    public Gateway getReceiver()
     {
         return receiver;
     }
 
-    public void setReceiver(RPCController receiver)
+    public void setReceiver(Gateway receiver)
     {
         this.receiver = receiver;
     }

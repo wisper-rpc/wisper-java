@@ -14,14 +14,14 @@ import java.util.HashMap;
 import java.util.UUID;
 
 /**
- * RPCController is the receiving end point for RPC messages coming from a
+ * Gateway is the receiving end point for RPC messages coming from a
  * WebView end point. The controller will handle the incoming objects and parses
  * them into a model objects that are easier to interact with.
  * <p/>
  * Created by Ehssan Hoorvash on 21/05/14.
  */
 
-public class RPCController
+public class Gateway
 {
     public static final String EXTRA_KEY_ADSPACE = "adspace";
     public static final String EXTRA_KEY_WEBVIEW = "webview";
@@ -31,7 +31,7 @@ public class RPCController
 
     private HashMap<String, Object> extras;
 
-    public RPCController(GatewayCallback callback)
+    public Gateway(GatewayCallback callback)
     {
         this.callback = callback;
         requests = new HashMap<String, Request>();

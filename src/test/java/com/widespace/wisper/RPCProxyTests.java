@@ -1,6 +1,6 @@
 package com.widespace.wisper;
 
-import com.widespace.wisper.controller.RPCController;
+import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.proxy.RPCProxy;
@@ -35,9 +35,9 @@ public class RPCProxyTests
     @Test
     public void testReceiverWorks() throws Exception
     {
-        RPCController rpcController = mock(RPCController.class);
-        proxy.setReceiver(rpcController);
-        assertEquals(rpcController, proxy.getReceiver());
+        Gateway gateway = mock(Gateway.class);
+        proxy.setReceiver(gateway);
+        assertEquals(gateway, proxy.getReceiver());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class RPCProxyTests
     public void testHandlingRequestCallsReceiverCorrectly() throws Exception
     {
         proxy.setReceiverMapName("my.receiver.mapname");
-        RPCController receiverMock = mock(RPCController.class);
+        Gateway receiverMock = mock(Gateway.class);
         proxy.setReceiver(receiverMock);
         proxy.setMapName("proxy.map.name");
         Request sampleRequest = new Request(new JSONObject("{ \"method\" : \"proxy.map.name.wisp.ai.MyRPCTestObject:~\", \"params\" : [\"" + SAMPLE_INSTANCE_ID + "\"], \"id\": \"abcd5\" }"),  null);
@@ -68,7 +68,7 @@ public class RPCProxyTests
     public void testHandlingNotificationsCallsReceiverCorrectly() throws Exception
     {
         proxy.setReceiverMapName("my.receiver.mapname");
-        RPCController receiverMock = mock(RPCController.class);
+        Gateway receiverMock = mock(Gateway.class);
         proxy.setReceiver(receiverMock);
         proxy.setMapName("proxy.map.name");
         Notification sampleNotification = new Notification(new JSONObject("{ \"method\" : \"proxy.map.name.wisp.ai.MyRPCTestObject:~\", \"params\" : [\"" + SAMPLE_INSTANCE_ID + "\"] }"));

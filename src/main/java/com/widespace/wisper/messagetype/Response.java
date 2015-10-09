@@ -12,7 +12,7 @@ import java.util.Map;
 
 /**
  * When an instance handling an Request has finished, it should generate an instance of this object and fill it with the results.
- * This object is then passed to the other endpoint either through the Response's responseBlock or through the RPCController.
+ * This object is then passed to the other endpoint either through the Response's responseBlock or through the Gateway.
  * <p/>
  * Created by Ehssan Hoorvash on 22/05/14.
  */

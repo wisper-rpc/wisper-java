@@ -14,13 +14,13 @@ import java.util.HashMap;
 
 
 /**
- * Subclass of the RPCController to extend functionality for handling instances
+ * Subclass of the Gateway to extend functionality for handling instances
  * with rpc messages. This class will allow you to register classes to be used
  * by the rpc bridge through exposed methods.
  * <p/>
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class RPCRemoteObjectController extends RPCController
+public class RPCRemoteObjectController extends Gateway
 {
     HashMap<String, RPCClass> classMap;
     HashMap<String, RPCClassInstance> instanceMap;
