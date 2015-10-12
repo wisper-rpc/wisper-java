@@ -29,7 +29,7 @@ public class MessageFactory
     public RPCMessageType determineMessageType(JSONObject jsonMessage)
     {
         RPCMessageType result = RPCMessageType.UNKNOWN;
-        if(jsonMessage == null)
+        if (jsonMessage == null)
         {
             return RPCMessageType.UNKNOWN;
         }
@@ -52,5 +52,15 @@ public class MessageFactory
         }
 
         return result;
+    }
+
+    public RPCMessageType determineMessageType(AbstractMessage message)
+    {
+        if (message == null)
+        {
+            return RPCMessageType.UNKNOWN;
+        }
+
+        return message.type();
     }
 }

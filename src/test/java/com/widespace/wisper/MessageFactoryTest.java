@@ -1,7 +1,9 @@
 package com.widespace.wisper;
 
-import com.widespace.wisper.messagetype.MessageFactory;
-import com.widespace.wisper.messagetype.RPCMessageType;
+import com.widespace.wisper.messagetype.*;
+import com.widespace.wisper.messagetype.error.ErrorDomain;
+import com.widespace.wisper.messagetype.error.RPCError;
+import com.widespace.wisper.messagetype.error.RPCErrorBuilder;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +61,40 @@ public class MessageFactoryTest
     @Test
     public void canHandleNull() throws Exception
     {
-        assertThat(messageFactory.determineMessageType(null), is(RPCMessageType.UNKNOWN));
+        assertThat(messageFactory.determineMessageType((JSONObject) null), is(RPCMessageType.UNKNOWN));
     }
 
+    @Test
+    public void canDetermineRequestTypeFromAbstractMessage() throws Exception
+    {
+        Request request = new Request();
+        assertThat(messageFactory.determineMessageType(request), is(RPCMessageType.REQUEST));
+    }
+
+    @Test
+    public void canDetermineResponseTypeFromAbstractMessage() throws Exception
+    {
+        Response response = new Response(new Request());
+        assertThat(messageFactory.determineMessageType(response), is(RPCMessageType.RESPONSE));
+    }
+
+    @Test
+    public void canDetermineErrorTypeFromAbstractMessage() throws Exception
+    {
+        RPCError rpcError = new RPCError(new RPCErrorBuilder(ErrorDomain.RPC, 404));
+        assertThat(messageFactory.determineMessageType(rpcError), is(RPCMessageType.ERROR));
+    }
+
+    @Test
+    public void canDetermineNotificationTypeFromAbstractMessage() throws Exception
+    {
+        Notification notification = new Notification();
+        assertThat(messageFactory.determineMessageType(notification), is(RPCMessageType.NOTIFICATION));
+    }
+
+    @Test
+    public void determineCanHandleNullWithAbstractMessageType() throws Exception
+    {
+        assertThat(messageFactory.determineMessageType((AbstractMessage) null), is(RPCMessageType.UNKNOWN));
+    }
 }
