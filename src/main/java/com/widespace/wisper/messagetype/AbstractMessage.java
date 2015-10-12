@@ -117,4 +117,14 @@ public abstract class AbstractMessage
     {
         return Arrays.asList(jsonArrayToArray(array));
     }
+
+    public String getIdentifier()
+    {
+       if(jsonForm!=null && jsonForm.has("id"))
+       {
+           return jsonForm.getString("id");
+       }
+
+        return null;
+    }
 }

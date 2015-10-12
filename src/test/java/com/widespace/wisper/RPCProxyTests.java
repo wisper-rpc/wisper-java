@@ -60,7 +60,7 @@ public class RPCProxyTests
         proxy.handleRequest(sampleRequest);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(receiverMock).handle(argument.capture());
+        verify(receiverMock).handleMessage(argument.capture());
         JSONAssert.assertEquals(expected, argument.getValue(), false);
     }
 
@@ -77,7 +77,7 @@ public class RPCProxyTests
         proxy.handleNotification(sampleNotification);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(receiverMock).handle(argument.capture());
+        verify(receiverMock).handleMessage(argument.capture());
         JSONAssert.assertEquals(expected, argument.getValue(), false);
     }
 }

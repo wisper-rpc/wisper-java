@@ -113,7 +113,7 @@ public class RPCRemoteObjectController extends Gateway
         try
         {
             event = new RPCEventBuilder().withInstanceIdentifier(instanceIdentifier).withMethodName(mapName).withName(key).withValue(value).buildInstanceEvent();
-            respondToRequest(event);
+            handleMessage(event);
         }
         catch (JSONException e)
         {
@@ -123,20 +123,11 @@ public class RPCRemoteObjectController extends Gateway
 
     }
 
-    // Overridden methods
     @Override
-    protected void handleRPCNotification(Notification notification)
+    public void handleMessage(AbstractMessage message)
     {
-        super.handleRPCNotification(notification);
-        RPCRemoteObjectCall remoteObjectCall = new RPCRemoteObjectCall(notification);
-        makeCall(remoteObjectCall);
-    }
-
-    @Override
-    protected void handleRPCRequest(Request request)
-    {
-        super.handleRPCRequest(request);
-        RPCRemoteObjectCall remoteObjectCall = new RPCRemoteObjectCall(request);
+        super.handleMessage(message);
+        RPCRemoteObjectCall remoteObjectCall = new RPCRemoteObjectCall(message);
         makeCall(remoteObjectCall);
     }
 
@@ -283,7 +274,7 @@ public class RPCRemoteObjectController extends Gateway
             {
                 Response response = remoteObjectCall.getRequest().createResponse();
                 response.setResult(key);
-                remoteObjectCall.getRequest().getResponseBlock().perform(response);
+                remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
             }
         }
         else
@@ -321,7 +312,7 @@ public class RPCRemoteObjectController extends Gateway
         {
             Response response = remoteObjectCall.getRequest().createResponse();
             response.setResult(remoteObjectCall.getInstanceIdentifier());
-            remoteObjectCall.getRequest().getResponseBlock().perform(response);
+            remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
         }
     }
 
@@ -377,7 +368,7 @@ public class RPCRemoteObjectController extends Gateway
             Identifier = remoteObjectCall.getRequest().getIdentifier();
         }
         RPCError RPCError = new RPCErrorBuilder(ErrorDomain.REMOTE_OBJECT, errorCode.getErrorCode()).withMessage(message).withName(errorCode.getErrorName()).withId(Identifier).build();
-        respondToRequest(RPCError);
+        handleMessage(RPCError);
     }
 
     private void handleRpcError(RPCErrorCodes rpcErrorCode, String message, RPCRemoteObjectCall remoteObjectCall)
@@ -388,7 +379,7 @@ public class RPCRemoteObjectController extends Gateway
             Identifier = remoteObjectCall.getRequest().getIdentifier();
         }
         RPCError RPCError = new RPCErrorBuilder(ErrorDomain.RPC, rpcErrorCode.getErrorCode()).withMessage(message).withName(rpcErrorCode.getErrorName()).withId(Identifier).build();
-        respondToRequest(RPCError);
+        handleMessage(RPCError);
     }
 
     private void callRpcClassMethodOnInstance(RPCClassMethod rpcClassMethod, RPCClassInstance rpcInstance, RPCClass rpcClass, RPCRemoteObjectCall remoteObjectCall)
@@ -450,7 +441,7 @@ public class RPCRemoteObjectController extends Gateway
             {
                 response.setResult(returnedValue);
             }
-            remoteObjectCall.getRequest().getResponseBlock().perform(response);
+            remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
         }
     }
 

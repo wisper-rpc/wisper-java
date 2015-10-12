@@ -33,14 +33,14 @@ public class RpcControllerTests
     @Test
     public void testCallBackRequestReceivedIsCalled() throws Exception
     {
-        gateway.handle(SAMPLE_INSTANCE_METHOD_CALL_REQUEST);
+        gateway.handleMessage(SAMPLE_INSTANCE_METHOD_CALL_REQUEST);
         verify(callbackMock).gatewayReceivedMessage(any(Request.class));
     }
 
     @Test
     public void testCallBackNotificationReceivedIsCalled() throws Exception
     {
-        gateway.handle(SAMPLE_NOTIFICATION);
+        gateway.handleMessage(SAMPLE_NOTIFICATION);
         verify(callbackMock).gatewayReceivedMessage(any(Notification.class));
     }
 

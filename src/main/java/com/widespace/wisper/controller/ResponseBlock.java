@@ -1,6 +1,7 @@
 package com.widespace.wisper.controller;
 
 import com.widespace.wisper.messagetype.Response;
+import com.widespace.wisper.messagetype.error.RPCError;
 
 /**
  * An interface representing a block in objective C, The block is supposed to be used by Response message types and
@@ -17,6 +18,7 @@ public interface ResponseBlock
      * The piece of code to be executed by teh response.
      *
      * @param response The relevant Response object
+     * @param error
      */
-    void perform(Response response);
+    void perform(Response response, RPCError error);
 }

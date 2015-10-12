@@ -60,7 +60,7 @@ public abstract class RPCObject implements RPCProtocol
                 notification.setParams(params);
             }
 
-            remoteObjectController.respondToRequest(notification);
+            remoteObjectController.handleMessage(notification);
         }
     }
 

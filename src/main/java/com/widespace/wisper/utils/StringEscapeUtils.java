@@ -179,7 +179,7 @@ public class StringEscapeUtils
         {
             char ch = str.charAt(i);
 
-            // handle unicode
+            // handleMessage unicode
             if (ch > 0xfff)
             {
                 out.write("\\u" + hex(ch));

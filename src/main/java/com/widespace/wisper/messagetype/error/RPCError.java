@@ -72,4 +72,9 @@ public class RPCError extends AbstractMessage
 
         return errorJson.toString();
     }
+
+    public String getIdentifier()
+    {
+        return id;
+    }
 }
