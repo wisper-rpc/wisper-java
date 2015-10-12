@@ -16,15 +16,13 @@ import java.util.List;
  */
 public class Event extends Notification
 {
-    private String methodName;
-    private String instanceIdentifier;
+
     private String name;
     private Object value;
 
     public Event(String methodName, String instanceIdentifier, String name, Object value) throws JSONException
     {
-        this.methodName = methodName;
-        this.instanceIdentifier = instanceIdentifier;
+
         this.name = name;
         this.value = value;
 
@@ -60,9 +58,7 @@ public class Event extends Notification
         }
 
         String theMethodName = remoteObjectCall.getMethodName();
-        this.methodName = theMethodName;
         String theIdentifier = remoteObjectCall.getInstanceIdentifier();
-        this.instanceIdentifier = theIdentifier;
 
         this.name = theName;
         this.value = theValue;
@@ -73,11 +69,24 @@ public class Event extends Notification
     private void fillJsonForm(String methodName, String instanceIdentifier, String name, Object value) throws JSONException
     {
         jsonForm.put("method", methodName);
+        if (methodName != null)
+        {
+            jsonForm.put("method", methodName);
+        }
+
         JSONArray paramsArray = new JSONArray();
         paramsArray.put(instanceIdentifier);
+
+        if (instanceIdentifier != null)
+        {
+            paramsArray.put(instanceIdentifier);
+        }
+
         paramsArray.put(name);
         paramsArray.put(value); //TODO: investigate if this works as intended
+        paramsArray.put(value);
         jsonForm.put("params", paramsArray);
+
     }
 
     public String getName()

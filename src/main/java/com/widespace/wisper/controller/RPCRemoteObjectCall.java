@@ -11,7 +11,6 @@ import java.util.List;
 
 /**
  * Created by Ehssan Hoorvash on 23/05/14.
- *
  */
 public class RPCRemoteObjectCall
 {
@@ -29,7 +28,8 @@ public class RPCRemoteObjectCall
         if (message instanceof Request)
         {
             this.request = (Request) message;
-        } else if (message instanceof Notification)
+        }
+        else if (message instanceof Notification)
         {
             this.notification = (Notification) message;
         }
@@ -58,16 +58,19 @@ public class RPCRemoteObjectCall
                     if (notification.getParams() == null || notification.getParams().length == 0)
                     {
                         instanceIdentifier = null;
-                    } else
+                    }
+                    else
                     {
                         instanceIdentifier = (String) notification.getParams()[0];
                     }
-                } else if (request != null)
+                }
+                else if (request != null)
                 {
                     if (request.getParams() == null || request.getParams().length == 0)
                     {
                         instanceIdentifier = null;
-                    } else
+                    }
+                    else
                     {
                         instanceIdentifier = (String) request.getParams()[0];
                     }
@@ -170,7 +173,9 @@ public class RPCRemoteObjectCall
 
                     break;
                 case STATIC_EVENT:
+                    result = className.split("!")[0];
                     break;
+
                 case INSTANCE:
                 {
                     result = className.split(":")[0];
@@ -235,6 +240,9 @@ public class RPCRemoteObjectCall
             case INSTANCE:
             case INSTANCE_EVENT:
                 index = 1;
+                break;
+            case STATIC_EVENT:
+                index = 0;
                 break;
             default:
                 break;

@@ -107,6 +107,25 @@ public class RpcRemoteObjectControllerTests
         assertEquals("new_prop_value", MyRPCTestObject.propertyValue);
     }
 
+    public void testRpcPropertiesAreSetWithStaticEvents() throws Exception
+    {
+        registerAndCreateTestObject();
+        Request staticEventRequest = new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject!\", \"params\" : [ \"" + MyRPCTestObject.TEST_STATIC_PROPERTY_MAPPING_NAME + "\", \"new_prop_value\"] }"), null);
+        remoteObjectController.handleMessage(staticEventRequest.toJsonString());
+
+        assertEquals("new_prop_value", MyRPCTestObject.staticProp);
+    }
+
+    public void testRPCPropertiesAreSetWithStaticEvents() throws Exception
+    {
+        registerAndCreateTestObject();
+        Request instanceEventRequest = new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + MyRPCTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"new_prop_value\"] }"), null);
+        remoteObjectController.handleMessage(instanceEventRequest.toJsonString());
+
+        assertEquals("new_prop_value", MyRPCTestObject.propertyValue);
+    }
+
+
     public void testCallingPassByReferenceWorksOnInstanceMethods() throws Exception
     {
         //register two remote objects

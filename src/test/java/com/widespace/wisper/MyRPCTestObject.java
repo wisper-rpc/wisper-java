@@ -15,13 +15,17 @@ public class MyRPCTestObject extends RPCObject
     public static final String TEST_PROPERTY_MAPPING_NAME = "prop";
     public static final String TEST_PASSBYREF_METHOD_MAPPING_NAME = "passByRef";
     public static final String TEST_INSTANCE_PROPERTY_MAPPING_NAME = "instanceProp";
+    public static final String TEST_STATIC_PROPERTY_MAPPING_NAME = "staticProp";
 
     public static String propertyValue = null;
 
     public RPCProtocol instanceProperty = null;
 
     private static String lasteMethodCalled = null;
+
     private String property = null;
+    public static String staticProp = null;
+
 
     public static String testStaticMethod1(String message)
     {
