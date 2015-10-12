@@ -1,5 +1,6 @@
 package com.widespace.wisper.controller;
 
+import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.utils.StringUtils;
@@ -10,6 +11,7 @@ import java.util.List;
 
 /**
  * Created by Ehssan Hoorvash on 23/05/14.
+ *
  */
 public class RPCRemoteObjectCall
 {
@@ -22,19 +24,17 @@ public class RPCRemoteObjectCall
 
     private Notification notification;
 
-
-    // Constructors
-    public RPCRemoteObjectCall(Request request)
+    public RPCRemoteObjectCall(AbstractMessage message)
     {
-        this.request = request;
-        determineInstanceIdentifier();
-    }
+        if (message instanceof Request)
+        {
+            this.request = (Request) message;
+        } else if (message instanceof Notification)
+        {
+            this.notification = (Notification) message;
+        }
 
-    public RPCRemoteObjectCall(Notification notification)
-    {
-        this.notification = notification;
         determineInstanceIdentifier();
-
     }
 
     private void determineInstanceIdentifier()
@@ -58,19 +58,16 @@ public class RPCRemoteObjectCall
                     if (notification.getParams() == null || notification.getParams().length == 0)
                     {
                         instanceIdentifier = null;
-                    }
-                    else
+                    } else
                     {
                         instanceIdentifier = (String) notification.getParams()[0];
                     }
-                }
-                else if (request != null)
+                } else if (request != null)
                 {
                     if (request.getParams() == null || request.getParams().length == 0)
                     {
                         instanceIdentifier = null;
-                    }
-                    else
+                    } else
                     {
                         instanceIdentifier = (String) request.getParams()[0];
                     }

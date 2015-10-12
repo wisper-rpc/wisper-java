@@ -15,7 +15,7 @@ import java.util.UUID;
 
 /**
  * Gateway is the receiving end point for RPC messages coming from a
- * WebView end point. The controller will handle the incoming objects and parses
+ * WebView end point. The controller will handleMessage the incoming objects and parses
  * them into a model objects that are easier to interact with.
  * <p/>
  * Created by Ehssan Hoorvash on 21/05/14.
@@ -30,12 +30,14 @@ public class Gateway
     private HashMap<String, Request> requests;
 
     private HashMap<String, Object> extras;
+    private MessageFactory messageFactory;
 
     public Gateway(GatewayCallback callback)
     {
         this.callback = callback;
         requests = new HashMap<String, Request>();
         extras = new HashMap<String, Object>();
+        messageFactory = new MessageFactory();
     }
 
     /**
@@ -48,15 +50,30 @@ public class Gateway
         return UUID.randomUUID().toString();
     }
 
+    /**
+     * This is a setter for any object that could be contained with the Gateway.
+     * This comes handy for example on Android context where we need it.
+     *
+     * @param key a key assigned to the  resource.
+     * @param value the resouce to inject.
+     */
     public void setExtra(String key, Object value)
     {
         extras.put(key, value);
     }
 
+    /**
+     * Returns the resource specified with this key.
+     *
+     * @param key key of the resource.
+     * @return value of the injected resource.
+     */
     public Object getExtra(String key)
     {
         return extras.get(key);
     }
+
+
 
     public HashMap getExtras()
     {
@@ -66,50 +83,35 @@ public class Gateway
 
     /**
      * Entry point for the RPC interface from the WebView. Decides if we can
-     * handle this request or not, will also handle the request. This is the
-     * only method you need to call from the webView delegate to handle RPC
+     * handleMessage this request or not, will also handleMessage the request. This is the
+     * only method you need to call from the webView delegate to handleMessage RPC
      * Communication.
      *
-     * @param rpcMessage a string representation of the message, the message is
-     *                   a JSON object and if it is malformed an error will be returned
-     *                   back to the endpoint in form of an RPCError.
+     * @param message a string representation of the message, the message is
+     *                a JSON object and if it is malformed an error will be returned
+     *                back to the endpoint in form of an RPCError.
      */
-    public void handle(String rpcMessage)
+    public void handleMessage(String message)
     {
         try
         {
-            System.out.println(" --------------> " + rpcMessage);
-            handle(new JSONObject(rpcMessage));
-        }
-        catch (JSONException e)
+            handleMessage(new JSONObject(message));
+        } catch (JSONException e)
         {
             RPCError err = new RPCErrorBuilder(ErrorDomain.RPC, RPCErrorCodes.PARSE_ERROR.getErrorCode()).withMessage(e.getMessage()).build();
-            respondToRequest(err);
+            respondWithError(err);
         }
     }
 
-    private void handle(JSONObject json) throws JSONException
+    /**
+     * Handle incoming Wisper message.
+     *
+     * @param json json object that contains the Wisper message.
+     * @throws JSONException
+     */
+    private void handleMessage(JSONObject json) throws JSONException
     {
-        RPCMessageType messageType = new MessageFactory().determineMessageType(json);
-        switch (messageType)
-        {
-            case UNKNOWN:
-                RPCError err = new RPCErrorBuilder(ErrorDomain.RPC, RPCErrorCodes.GENERIC_ERROR.getErrorCode()).withMessage("Request Type is unknown.").withId(getIdFromJson(json)).build();
-                respondToRequest(err);
-                break;
-            case REQUEST:
-                handleRequestMessageType(json);
-                break;
-            case RESPONSE:
-                handleResponseMessageType(json);
-                break;
-            case NOTIFICATION:
-                handleNotificationMessageType(json);
-                break;
-            case ERROR:
-                handleErrorMessageType(json);
-                break;
-        }
+        handleMessage(messageFactory.createMessage(json));
     }
 
     /**
@@ -117,104 +119,60 @@ public class Gateway
      *
      * @param message the message to be sent to the other endpoint.
      */
-    public void respondToRequest(AbstractMessage message)
+    public void handleMessage(AbstractMessage message)
     {
-        try
+        if (message.type() == RPCMessageType.REQUEST)
         {
-            switch (message.type())
+            final Request request = (Request) message;
+            request.setResponseBlock(new ResponseBlock()
             {
-                case UNKNOWN:
-                    RPCError err = new RPCErrorBuilder(ErrorDomain.RPC, RPCErrorCodes.FORMAT_ERROR.getErrorCode()).withMessage("Message type not recognized for " + message.toJsonString()).build();
-                    respondWithError(err);
-                    break;
-                case REQUEST:
-                    makeRequest((Request) message);
-                    break;
-                case RESPONSE:
-                    respondWithResponse((Response) message);
-                    break;
-                case NOTIFICATION:
-                    respondWithNotification((Notification) message);
-                    break;
-                case ERROR:
-                    respondWithError((RPCError) message);
-                    break;
-            }
-        }
-        catch (JSONException e)
+                @Override
+                public void perform(Response response, RPCError error)
+                {
+                    passMessageToCallback(response.toJsonString());
+                }
+            });
+        } else if (message.type() == RPCMessageType.RESPONSE)
         {
-            // ignore!
+            respondBackOnMessage(message);
+        } else if (message.type() == RPCMessageType.ERROR)
+        {
+            respondBackOnMessage(message);
+
         }
-    }
 
-    private void handleNotificationMessageType(JSONObject rpcReq) throws JSONException
-    {
-        Notification notification = new Notification(rpcReq);
-        handleRPCNotification(notification);
-
-    }
-
-    protected void handleRPCNotification(Notification notification)
-    {
         if (callback != null)
         {
-            callback.gatewayReceivedMessage(notification);
+            callback.gatewayReceivedMessage(message);
         }
     }
 
-    private void handleRequestMessageType(JSONObject rpcReq) throws JSONException
+    private void respondBackOnMessage(AbstractMessage message)
     {
-        Request request = new Request(rpcReq, new ResponseBlock()
+        String identifier = message.getIdentifier();
+        if (identifier == null)
+            return;
+
+        if (requests.containsKey(identifier))
         {
-            @Override
-            public void perform(Response response)
-            {
-                System.out.println("perform on response callback called");
-                passMessageToCallback(response.toJsonString());
-            }
-        });
+            Request theRequest = requests.get(identifier);
+            requests.remove(identifier);
 
-        handleRPCRequest(request);
-    }
-
-    protected void handleRPCRequest(Request request)
-    {
-        callback.gatewayReceivedMessage(request);
-    }
-
-    private void handleResponseMessageType(JSONObject rpcResponse) throws JSONException
-    {
-        String requestId = getIdFromJson(rpcResponse);
-        if (requests != null && requests.containsKey(requestId))
-        {
-            Request theRequest = requests.get(requestId);
-            requests.remove(requestId);
-            Response response = new Response(rpcResponse, theRequest);
             if (theRequest.getResponseBlock() != null)
             {
-                theRequest.getResponseBlock().perform(response);
+                if (message instanceof RPCError)
+                {
+                    theRequest.getResponseBlock().perform(null, (RPCError) message);
+                } else if (message instanceof Response)
+                {
+                    theRequest.getResponseBlock().perform((Response) message, null);
+                }
             }
         }
     }
 
-    private void handleErrorMessageType(JSONObject rpcError) throws JSONException
-    {
-        // Run response through WSRPCRequest object if it invoked the request
-        String requestId = getIdFromJson(rpcError);
-        if (requestId != null && requests.containsKey(requestId))
-        {
-            Request theRequest = requests.get(requestId);
-            requests.remove(requestId);
-            theRequest.getResponseBlock().perform(theRequest.createResponse());
-        }
-
-        RPCError RPCError = new RPCError(rpcError);
-        callback.gatewayReceivedMessage(RPCError);
-    }
-
     // Handlers of outgoing messages
 
-    // Handlers of outgoing messages
     public void makeRequest(Request request) throws JSONException
     {
         if (request.getIdentifier() == null)
@@ -251,8 +209,6 @@ public class Gateway
         System.out.println("<------------" + escapedJson);
         callback.gatewayGeneratedMessage(escapedJson);
     }
-
-
 
 
     private String getIdFromJson(JSONObject json) throws JSONException

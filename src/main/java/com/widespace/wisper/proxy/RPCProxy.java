@@ -39,7 +39,7 @@ public class RPCProxy
         proxifiedRequest.setMethodName(extractMethodName(request.getMethodName()));
         proxifiedRequest.setParams(request.getParams());
         proxifiedRequest.setResponseBlock(request.getResponseBlock());
-        receiver.handle(proxifiedRequest.toJsonString());
+        receiver.handleMessage(proxifiedRequest.toJsonString());
     }
 
     /**
@@ -53,7 +53,7 @@ public class RPCProxy
         Notification proxifiedNotification = new Notification();
         proxifiedNotification.setMethodName(extractMethodName(notification.getMethodName()));
         proxifiedNotification.setParams(notification.getParams());
-        receiver.handle(proxifiedNotification.toJsonString());
+        receiver.handleMessage(proxifiedNotification.toJsonString());
     }
 
 
