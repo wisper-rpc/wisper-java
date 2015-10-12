@@ -95,6 +95,13 @@ public class RPCRemoteObjectController extends Gateway
         return instanceMap;
     }
 
+    /**
+     * Sends a wisper event to an instance.
+     *
+     * @param rpcInstance the instance to which the event is sent.
+     * @param key event key.
+     * @param value the value wrapped in the event.
+     */
     public void sendInstanceEvent(RPCProtocol rpcInstance, String key, Object value)
     {
         RPCClassInstance rpcClassInstance = getRpcClassInstance(rpcInstance);
