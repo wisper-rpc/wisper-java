@@ -8,6 +8,7 @@ import com.widespace.wisper.messagetype.error.*;
 import com.widespace.wisper.messagetype.error.RPCError;
 import org.json.JSONException;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -159,7 +160,7 @@ public class RPCRemoteObjectController extends Gateway
                     break;
                 case STATIC_EVENT:
                     // TODO: IMPLEMENT
-
+                    handleStaticEvent(remoteObjectCall);
                     break;
                 case INSTANCE:
                     rpcRemoteObjectCallInstanceMethod(remoteObjectCall);
@@ -209,6 +210,18 @@ public class RPCRemoteObjectController extends Gateway
         catch (Exception e)
         {
             e.printStackTrace();
+        }
+    }
+
+    private void handleStaticEvent(RPCRemoteObjectCall remoteObjectCall) throws Exception
+    {
+        if(classMap.containsKey(remoteObjectCall.getClassName()))
+        {
+            RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
+            String proprtyName = (String) remoteObjectCall.getParams()[0];
+            String proprtyValue = (String) remoteObjectCall.getParams()[1];
+            Field field = rpcClass.getClassRef().getDeclaredField(proprtyName);
+            field.set(null, proprtyValue);
         }
     }
 
