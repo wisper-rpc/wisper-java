@@ -121,7 +121,7 @@ public class RPCRemoteObjectController extends Gateway
         try
         {
             event = new RPCEventBuilder().withInstanceIdentifier(instanceIdentifier).withMethodName(mapName).withName(key).withValue(value).buildInstanceEvent();
-            handleMessage(event);
+            sendMessage(event);
         }
         catch (JSONException e)
         {
@@ -388,7 +388,7 @@ public class RPCRemoteObjectController extends Gateway
             Identifier = remoteObjectCall.getRequest().getIdentifier();
         }
         RPCError RPCError = new RPCErrorBuilder(ErrorDomain.REMOTE_OBJECT, errorCode.getErrorCode()).withMessage(message).withName(errorCode.getErrorName()).withId(Identifier).build();
-        handleMessage(RPCError);
+        sendMessage(RPCError);
     }
 
     private void handleRpcError(RPCErrorCodes rpcErrorCode, String message, RPCRemoteObjectCall remoteObjectCall)
@@ -399,7 +399,7 @@ public class RPCRemoteObjectController extends Gateway
             Identifier = remoteObjectCall.getRequest().getIdentifier();
         }
         RPCError RPCError = new RPCErrorBuilder(ErrorDomain.RPC, rpcErrorCode.getErrorCode()).withMessage(message).withName(rpcErrorCode.getErrorName()).withId(Identifier).build();
-        handleMessage(RPCError);
+        sendMessage(RPCError);
     }
 
     private void callRpcClassMethodOnInstance(RPCClassMethod rpcClassMethod, RPCClassInstance rpcInstance, RPCClass rpcClass, RPCRemoteObjectCall remoteObjectCall)
