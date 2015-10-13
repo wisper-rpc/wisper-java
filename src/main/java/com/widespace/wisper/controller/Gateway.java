@@ -54,7 +54,7 @@ public class Gateway
      * This is a setter for any object that could be contained with the Gateway.
      * This comes handy for example on Android context where we need it.
      *
-     * @param key a key assigned to the  resource.
+     * @param key   a key assigned to the  resource.
      * @param value the resouce to inject.
      */
     public void setExtra(String key, Object value)
@@ -72,7 +72,6 @@ public class Gateway
     {
         return extras.get(key);
     }
-
 
 
     public HashMap getExtras()
@@ -96,10 +95,11 @@ public class Gateway
         try
         {
             handleMessage(new JSONObject(message));
-        } catch (JSONException e)
+        }
+        catch (JSONException e)
         {
             RPCError err = new RPCErrorBuilder(ErrorDomain.RPC, RPCErrorCodes.PARSE_ERROR.getErrorCode()).withMessage(e.getMessage()).build();
-            respondWithError(err);
+            sendMessage(err);
         }
     }
 
@@ -129,16 +129,17 @@ public class Gateway
                 @Override
                 public void perform(Response response, RPCError error)
                 {
-                    passMessageToCallback(response.toJsonString());
+                    sendMessage(response);
                 }
             });
-        } else if (message.type() == RPCMessageType.RESPONSE)
+        }
+        else if (message.type() == RPCMessageType.RESPONSE)
         {
             respondBackOnMessage(message);
-        } else if (message.type() == RPCMessageType.ERROR)
+        }
+        else if (message.type() == RPCMessageType.ERROR)
         {
             respondBackOnMessage(message);
-
         }
 
         if (callback != null)
@@ -151,7 +152,9 @@ public class Gateway
     {
         String identifier = message.getIdentifier();
         if (identifier == null)
+        {
             return;
+        }
 
         if (requests.containsKey(identifier))
         {
@@ -163,7 +166,8 @@ public class Gateway
                 if (message instanceof RPCError)
                 {
                     theRequest.getResponseBlock().perform(null, (RPCError) message);
-                } else if (message instanceof Response)
+                }
+                else if (message instanceof Response)
                 {
                     theRequest.getResponseBlock().perform((Response) message, null);
                 }
@@ -172,54 +176,19 @@ public class Gateway
     }
 
     // Handlers of outgoing messages
-
-    public void makeRequest(Request request) throws JSONException
+    public void sendMessage(AbstractMessage message)
     {
-        if (request.getIdentifier() == null)
+        if (message.type() == RPCMessageType.REQUEST)
         {
-            request.setIdentifier(uniqueRequestIdentifier());
+            String identifier = ((Request) message).getIdentifier();
+            requests.put(identifier, (Request) message);
         }
 
-        requests.put(request.getIdentifier(), request);
-        passMessageToCallback(request.toJsonString());
+        sendMessage(message.toJsonString());
     }
 
-    private void respondWithResponse(Response response)
+    public void sendMessage(String message)
     {
-        passMessageToCallback(response.toJsonString());
+        callback.gatewayGeneratedMessage(StringEscapeUtils.escapeJavaScript(message));
     }
-
-    private void respondWithNotification(Notification notification)
-    {
-        passMessageToCallback(notification.toJsonString());
-    }
-
-    private void respondWithError(RPCError rpcRPCError)
-    {
-        // format json
-        String formatted = rpcRPCError.toJsonString();
-        passMessageToCallback(formatted);
-
-
-    }
-
-    private void passMessageToCallback(String jsonString)
-    {
-        String escapedJson = StringEscapeUtils.escapeJavaScript(jsonString);
-        System.out.println("<------------" + escapedJson);
-        callback.gatewayGeneratedMessage(escapedJson);
-    }
-
-
-    private String getIdFromJson(JSONObject json) throws JSONException
-    {
-        if (json.has("id"))
-        {
-            return json.getString("id");
-        }
-
-        return null;
-    }
-
-
 }
