@@ -174,7 +174,12 @@ public class RPCRemoteObjectController extends Gateway
         }
         catch (InvocationTargetException e)
         {
-            handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
+            String id = null;
+            if (remoteObjectCall.getRequest()!=null)
+            {
+                id =remoteObjectCall.getRequest().getIdentifier();
+            }
+            sendMessage(new RPCErrorBuilder(ErrorDomain.ANDROID, -1).withMessage(e.getLocalizedMessage()).withId(id).build());
             e.printStackTrace();
         }
         catch (IllegalAccessException e)

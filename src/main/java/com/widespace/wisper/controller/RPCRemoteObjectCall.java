@@ -72,6 +72,7 @@ public class RPCRemoteObjectCall
                     }
                     else
                     {
+                        //TODO: Handle "params":[null] case. causes a crash here.
                         instanceIdentifier = (String) request.getParams()[0];
                     }
                 }
