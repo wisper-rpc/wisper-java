@@ -30,10 +30,15 @@ public class RPCTestObject extends RPCObject
         //2.Build class methods of instance or static methods you might need
         RPCClassMethod appendMethod = new RPCClassMethod("append", "appendString", RPCMethodParameterType.STRING, RPCMethodParameterType.STRING);
         RPCClassMethod appendStaticMethod = new RPCClassMethod("append", "appendStringStatic", RPCMethodParameterType.STRING, RPCMethodParameterType.STRING);
+        RPCClassMethod exceptionInMethodCallMethod = new RPCClassMethod("exceptionInMethodCall", "exceptionInMethodCall");
+        RPCClassMethod exceptionInMethodCallStaticMethod = new RPCClassMethod("exceptionInMethodCall", "exceptionInMethodCallStatic");
 
         //3. Add the method models to your class model
         classModel.addInstanceMethod(appendMethod);
         classModel.addStaticMethod(appendStaticMethod);
+
+        classModel.addInstanceMethod(exceptionInMethodCallMethod);
+        classModel.addStaticMethod(exceptionInMethodCallStaticMethod);
 
         //4. Return the class model
         return classModel;
@@ -49,6 +54,16 @@ public class RPCTestObject extends RPCObject
         System.out.println(message);
     }
 
+
+    public void exceptionInMethodCall() throws Exception
+    {
+        throw new Exception("Test Exception");
+    }
+
+    public static void exceptionInMethodCallStatic() throws Exception
+    {
+        throw new Exception("Test Exception");
+    }
 
 }
 

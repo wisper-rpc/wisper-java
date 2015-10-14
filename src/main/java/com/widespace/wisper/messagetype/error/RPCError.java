@@ -49,7 +49,10 @@ public class RPCError extends AbstractMessage
         try
         {
             errorJson = new JSONObject();
-            errorJson.put("id", id);
+            if (id != null)
+            {
+                errorJson.put("id", id);
+            }
             JSONObject errorFields = new JSONObject();
             errorFields.put("code", code);
             errorFields.put("name", name);
