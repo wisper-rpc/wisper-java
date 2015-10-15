@@ -111,7 +111,12 @@ public class Gateway
      */
     private void handleMessage(JSONObject json) throws JSONException
     {
-        handleMessage(messageFactory.createMessage(json));
+        AbstractMessage message = messageFactory.createMessage(json);
+        if (message == null)
+        {
+            sendMessage(new RPCErrorBuilder(ErrorDomain.RPC, RPCErrorCodes.FORMAT_ERROR.getErrorCode()).withMessage("The message could not be parsed as a valid RPC message. Wrong format? " + json.toString()).build());
+        }
+        handleMessage(message);
     }
 
     /**
