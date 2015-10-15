@@ -16,17 +16,24 @@ import java.util.List;
  */
 public class Event extends Notification
 {
-
+    private String methodName;
+    private String instanceIdentifier;
     private String name;
     private Object value;
 
+    public Event()
+    {
+        super();
+    }
+
     public Event(String methodName, String instanceIdentifier, String name, Object value) throws JSONException
     {
-
+        this.methodName = methodName;
+        this.instanceIdentifier = instanceIdentifier;
         this.name = name;
         this.value = value;
 
-        fillJsonForm(methodName, instanceIdentifier, name, value);
+        fillJsonForm();
     }
 
     public Event(RPCRemoteObjectCall remoteObjectCall) throws JSONException
@@ -57,16 +64,16 @@ public class Event extends Notification
                 break;
         }
 
-        String theMethodName = remoteObjectCall.getMethodName();
-        String theIdentifier = remoteObjectCall.getInstanceIdentifier();
+        this.methodName = remoteObjectCall.getMethodName();
+        this.instanceIdentifier = remoteObjectCall.getInstanceIdentifier();
 
         this.name = theName;
         this.value = theValue;
 
-        fillJsonForm(theMethodName, theIdentifier, theName, theValue);
+        fillJsonForm();
     }
 
-    private void fillJsonForm(String methodName, String instanceIdentifier, String name, Object value) throws JSONException
+    private void fillJsonForm() throws JSONException
     {
         jsonForm.put("method", methodName);
         if (methodName != null)
@@ -84,7 +91,6 @@ public class Event extends Notification
 
         paramsArray.put(name);
         paramsArray.put(value); //TODO: investigate if this works as intended
-        paramsArray.put(value);
         jsonForm.put("params", paramsArray);
 
     }
@@ -94,13 +100,31 @@ public class Event extends Notification
         return name;
     }
 
+    public void setName(String name) throws JSONException
+    {
+        this.name = name;
+        fillJsonForm();
+    }
+
     public Object getValue()
     {
         return value;
     }
 
-    public void setValue(Object value)
+    public void setValue(Object value) throws JSONException
     {
         this.value = value;
+        fillJsonForm();
+    }
+
+    public String getInstanceIdentifier()
+    {
+        return instanceIdentifier;
+    }
+
+    public void setInstanceIdentifier(String instanceIdentifier) throws JSONException
+    {
+        this.instanceIdentifier = instanceIdentifier;
+        fillJsonForm();
     }
 }
