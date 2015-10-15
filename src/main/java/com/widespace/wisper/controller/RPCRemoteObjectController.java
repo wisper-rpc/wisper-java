@@ -1,6 +1,6 @@
 package com.widespace.wisper.controller;
 
-import com.widespace.wisper.base.RPCProtocol;
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.base.RPCUtilities;
 import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.messagetype.*;
@@ -74,7 +74,7 @@ public class RPCRemoteObjectController extends Gateway
      * @param instance an instance of a class that implements the RPC protocol
      *                 and has the static registerClass() method implemented.
      */
-    public RPCClassInstance getRpcClassInstance(RPCProtocol instance)
+    public RPCClassInstance getRpcClassInstance(Wisper instance)
     {
         return instanceMap.get(instance.toString());
     }
@@ -103,7 +103,7 @@ public class RPCRemoteObjectController extends Gateway
      * @param key event key.
      * @param value the value wrapped in the event.
      */
-    public void sendInstanceEvent(RPCProtocol rpcInstance, String key, Object value)
+    public void sendInstanceEvent(Wisper rpcInstance, String key, Object value)
     {
         RPCClassInstance rpcClassInstance = getRpcClassInstance(rpcInstance);
 
@@ -263,7 +263,7 @@ public class RPCRemoteObjectController extends Gateway
 
 
         String setterMethodName = property.getSetterName();
-        RPCProtocol instance = rpcClassInstance.getInstance();
+        Wisper instance = rpcClassInstance.getInstance();
 
         // Instance method
         Class[] parameterTypes = RPCUtilities.convertRpcParameterTypeToClassType(property.getSetterMethodParameterType());
@@ -274,7 +274,7 @@ public class RPCRemoteObjectController extends Gateway
             {
                 RPCClassInstance classInstancePointer = instanceMap.get(event.getValue().toString());
                 event.setValue(classInstancePointer.getInstance());
-                parameterTypes[0] = RPCProtocol.class;
+                parameterTypes[0] = Wisper.class;
             }
         }
         Method method = instance.getClass().getMethod(setterMethodName, parameterTypes);
@@ -288,7 +288,7 @@ public class RPCRemoteObjectController extends Gateway
         {
             RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
             Class<?> classRef = rpcClass.getClassRef();
-            RPCProtocol instance = (RPCProtocol) Class.forName(classRef.getName()).newInstance();
+            Wisper instance = (Wisper) Class.forName(classRef.getName()).newInstance();
 
             String key = instance.toString();
             RPCClassInstance rpcClassInstance = new RPCClassInstance(rpcClass, instance, key);
@@ -445,7 +445,7 @@ public class RPCRemoteObjectController extends Gateway
 
         if (rpcInstance != null)
         {
-            RPCProtocol instance = rpcInstance.getInstance();
+            Wisper instance = rpcInstance.getInstance();
 
             // Instance method
             method = instance.getClass().getMethod(methodName, parameterTypes);
@@ -488,7 +488,7 @@ public class RPCRemoteObjectController extends Gateway
     }
 
 
-    public RPCClassInstance addRpcObjectInstance(RPCProtocol rpcObjectInstance, RPCClass rpcClass)
+    public RPCClassInstance addRpcObjectInstance(Wisper rpcObjectInstance, RPCClass rpcClass)
     {
         rpcObjectInstance.setRemoteObjectController(this);
         String key = rpcObjectInstance.toString();

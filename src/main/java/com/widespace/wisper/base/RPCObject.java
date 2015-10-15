@@ -14,7 +14,7 @@ import java.util.Arrays;
  * <p/>
  * Created by Ehssan Hoorvash on 21/05/14.
  */
-public abstract class RPCObject implements RPCProtocol
+public abstract class RPCObject implements Wisper
 {
     protected RPCRemoteObjectController remoteObjectController;
     private RPCClassInstance rpcClassInstance;
@@ -69,7 +69,7 @@ public abstract class RPCObject implements RPCProtocol
      * If remoteObjectController is not set this method will return nil.
      *
      * @throws JSONException
-     * @see com.widespace.wisper.base.RPCProtocol
+     * @see Wisper
      */
     public Notification createEventNotification(ArrayList<Object> params) throws JSONException
     {
@@ -89,7 +89,7 @@ public abstract class RPCObject implements RPCProtocol
      * If remoteObjectController is not set this method will return nil.
      *
      * @throws JSONException
-     * @see com.widespace.wisper.base.RPCProtocol
+     * @see Wisper
      */
     public Notification createClassEventNotification(ArrayList<Object> params) throws JSONException
     {

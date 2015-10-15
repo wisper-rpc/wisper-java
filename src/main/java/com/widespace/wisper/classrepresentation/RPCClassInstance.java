@@ -1,10 +1,10 @@
 package com.widespace.wisper.classrepresentation;
 
-import com.widespace.wisper.base.RPCProtocol;
+import com.widespace.wisper.base.Wisper;
 
 /**
  * This is a model object containing the instance of an RPC object. The actual instance class has to
- * implement RPCProtocol and has a static method registerClass().
+ * implement Wisper and has a static method registerClass().
  * <p/>
  * Created by Ehssan Hoorvash on 23/05/14.
  */
@@ -12,10 +12,10 @@ public class RPCClassInstance
 {
     private RPCClass rpcClass;
     private String instanceIdentifier;
-    private RPCProtocol instance;
+    private Wisper instance;
 
 
-    public RPCClassInstance(RPCClass rpcClass, RPCProtocol instance, String instanceIdentifier)
+    public RPCClassInstance(RPCClass rpcClass, Wisper instance, String instanceIdentifier)
     {
         this.setRpcClass(rpcClass);
         this.instanceIdentifier = instanceIdentifier;
@@ -33,13 +33,13 @@ public class RPCClassInstance
     }
 
     /**
-     * returns the actual Java instance of the object. The instance has to implement RPCProtocol
+     * returns the actual Java instance of the object. The instance has to implement Wisper
      * and has a static method registerClass().
      *
      * @return the instance
-     * @see com.widespace.wisper.base.RPCProtocol
+     * @see Wisper
      */
-    public RPCProtocol getInstance()
+    public Wisper getInstance()
     {
         return instance;
     }
