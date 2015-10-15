@@ -118,7 +118,7 @@ public class Request extends AbstractMessage
         return methodName;
     }
 
-    public void setMethodName(String methodName) throws JSONException
+    public void setMethod(String methodName) throws JSONException
     {
         this.methodName = methodName;
         jsonForm.put("method", methodName);

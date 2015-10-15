@@ -1,7 +1,7 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.base.RPCObject;
-import com.widespace.wisper.base.RPCProtocol;
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
 
 // This class is needed for RPC tests.
@@ -19,7 +19,7 @@ public class MyRPCTestObject extends RPCObject
 
     public static String propertyValue = null;
 
-    public RPCProtocol instanceProperty = null;
+    public Wisper instanceProperty = null;
 
     private static String lasteMethodCalled = null;
 
@@ -91,7 +91,7 @@ public class MyRPCTestObject extends RPCObject
         propertyValue = this.property;
     }
 
-    public void setInstanceProperty(RPCProtocol instanceProperty)
+    public void setInstanceProperty(Wisper instanceProperty)
     {
         this.instanceProperty = instanceProperty;
     }
