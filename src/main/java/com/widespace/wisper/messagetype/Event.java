@@ -2,21 +2,20 @@ package com.widespace.wisper.messagetype;
 
 import com.widespace.wisper.controller.RPCRemoteObjectCall;
 import com.widespace.wisper.controller.RPCRemoteObjectCallType;
-import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
 /**
  * Model object representing an event to be sent or received.
- * <p/>
+ * <p>
  * Created by Ehssan Hoorvash on 17/06/14.
  */
 public class Event extends Notification
 {
-    private String methodName;
     private String instanceIdentifier;
     private String name;
     private Object value;
@@ -32,8 +31,6 @@ public class Event extends Notification
         this.instanceIdentifier = instanceIdentifier;
         this.name = name;
         this.value = value;
-
-        fillJsonForm();
     }
 
     public Event(RPCRemoteObjectCall remoteObjectCall) throws JSONException
@@ -54,8 +51,6 @@ public class Event extends Notification
             break;
             case INSTANCE_EVENT:
             {
-                // theName = (String) (parameters.size() > 1 ? parameters.get(1) : null);
-                // theValue = (parameters.size() > 2 ? parameters.get(2) : null);
                 theName = (String) parameters.get(0);
                 theValue = (parameters.size() > 1) ? parameters.get(1) : null;
             }
@@ -69,30 +64,17 @@ public class Event extends Notification
 
         this.name = theName;
         this.value = theValue;
-
-        fillJsonForm();
     }
 
-    private void fillJsonForm() throws JSONException
+
+    public String getInstanceIdentifier()
     {
-        jsonForm.put("method", methodName);
-        if (methodName != null)
-        {
-            jsonForm.put("method", methodName);
-        }
+        return instanceIdentifier;
+    }
 
-        JSONArray paramsArray = new JSONArray();
-        paramsArray.put(instanceIdentifier);
-
-        if (instanceIdentifier != null)
-        {
-            paramsArray.put(instanceIdentifier);
-        }
-
-        paramsArray.put(name);
-        paramsArray.put(value); //TODO: investigate if this works as intended
-        jsonForm.put("params", paramsArray);
-
+    public void setInstanceIdentifier(String instanceIdentifier)
+    {
+        this.instanceIdentifier = instanceIdentifier;
     }
 
     public String getName()
@@ -100,10 +82,9 @@ public class Event extends Notification
         return name;
     }
 
-    public void setName(String name) throws JSONException
+    public void setName(String name)
     {
         this.name = name;
-        fillJsonForm();
     }
 
     public Object getValue()
@@ -111,20 +92,25 @@ public class Event extends Notification
         return value;
     }
 
-    public void setValue(Object value) throws JSONException
+    public void setValue(Object value)
     {
         this.value = value;
-        fillJsonForm();
     }
 
-    public String getInstanceIdentifier()
+    @Override
+    public Object[] getParams()
     {
-        return instanceIdentifier;
+        ArrayList<Object> params = new ArrayList<Object>();
+        if (instanceIdentifier != null)
+        {
+            params.add(instanceIdentifier);
+        }
+
+        params.add(name == null ? "" : name);
+        params.add(value == null ? "" : value);
+
+        return params.toArray(new Object[params.size()]);
     }
 
-    public void setInstanceIdentifier(String instanceIdentifier) throws JSONException
-    {
-        this.instanceIdentifier = instanceIdentifier;
-        fillJsonForm();
-    }
+
 }

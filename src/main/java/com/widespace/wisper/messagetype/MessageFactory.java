@@ -1,6 +1,6 @@
 package com.widespace.wisper.messagetype;
 
-import com.widespace.wisper.messagetype.error.RPCError;
+import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import org.json.JSONObject;
 
 public class MessageFactory
@@ -18,7 +18,7 @@ public class MessageFactory
             case NOTIFICATION:
                 return new Notification(json);
             case ERROR:
-                return new RPCError(json);
+                return new RPCErrorMessage(json);
             case UNKNOWN:
             default:
                 return null;

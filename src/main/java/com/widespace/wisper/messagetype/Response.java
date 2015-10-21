@@ -1,68 +1,69 @@
 package com.widespace.wisper.messagetype;
 
 
-import com.widespace.wisper.utils.ClassUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * When an instance handling an Request has finished, it should generate an instance of this object and fill it with the results.
  * This object is then passed to the other endpoint either through the Response's responseBlock or through the Gateway.
- * <p/>
+ * <p>
  * Created by Ehssan Hoorvash on 22/05/14.
  */
 public class Response extends AbstractMessage
 {
     private String identifier;
+    private Object result;
 
-    public Response(JSONObject jsonRpcResponse, Request theRequest) throws JSONException
+
+    public Response()
     {
-        this.jsonForm = jsonRpcResponse;
-        setIdentifier(theRequest.getIdentifier());
+        this(null, null);
     }
 
-    public Response(Request theRequest) throws JSONException
+    public Response(String identifier, Object result)
     {
-        this(new JSONObject(), theRequest);
+        this.identifier = identifier;
+        this.result = result;
+    }
+
+    public Response(Request theRequest)
+    {
+        this.identifier = theRequest.getIdentifier();
     }
 
     public Response(JSONObject json)
     {
-        this.jsonForm = json;
-    }
+        if (json == null)
+        {
+            return;
+        }
 
+        if (json.has("id"))
+        {
+            this.identifier = json.getString("id");
+        }
+
+        if (json.has("result"))
+        {
+            this.result = deserialize(json.get("result"));
+        }
+    }
 
     @Override
-    public RPCMessageType type()
-    {
-        return RPCMessageType.RESPONSE;
-    }
-
-    @Override
-    public String toJsonString()
-    {
-        return jsonForm.toString();
-    }
-
-    public Object getResult() throws JSONException
-    {
-        return jsonForm.get("result");
-    }
-
     public String getIdentifier()
     {
         return identifier;
     }
 
-    public void setIdentifier(String identifier) throws JSONException
+    public void setIdentifier(String identifier)
     {
         this.identifier = identifier;
-        jsonForm.put("id", identifier);
+    }
+
+    public Object getResult()
+    {
+        return result;
     }
 
     /**
@@ -72,53 +73,24 @@ public class Response extends AbstractMessage
      * @param newResult the new result
      * @throws JSONException if the newResult could not be parsed properly into the result, this exception is thrown
      */
-    public void setResult(Object newResult) throws JSONException
+    public void setResult(Object newResult)
     {
-        jsonForm.put("result", serialize(newResult));
+        this.result = newResult;
     }
 
-    private Object serialize(Object newResult)
+    @Override
+    public RPCMessageType type()
     {
-        if (newResult.getClass().isArray())
-        {
-            JSONArray array = new JSONArray();
+        return RPCMessageType.RESPONSE;
+    }
 
-            for (Object object : (Object[]) newResult)
-            {
-                array.put(serialize(object));
-            }
+    @Override
+    public JSONObject toJson() throws JSONException
+    {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", identifier == null ? "" : identifier);
+        jsonObject.put("result", result == null ? "" : serialize(result));
 
-            return array;
-        }
-        else if (newResult instanceof List)
-        {
-            JSONArray array = new JSONArray();
-            for (java.lang.Object object : (List) newResult)
-            {
-                array.put(serialize(object));
-            }
-            return array;
-        }
-        else if (ClassUtils.isPrimitive(newResult.getClass()) || newResult.getClass().equals(String.class))
-        {
-            return newResult;
-        }
-        else if (newResult.getClass().equals(JSONObject.class) || newResult.getClass().equals(JSONArray.class))
-        {
-            return newResult;
-        }
-        else if (newResult.getClass().isAssignableFrom(Map.class) || newResult.getClass().isAssignableFrom(HashMap.class))
-        {
-            return new JSONObject((Map) newResult);
-        }
-        else if (Number.class.isAssignableFrom(newResult.getClass()))
-        {
-            return newResult;
-        }
-        else
-        {
-            //Just ignore it for now...the return type must be serializable
-            return null;
-        }
+        return jsonObject;
     }
 }
