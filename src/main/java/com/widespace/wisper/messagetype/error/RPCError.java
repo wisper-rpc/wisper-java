@@ -1,83 +1,117 @@
 package com.widespace.wisper.messagetype.error;
 
-import com.widespace.wisper.messagetype.AbstractMessage;
-import com.widespace.wisper.messagetype.RPCMessageType;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by Ehssan Hoorvash on 22/05/14.
+ * Created by ehssanhoorvash on 21/10/15.
  */
-public class RPCError extends AbstractMessage
+public class RPCError
 {
-    public static String RPC_ANDROID_ERROR_DOMAIN = "20";
     private int code;
     private int domain;
     private String name;
     private String message;
 
-    private JSONObject data;
-    private RPCError underlying;
-    private String id;
+    private Object data;
+    private RPCError underlyingError;
 
-    public RPCError(RPCErrorBuilder builder)
+    public RPCError()
     {
-        this.id = builder.getId();
-        this.code = builder.getCode();
-        this.domain = builder.getDomain().getDomainCode();
-        this.name = builder.getName();
-        this.message = builder.getMessage();
-        this.data = builder.getData();
-        this.underlying = builder.getUnderlyingError();
+        domain = ErrorDomain.ANDROID.getDomainCode();
     }
 
     public RPCError(JSONObject jsonObject)
     {
-        this.jsonForm = jsonObject;
-    }
-
-    @Override
-    public RPCMessageType type()
-    {
-        return RPCMessageType.ERROR;
-    }
-
-    @Override
-    public String toJsonString()
-    {
-        JSONObject errorJson = null;
-        try
+        if (jsonObject.has("domain"))
         {
-            errorJson = new JSONObject();
-            if (id != null)
-            {
-                errorJson.put("id", id);
-            }
-            JSONObject errorFields = new JSONObject();
-            errorFields.put("code", code);
-            errorFields.put("name", name);
-            errorFields.put("domain", domain);
-            errorFields.put("message", message);
-            errorFields.put("data", data);
-            if (underlying != null)
-            {
-                errorFields.put("underlying", new JSONObject(underlying.toJsonString())); //recursion check?
-            }
-            errorJson.put("error", errorFields);
-
-        }
-        catch (JSONException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            this.domain = jsonObject.getInt("domain");
         }
 
+        if (jsonObject.has("code"))
+        {
+            this.code = jsonObject.getInt("code");
+        }
 
-        return errorJson.toString();
+        if (jsonObject.has("message"))
+        {
+            this.message = jsonObject.getString("message");
+        }
+
+        if (jsonObject.has("name"))
+        {
+            this.name = jsonObject.getString("name");
+        }
+
+        if (jsonObject.has("data"))
+        {
+            this.data = jsonObject.get("data");
+        }
+
+        if (jsonObject.has("underlying"))
+        {
+            this.underlyingError = new RPCError(jsonObject.getJSONObject("underlyingError"));
+        }
     }
 
-    public String getIdentifier()
+    public int getCode()
     {
-        return id;
+        return code;
     }
+
+    public void setCode(int code)
+    {
+        this.code = code;
+    }
+
+    public int getDomain()
+    {
+        return domain;
+    }
+
+    public void setDomain(int domain)
+    {
+        this.domain = domain;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    public void setMessage(String message)
+    {
+        this.message = message;
+    }
+
+    public Object getData()
+    {
+        return data;
+    }
+
+    public void setData(Object data)
+    {
+        this.data = data;
+    }
+
+    public RPCError getUnderlyingError()
+    {
+        return underlyingError;
+    }
+
+    public void setUnderlyingError(RPCError underlyingError)
+    {
+        this.underlyingError = underlyingError;
+    }
+
+
 }
