@@ -117,4 +117,14 @@ public class RPCClass
     {
         return properties;
     }
+
+    public void setMapName(String mapName)
+    {
+        this.mapName = mapName;
+    }
+
+    public void setClassRef(Class<?> classRef)
+    {
+        this.classRef = classRef;
+    }
 }
