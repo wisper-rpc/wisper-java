@@ -1,58 +1,43 @@
 package com.widespace.wisper.messagetype;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by Ehssan Hoorvash on 22/05/14.
  */
 public class Notification extends AbstractMessage
 {
-    private String methodName;
-    private Object[] params;
-
-
-    public Notification(JSONObject rpcNotification) throws JSONException
-    {
-        this.jsonForm = rpcNotification;
-        determineMethodNameAndParameters();
-    }
+    protected String methodName;
+    protected Object[] params;
 
     public Notification()
     {
-        this.jsonForm = new JSONObject();
+        this(null, null);
     }
 
-
-    public String getMethodName()
-    {
-        return methodName;
-    }
-
-    public void setMethodName(String methodName) throws JSONException
+    public Notification(String methodName, Object[] params)
     {
         this.methodName = methodName;
-        jsonForm.put("method", methodName);
-    }
-
-    public Object[] getParams()
-    {
-        return params;
-    }
-
-    public void setParams(Object[] params) throws JSONException
-    {
         this.params = params;
-        jsonForm.put("params" , new JSONArray(Arrays.asList(params)));
     }
 
-    public void setParams(ArrayList<Object> params)
+    public Notification(JSONObject jsonObject) throws JSONException
     {
-        this.params = params.toArray();
+        if (jsonObject == null)
+        {
+            return;
+        }
+
+        if (jsonObject.has("method"))
+        {
+            this.methodName = jsonObject.getString("method");
+        }
+
+        if (jsonObject.has("params"))
+        {
+            params = (Object[]) deserialize(jsonObject.getJSONArray("params"));
+        }
     }
 
     @Override
@@ -61,27 +46,33 @@ public class Notification extends AbstractMessage
         return RPCMessageType.NOTIFICATION;
     }
 
-    @Override
-    public String toJsonString()
+    public String getMethodName()
     {
-        return jsonForm.toString();
+        return methodName;
     }
 
-    private void determineMethodNameAndParameters() throws JSONException
+    public void setMethodName(String methodName)
     {
-        if (this.jsonForm == null)
-        {
-            return;
-        }
+        this.methodName = methodName;
+    }
 
-        if (this.jsonForm.has("method"))
-        {
-            this.methodName = this.jsonForm.getString("method");
-        }
+    public Object[] getParams()
+    {
+        return params;
+    }
 
-        if (this.jsonForm.has("params"))
-        {
-            this.params = jsonArrayToArray(jsonForm.getJSONArray("params"));
-        }
+    public void setParams(Object[] params)
+    {
+        this.params = params;
+    }
+
+    @Override
+    public JSONObject toJson() throws JSONException
+    {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("method", methodName == null ? "" : methodName);
+        jsonObject.put("params", getParams() == null ? "" :  serialize(getParams()));
+
+        return jsonObject;
     }
 }

@@ -5,8 +5,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
-
 /**
  * Request object that you can either use yourself to request the other RPC endpoint or you will get from the RPC controller when the other endpoint is asking you for it.
  * The WSRPCRequest is a subclass of AbstractMessage.
@@ -20,24 +18,36 @@ public class Request extends AbstractMessage
     private ResponseBlock responseBlock;
 
     private String identifier;
-    private String methodName;
+    private String method;
     private Object[] params;
 
 
     public Request()
     {
-        this.jsonForm = new JSONObject();
+        super();
     }
 
-    public Request(JSONObject json)
+    public Request(JSONObject json) throws JSONException
     {
-        this.jsonForm = json;
-        if (json != null && json.has("id"))
+        if (json == null)
         {
-            this.identifier = json.getString("id");
+            return;
         }
 
-        determineMethodNameAndParameters();
+        if (json.has("id"))
+        {
+            identifier = json.getString("id");
+        }
+
+        if (json.has("method"))
+        {
+            method = json.getString("method");
+        }
+
+        if (json.has("params"))
+        {
+            params = (Object[]) deserialize(json.getJSONArray("params"));
+        }
     }
 
     public Request(JSONObject json, ResponseBlock block) throws JSONException
@@ -63,11 +73,6 @@ public class Request extends AbstractMessage
         return RPCMessageType.REQUEST;
     }
 
-    @Override
-    public String toJsonString()
-    {
-        return jsonForm.toString();
-    }
 
     /**
      * The id of this request used to identify what response is paired with what request. A response to this request must have the exact same requestIdentifier.
@@ -86,16 +91,27 @@ public class Request extends AbstractMessage
      */
     public void setIdentifier(String identifier)
     {
-        try
-        {
-            this.jsonForm.put("id", identifier);
-            this.identifier = identifier;
-        }
-        catch (JSONException e)
-        {
+        this.identifier = identifier;
+    }
 
-            e.printStackTrace();
-        }
+    public String getMethod()
+    {
+        return method;
+    }
+
+    public void setMethod(String methodName) throws JSONException
+    {
+        this.method = methodName;
+    }
+
+    public Object[] getParams()
+    {
+        return params;
+    }
+
+    public void setParams(Object[] params) throws JSONException
+    {
+        this.params = params;
     }
 
     /**
@@ -107,46 +123,17 @@ public class Request extends AbstractMessage
      */
     public Response createResponse() throws JSONException
     {
-        JSONObject responseJson = new JSONObject();
-        responseJson.put("id", this.identifier);
-        responseJson.put("result", new JSONArray());
-        return new Response(responseJson, this);
+        return new Response(this);
     }
 
-    public String getMethodName()
+    @Override
+    public JSONObject toJson() throws JSONException
     {
-        return methodName;
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", identifier == null ? "" : identifier);
+        jsonObject.put("method", method == null ? "" : method);
+        jsonObject.put("params", params == null ? new String[]{} : (JSONArray) serialize(params));
+
+        return jsonObject;
     }
-
-    public void setMethod(String methodName) throws JSONException
-    {
-        this.methodName = methodName;
-        jsonForm.put("method", methodName);
-    }
-
-    public void setParams(Object[] params) throws JSONException
-    {
-        this.params = params;
-        jsonForm.put("params" , new JSONArray(Arrays.asList(params)));
-    }
-
-    protected void determineMethodNameAndParameters() throws JSONException
-    {
-        if (this.jsonForm.has("method"))
-        {
-            this.methodName = this.jsonForm.getString("method");
-        }
-
-        if (this.jsonForm.has("params"))
-        {
-            params = jsonArrayToArray(jsonForm.getJSONArray("params"));
-        }
-    }
-
-    public Object[] getParams()
-    {
-        return params;
-    }
-
-
 }
