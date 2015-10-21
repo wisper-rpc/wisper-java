@@ -279,7 +279,7 @@ public class RPCRemoteObjectCall
 
         if (request != null)
         {
-            return request.getMethodName();
+            return request.getMethod();
         }
 
         return null;
