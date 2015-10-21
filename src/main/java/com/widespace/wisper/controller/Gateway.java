@@ -2,16 +2,12 @@ package com.widespace.wisper.controller;
 
 
 import com.widespace.wisper.messagetype.*;
-import com.widespace.wisper.messagetype.error.ErrorDomain;
-import com.widespace.wisper.messagetype.error.RPCError;
-import com.widespace.wisper.messagetype.error.RPCErrorBuilder;
-import com.widespace.wisper.messagetype.error.RPCErrorCodes;
+import com.widespace.wisper.messagetype.error.*;
 import com.widespace.wisper.utils.StringEscapeUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.UUID;
 
 /**
  * Gateway is the receiving end point for RPC messages coming from a
@@ -32,6 +28,8 @@ public class Gateway
     private HashMap<String, Object> extras;
     private MessageFactory messageFactory;
 
+    private static int requestCount = 0;
+
     public Gateway(GatewayCallback callback)
     {
         this.callback = callback;
@@ -47,7 +45,9 @@ public class Gateway
      */
     public String uniqueRequestIdentifier()
     {
-        return UUID.randomUUID().toString();
+        //return UUID.randomUUID().toString();
+        requestCount ++;
+        return "WISPER-ANDROID-" + String.valueOf(requestCount);
     }
 
     /**
@@ -88,17 +88,18 @@ public class Gateway
      *
      * @param message a string representation of the message, the message is
      *                a JSON object and if it is malformed an error will be returned
-     *                back to the endpoint in form of an RPCError.
+     *                back to the endpoint in form of an RPCErrorMessage.
      */
     public void handleMessage(String message)
     {
+        System.out.println(" JS ----> N :  "+ message);
         try
         {
             handleMessage(new JSONObject(message));
         }
         catch (JSONException e)
         {
-            RPCError err = new RPCErrorBuilder(ErrorDomain.RPC, RPCErrorCodes.PARSE_ERROR.getErrorCode()).withMessage(e.getMessage()).build();
+            RPCErrorMessage err = new RPCErrorMessageBuilder(ErrorDomain.RPC, RPCErrorCodes.PARSE_ERROR.getErrorCode()).withMessage(e.getMessage()).build();
             sendMessage(err);
         }
     }
@@ -114,8 +115,10 @@ public class Gateway
         AbstractMessage message = messageFactory.createMessage(json);
         if (message == null)
         {
-            sendMessage(new RPCErrorBuilder(ErrorDomain.RPC, RPCErrorCodes.FORMAT_ERROR.getErrorCode()).withMessage("The message could not be parsed as a valid RPC message. Wrong format? " + json.toString()).build());
+            sendMessage(new RPCErrorMessageBuilder(ErrorDomain.RPC, RPCErrorCodes.FORMAT_ERROR.getErrorCode()).withMessage("The message could not be parsed as a valid RPC message. Wrong format? " + json.toString()).build());
+            return;
         }
+
         handleMessage(message);
     }
 
@@ -132,9 +135,17 @@ public class Gateway
             request.setResponseBlock(new ResponseBlock()
             {
                 @Override
-                public void perform(Response response, RPCError error)
+                public void perform(Response response, RPCErrorMessage error)
                 {
                     sendMessage(response);
+                    request.setResponseBlock(new ResponseBlock()
+                    {
+                        @Override
+                        public void perform(Response response, RPCErrorMessage error)
+                        {
+                            //Empty, to avoid re-running the block
+                        }
+                    });
                 }
             });
         }
@@ -168,9 +179,9 @@ public class Gateway
 
             if (theRequest.getResponseBlock() != null)
             {
-                if (message instanceof RPCError)
+                if (message instanceof RPCErrorMessage)
                 {
-                    theRequest.getResponseBlock().perform(null, (RPCError) message);
+                    theRequest.getResponseBlock().perform(null, (RPCErrorMessage) message);
                 }
                 else if (message instanceof Response)
                 {
@@ -185,7 +196,9 @@ public class Gateway
     {
         if (message.type() == RPCMessageType.REQUEST)
         {
-            String identifier = ((Request) message).getIdentifier();
+            String identifier = uniqueRequestIdentifier();
+            ((Request)message).setIdentifier(identifier);
+
             requests.put(identifier, (Request) message);
         }
 
@@ -194,6 +207,7 @@ public class Gateway
 
     public void sendMessage(String message)
     {
+
         callback.gatewayGeneratedMessage(StringEscapeUtils.escapeJavaScript(message));
     }
 }
