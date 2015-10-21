@@ -5,7 +5,7 @@ import com.widespace.wisper.base.RPCUtilities;
 import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.*;
-import com.widespace.wisper.messagetype.error.RPCError;
+import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import org.json.JSONException;
 
 import java.lang.reflect.Field;
@@ -18,7 +18,7 @@ import java.util.HashMap;
  * Subclass of the Gateway to extend functionality for handling instances
  * with rpc messages. This class will allow you to register classes to be used
  * by the rpc bridge through exposed methods.
- * <p/>
+ * <p>
  * Created by Ehssan Hoorvash on 22/05/14.
  */
 public class RPCRemoteObjectController extends Gateway
@@ -76,7 +76,12 @@ public class RPCRemoteObjectController extends Gateway
      */
     public RPCClassInstance getRpcClassInstance(Wisper instance)
     {
-        return instanceMap.get(instance.toString());
+        return getRpcClassInstance(instance.toString());
+    }
+
+    public RPCClassInstance getRpcClassInstance(String instanceIdentifier)
+    {
+        return instanceMap.get(instanceIdentifier);
     }
 
     /**
@@ -100,8 +105,8 @@ public class RPCRemoteObjectController extends Gateway
      * Sends a wisper event to an instance.
      *
      * @param rpcInstance the instance to which the event is sent.
-     * @param key event key.
-     * @param value the value wrapped in the event.
+     * @param key         event key.
+     * @param value       the value wrapped in the event.
      */
     public void sendInstanceEvent(Wisper rpcInstance, String key, Object value)
     {
@@ -175,11 +180,11 @@ public class RPCRemoteObjectController extends Gateway
         catch (InvocationTargetException e)
         {
             String id = null;
-            if (remoteObjectCall.getRequest()!=null)
+            if (remoteObjectCall.getRequest() != null)
             {
-                id =remoteObjectCall.getRequest().getIdentifier();
+                id = remoteObjectCall.getRequest().getIdentifier();
             }
-            sendMessage(new RPCErrorBuilder(ErrorDomain.ANDROID, -1).withMessage(e.getLocalizedMessage()).withId(id).build());
+            sendMessage(new RPCErrorMessageBuilder(ErrorDomain.ANDROID, -1).withMessage(e.getLocalizedMessage()).withId(id).build());
             e.printStackTrace();
         }
         catch (IllegalAccessException e)
@@ -220,7 +225,7 @@ public class RPCRemoteObjectController extends Gateway
 
     private void handleStaticEvent(RPCRemoteObjectCall remoteObjectCall) throws Exception
     {
-        if(classMap.containsKey(remoteObjectCall.getClassName()))
+        if (classMap.containsKey(remoteObjectCall.getClassName()))
         {
             RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
             String proprtyName = (String) remoteObjectCall.getParams()[0];
