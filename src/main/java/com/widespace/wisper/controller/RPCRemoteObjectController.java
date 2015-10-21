@@ -397,8 +397,8 @@ public class RPCRemoteObjectController extends Gateway
         {
             Identifier = remoteObjectCall.getRequest().getIdentifier();
         }
-        RPCError RPCError = new RPCErrorBuilder(ErrorDomain.REMOTE_OBJECT, errorCode.getErrorCode()).withMessage(message).withName(errorCode.getErrorName()).withId(Identifier).build();
-        sendMessage(RPCError);
+        RPCErrorMessage error = new RPCErrorMessageBuilder(ErrorDomain.REMOTE_OBJECT, errorCode.getErrorCode()).withMessage(message).withName(errorCode.getErrorName()).withId(Identifier).build();
+        sendMessage(error);
     }
 
     private void handleRpcError(RPCErrorCodes rpcErrorCode, String message, RPCRemoteObjectCall remoteObjectCall)
@@ -408,8 +408,8 @@ public class RPCRemoteObjectController extends Gateway
         {
             Identifier = remoteObjectCall.getRequest().getIdentifier();
         }
-        RPCError RPCError = new RPCErrorBuilder(ErrorDomain.RPC, rpcErrorCode.getErrorCode()).withMessage(message).withName(rpcErrorCode.getErrorName()).withId(Identifier).build();
-        sendMessage(RPCError);
+        RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.RPC, rpcErrorCode.getErrorCode()).withMessage(message).withName(rpcErrorCode.getErrorName()).withId(Identifier).build();
+        sendMessage(errorMessage);
     }
 
     private void callRpcClassMethodOnInstance(RPCClassMethod rpcClassMethod, RPCClassInstance rpcInstance, RPCClass rpcClass, RPCRemoteObjectCall remoteObjectCall)
