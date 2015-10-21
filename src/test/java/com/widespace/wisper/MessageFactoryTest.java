@@ -1,9 +1,8 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.messagetype.*;
-import com.widespace.wisper.messagetype.error.ErrorDomain;
 import com.widespace.wisper.messagetype.error.RPCError;
-import com.widespace.wisper.messagetype.error.RPCErrorBuilder;
+import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,8 +80,8 @@ public class MessageFactoryTest
     @Test
     public void canDetermineErrorTypeFromAbstractMessage() throws Exception
     {
-        RPCError rpcError = new RPCError(new RPCErrorBuilder(ErrorDomain.RPC, 404));
-        assertThat(messageFactory.determineMessageType(rpcError), is(RPCMessageType.ERROR));
+        RPCErrorMessage rpcErrorMessage = new RPCErrorMessage("1",new RPCError(new JSONObject()));
+        assertThat(messageFactory.determineMessageType(rpcErrorMessage), is(RPCMessageType.ERROR));
     }
 
     @Test

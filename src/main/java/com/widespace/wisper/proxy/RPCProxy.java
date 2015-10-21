@@ -36,7 +36,7 @@ public class RPCProxy
     {
         Request proxifiedRequest = new Request();
         proxifiedRequest.setIdentifier(request.getIdentifier());
-        proxifiedRequest.setMethod(extractMethodName(request.getMethodName()));
+        proxifiedRequest.setMethod(extractMethodName(request.getMethod()));
         proxifiedRequest.setParams(request.getParams());
         proxifiedRequest.setResponseBlock(request.getResponseBlock());
         receiver.handleMessage(proxifiedRequest.toJsonString());
