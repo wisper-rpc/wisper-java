@@ -1,6 +1,6 @@
 package com.widespace.wisper.classrepresentation;
 
-import com.widespace.wisper.controller.RPCRemoteObjectController;
+import com.widespace.wisper.controller.RemoteObjectController;
 import com.widespace.wisper.messagetype.Request;
 
 /**
@@ -8,5 +8,5 @@ import com.widespace.wisper.messagetype.Request;
  */
 public interface CallBlock
 {
-    void perform(RPCRemoteObjectController remoteObjectController, RPCClassInstance classInstance, RPCClassMethod method, Request request);
+    void perform(RemoteObjectController remoteObjectController, RPCClassInstance classInstance, RPCClassMethod method, Request request);
 }

@@ -1,6 +1,6 @@
 package com.widespace.wisper.base;
 
-import com.widespace.wisper.controller.RPCRemoteObjectController;
+import com.widespace.wisper.controller.RemoteObjectController;
 
 /**
  * Created by Ehssan Hoorvash on 21/05/14.
@@ -8,7 +8,7 @@ import com.widespace.wisper.controller.RPCRemoteObjectController;
 public interface Wisper
 {
     //gets the remote object controller for this RPC Class instance in case of creation
-    void setRemoteObjectController(RPCRemoteObjectController remoteObjectController);
+    void setRemoteObjectController(RemoteObjectController remoteObjectController);
 
     //This method is called when this RPC class instance is destructed
     void destruct();

@@ -21,12 +21,12 @@ import java.util.HashMap;
  * <p>
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class RPCRemoteObjectController extends Gateway
+public class RemoteObjectController extends Gateway
 {
     HashMap<String, RPCClass> classMap;
     HashMap<String, RPCClassInstance> instanceMap;
 
-    public RPCRemoteObjectController(GatewayCallback callback)
+    public RemoteObjectController(GatewayCallback callback)
     {
         super(callback);
         classMap = new HashMap<String, RPCClass>();

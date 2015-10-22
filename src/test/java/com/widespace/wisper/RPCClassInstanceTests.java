@@ -2,7 +2,7 @@ package com.widespace.wisper;
 
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.RPCClassInstance;
-import com.widespace.wisper.controller.RPCRemoteObjectController;
+import com.widespace.wisper.controller.RemoteObjectController;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ public class RPCClassInstanceTests
         sampleInstance = new Wisper()
         {
             @Override
-            public void setRemoteObjectController(RPCRemoteObjectController remoteObjectController)
+            public void setRemoteObjectController(RemoteObjectController remoteObjectController)
             {
 
             }
