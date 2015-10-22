@@ -2,7 +2,7 @@ package com.widespace.wisper;
 
 import com.widespace.wisper.classrepresentation.RPCClass;
 import com.widespace.wisper.controller.GatewayCallback;
-import com.widespace.wisper.controller.RPCRemoteObjectController;
+import com.widespace.wisper.controller.RemoteObjectController;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
 import org.json.JSONObject;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
  */
 public class RpcRemoteObjectControllerTests
 {
-    private RPCRemoteObjectController remoteObjectController;
+    private RemoteObjectController remoteObjectController;
     private GatewayCallback callBackMock;
 
 
@@ -27,7 +27,7 @@ public class RpcRemoteObjectControllerTests
     public void setUp() throws Exception
     {
         callBackMock = mock(GatewayCallback.class);
-        remoteObjectController = new RPCRemoteObjectController(callBackMock);
+        remoteObjectController = new RemoteObjectController(callBackMock);
     }
 
     @Test
