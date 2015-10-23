@@ -48,7 +48,7 @@ public class RpcClassMethodTests
         assertEquals(HashMap.class, classList.get(0));
         assertEquals(String.class, classList.get(1));
         assertEquals(Number.class, classList.get(2));
-        assertEquals(List.class, classList.get(3));
+        assertEquals(Object[].class, classList.get(3));
     }
 
     @Test

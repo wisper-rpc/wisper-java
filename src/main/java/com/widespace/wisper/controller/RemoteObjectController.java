@@ -230,7 +230,7 @@ public class RemoteObjectController extends Gateway
             RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
             String proprtyName = (String) remoteObjectCall.getParams()[0];
             String proprtyValue = (String) remoteObjectCall.getParams()[1];
-            Field field = rpcClass.getClassRef().getDeclaredField(proprtyName);
+            Field field = rpcClass.getClassRef().getField(proprtyName);
             field.setAccessible(true);
             field.set(null, proprtyValue);
         }
@@ -280,10 +280,10 @@ public class RemoteObjectController extends Gateway
             {
                 RPCClassInstance classInstancePointer = instanceMap.get(event.getValue().toString());
                 event.setValue(classInstancePointer.getInstance());
-                parameterTypes[0] = Wisper.class;
+                parameterTypes[0] = classInstancePointer.getInstance().getClass();
             }
         }
-        Method method = instance.getClass().getDeclaredMethod(setterMethodName, parameterTypes);
+        Method method = instance.getClass().getMethod(setterMethodName, parameterTypes);
         method.setAccessible(true);
         checkParameterTypes(parameterTypes, remoteObjectCall.getParams());
         method.invoke(instance, event.getValue());
@@ -455,7 +455,7 @@ public class RemoteObjectController extends Gateway
             Wisper instance = rpcInstance.getInstance();
 
             // Instance method
-            method = instance.getClass().getDeclaredMethod(methodName, parameterTypes);
+            method = instance.getClass().getMethod(methodName, parameterTypes);
             method.setAccessible(true);
             checkParameterTypes(parameterTypes, params);
             returnedValue = method.invoke(instance, params);
@@ -463,7 +463,7 @@ public class RemoteObjectController extends Gateway
         else
         {
             // Static method
-            method = rpcClass.getClassRef().getDeclaredMethod(methodName, parameterTypes);
+            method = rpcClass.getClassRef().getMethod(methodName, parameterTypes);
             method.setAccessible(true);
             returnedValue = method.invoke(null, params);
         }

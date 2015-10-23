@@ -28,7 +28,7 @@ public class RPCUtilities
                     result.add(Number.class);
                     break;
                 case ARRAY:
-                    result.add(List.class);
+                    result.add(Object[].class);
                     break;
                 case HASHMAP:
                     result.add(HashMap.class);
