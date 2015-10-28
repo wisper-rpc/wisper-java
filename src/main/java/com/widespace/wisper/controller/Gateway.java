@@ -207,7 +207,16 @@ public class Gateway
 
     public void sendMessage(String message)
     {
-
         callback.gatewayGeneratedMessage(StringEscapeUtils.escapeJavaScript(message));
+    }
+
+    public GatewayCallback getCallback()
+    {
+        return callback;
+    }
+
+    public void setCallback(GatewayCallback callback)
+    {
+        this.callback = callback;
     }
 }
