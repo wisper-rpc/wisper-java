@@ -1,10 +1,10 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.classrepresentation.RPCClass;
-import com.widespace.wisper.controller.RPCControllerCallback;
-import com.widespace.wisper.controller.RPCRemoteObjectController;
-import com.widespace.wisper.messagetype.RPCNotification;
-import com.widespace.wisper.messagetype.RPCRequest;
+import com.widespace.wisper.controller.GatewayCallback;
+import com.widespace.wisper.controller.RemoteObjectController;
+import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.Request;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,15 +19,15 @@ import static org.mockito.Mockito.*;
  */
 public class RpcRemoteObjectControllerTests
 {
-    private RPCRemoteObjectController remoteObjectController;
-    private RPCControllerCallback callBackMock;
+    private RemoteObjectController remoteObjectController;
+    private GatewayCallback callBackMock;
 
 
     @Before
     public void setUp() throws Exception
     {
-        callBackMock = mock(RPCControllerCallback.class);
-        remoteObjectController = new RPCRemoteObjectController(callBackMock);
+        callBackMock = mock(GatewayCallback.class);
+        remoteObjectController = new RemoteObjectController(callBackMock);
     }
 
     @Test
@@ -47,9 +47,9 @@ public class RpcRemoteObjectControllerTests
     @Test
     public void testRegisteringClassesWorks() throws Exception
     {
-        RPCClass rpcClass = MyRPCTestObject.registerRpcClass();
+        RPCClass rpcClass = MyWisperTestObject.registerRpcClass();
         remoteObjectController.registerClass(rpcClass);
-        assertEquals(remoteObjectController.getRpcClassForClass(MyRPCTestObject.class), rpcClass);
+        assertEquals(remoteObjectController.getRpcClassForClass(MyWisperTestObject.class), rpcClass);
     }
 
     @Test
@@ -66,8 +66,8 @@ public class RpcRemoteObjectControllerTests
 
         //destruct
         String instanceIdentifier = (String) remoteObjectController.getInstanceMap().keySet().toArray()[0];
-        RPCRequest sampleRequest = new RPCRequest(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:~\", \"params\" : [\"" + instanceIdentifier + "\"], \"id\": \"abcd5\" }"), null);
-        remoteObjectController.handle(sampleRequest.toJsonString());
+        Request sampleRequest = new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject:~\", \"params\" : [\"" + instanceIdentifier + "\"], \"id\": \"abcd5\" }"), null);
+        remoteObjectController.handleMessage(sampleRequest.toJsonString());
 
         assertTrue(remoteObjectController.getInstanceMap().isEmpty());
     }
@@ -79,10 +79,10 @@ public class RpcRemoteObjectControllerTests
 
         //Call instance method
         String instanceIdentifier = (String) remoteObjectController.getInstanceMap().keySet().toArray()[0];
-        RPCRequest instanceMethodRequest = new RPCRequest(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:" + MyRPCTestObject.TEST_INSTANCE_METHOD_MAPPING_NAME + "\", \"params\" : [\"" + instanceIdentifier + "\", \"something_else\"], \"id\": \"abcd4\" }"), null);
-        remoteObjectController.handle(instanceMethodRequest.toJsonString());
+        Request instanceMethodRequest = new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject:" + MyWisperTestObject.TEST_INSTANCE_METHOD_MAPPING_NAME + "\", \"params\" : [\"" + instanceIdentifier + "\", \"something_else\"], \"id\": \"abcd4\" }"), null);
+        remoteObjectController.handleMessage(instanceMethodRequest.toJsonString());
 
-        assertEquals(MyRPCTestObject.TEST_INSTANCE_METHOD_MAPPING_NAME, MyRPCTestObject.getLastMethodCalled());
+        assertEquals(MyWisperTestObject.TEST_INSTANCE_METHOD_MAPPING_NAME, MyWisperTestObject.getLastMethodCalled());
     }
 
     public void testCallingStaticMethodWorks() throws Exception
@@ -91,50 +91,69 @@ public class RpcRemoteObjectControllerTests
         assertFalse(remoteObjectController.getInstanceMap().isEmpty());
 
         //Call instance method
-        RPCRequest staticMethodRequest = new RPCRequest(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject." + MyRPCTestObject.TEST_STATIC_METHOD_MAPPING_NAME + "\", \"params\" : [\"some_string_param\"], \"id\": \"abcd4\" }"), null);
-        remoteObjectController.handle(staticMethodRequest.toJsonString());
+        Request staticMethodRequest = new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject." + MyWisperTestObject.TEST_STATIC_METHOD_MAPPING_NAME + "\", \"params\" : [\"some_string_param\"], \"id\": \"abcd4\" }"), null);
+        remoteObjectController.handleMessage(staticMethodRequest.toJsonString());
 
-        assertEquals(MyRPCTestObject.TEST_STATIC_METHOD_MAPPING_NAME, MyRPCTestObject.getLastMethodCalled());
+        assertEquals(MyWisperTestObject.TEST_STATIC_METHOD_MAPPING_NAME, MyWisperTestObject.getLastMethodCalled());
     }
 
     public void testRPCPropertiesAreSetWithInstanceEvents() throws Exception
     {
         registerAndCreateTestObject();
         String instanceIdentifier = (String) remoteObjectController.getInstanceMap().keySet().toArray()[0];
-        RPCRequest instanceEventRequest = new RPCRequest(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + instanceIdentifier + "\", \"" + MyRPCTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"new_prop_value\"] }"), null);
-        remoteObjectController.handle(instanceEventRequest.toJsonString());
+        Request instanceEventRequest = new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject:!\", \"params\" : [\"" + instanceIdentifier + "\", \"" + MyWisperTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"new_prop_value\"] }"), null);
+        remoteObjectController.handleMessage(instanceEventRequest.toJsonString());
 
-        assertEquals("new_prop_value", MyRPCTestObject.propertyValue);
+        assertEquals("new_prop_value", MyWisperTestObject.propertyValue);
     }
+
+    public void testRpcPropertiesAreSetWithStaticEvents() throws Exception
+    {
+        registerAndCreateTestObject();
+        Request staticEventRequest = new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject!\", \"params\" : [ \"" + MyWisperTestObject.TEST_STATIC_PROPERTY_MAPPING_NAME + "\", \"new_prop_value\"] }"), null);
+        remoteObjectController.handleMessage(staticEventRequest.toJsonString());
+
+        assertEquals("new_prop_value", MyWisperTestObject.staticProp);
+    }
+
+    public void testRPCPropertiesAreSetWithStaticEvents() throws Exception
+    {
+        registerAndCreateTestObject();
+        Request instanceEventRequest = new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject:!\", \"params\" : [\"" + MyWisperTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"new_prop_value\"] }"), null);
+        remoteObjectController.handleMessage(instanceEventRequest.toJsonString());
+
+        assertEquals("new_prop_value", MyWisperTestObject.propertyValue);
+    }
+
 
     public void testCallingPassByReferenceWorksOnInstanceMethods() throws Exception
     {
         //register two remote objects
         remoteObjectController.flushInstances();
-        RPCClass rpcClass = MyRPCTestObject.registerRpcClass();
+        RPCClass rpcClass = MyWisperTestObject.registerRpcClass();
         remoteObjectController.registerClass(rpcClass);
         remoteObjectController.registerClass(rpcClass);
-        remoteObjectController.handle(new RPCRequest(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject~\", \"params\" : [], \"id\": \"abcd1\" }"), null).toJsonString());
-        remoteObjectController.handle(new RPCRequest(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject~\", \"params\" : [], \"id\": \"abcd2\" }"), null).toJsonString());
-        verify(callBackMock, times(2)).rpcControllerGeneratedMessage(anyString());
+        remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject~\", \"params\" : [], \"id\": \"abcd1\" }"), null).toJsonString());
+        remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject~\", \"params\" : [], \"id\": \"abcd2\" }"), null).toJsonString());
+        verify(callBackMock, times(2)).gatewayGeneratedMessage(anyString());
 
         String instanceIdentifier1 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[0];
         String instanceIdentifier2 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[1];
 
         // Set a test property on both remote objects
-        RPCNotification instanceEventRequest = new RPCNotification(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + instanceIdentifier1 + "\", \"" + MyRPCTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"value1\"] }"), null);
-        remoteObjectController.handle(instanceEventRequest.toJsonString());
+        Notification instanceEventRequest = new Notification(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject:!\", \"params\" : [\"" + instanceIdentifier1 + "\", \"" + MyWisperTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"value1\"] }"));
+        remoteObjectController.handleMessage(instanceEventRequest.toJsonString());
 
-        instanceEventRequest = new RPCNotification(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + instanceIdentifier2 + "\", \"" + MyRPCTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"value2\"] }"), null);
-        remoteObjectController.handle(instanceEventRequest.toJsonString());
+        instanceEventRequest = new Notification(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject:!\", \"params\" : [\"" + instanceIdentifier2 + "\", \"" + MyWisperTestObject.TEST_PROPERTY_MAPPING_NAME + "\", \"value2\"] }"));
+        remoteObjectController.handleMessage(instanceEventRequest.toJsonString());
 
         //call method on remote obj1 with remote obj 2 as parameter
-        remoteObjectController.handle(new RPCRequest(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:" + MyRPCTestObject.TEST_PASSBYREF_METHOD_MAPPING_NAME + "\", \"params\" : [\"" + instanceIdentifier1 + "\",\"" + instanceIdentifier2 + "\"], \"id\": \"abcd3\" }"), null).toJsonString());
+        remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject:" + MyWisperTestObject.TEST_PASSBYREF_METHOD_MAPPING_NAME + "\", \"params\" : [\"" + instanceIdentifier1 + "\",\"" + instanceIdentifier2 + "\"], \"id\": \"abcd3\" }"), null).toJsonString());
 
         // Explanation: this times(3) is due to the weird behavior of Mockito on argument capturing in verify. Verify actually
         // catches all invocations of the mocked stub including the previous ones.
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(callBackMock, times(3)).rpcControllerGeneratedMessage(captor.capture());
+        verify(callBackMock, times(3)).gatewayGeneratedMessage(captor.capture());
         assertEquals("{\\\"id\\\":\\\"abcd3\\\",\\\"result\\\":\\\"value2\\\"}", captor.getValue());
     }
 
@@ -144,21 +163,21 @@ public class RpcRemoteObjectControllerTests
     {
         //register two remote objects
         remoteObjectController.flushInstances();
-        RPCClass rpcClass = MyRPCTestObject.registerRpcClass();
+        RPCClass rpcClass = MyWisperTestObject.registerRpcClass();
         remoteObjectController.registerClass(rpcClass);
         remoteObjectController.registerClass(rpcClass);
-        remoteObjectController.handle(new RPCRequest(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject~\", \"params\" : [], \"id\": \"abcd1\" }"), null).toJsonString());
-        remoteObjectController.handle(new RPCRequest(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject~\", \"params\" : [], \"id\": \"abcd2\" }"), null).toJsonString());
-        verify(callBackMock, times(2)).rpcControllerGeneratedMessage(anyString());
+        remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject~\", \"params\" : [], \"id\": \"abcd1\" }"), null).toJsonString());
+        remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject~\", \"params\" : [], \"id\": \"abcd2\" }"), null).toJsonString());
+        verify(callBackMock, times(2)).gatewayGeneratedMessage(anyString());
 
         String instanceIdentifier1 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[0];
         String instanceIdentifier2 = (String) remoteObjectController.getInstanceMap().keySet().toArray()[1];
 
-        RPCNotification instanceEventRequest = new RPCNotification(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject:!\", \"params\" : [\"" + instanceIdentifier1 + "\", \"" + MyRPCTestObject.TEST_INSTANCE_PROPERTY_MAPPING_NAME + "\", \"" + instanceIdentifier2 + "\"] }"), null);
-        remoteObjectController.handle(instanceEventRequest.toJsonString());
+        Notification instanceEventRequest = new Notification(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject:!\", \"params\" : [\"" + instanceIdentifier1 + "\", \"" + MyWisperTestObject.TEST_INSTANCE_PROPERTY_MAPPING_NAME + "\", \"" + instanceIdentifier2 + "\"] }"));
+        remoteObjectController.handleMessage(instanceEventRequest.toJsonString());
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(callBackMock, times(2)).rpcControllerGeneratedMessage(captor.capture());
+        verify(callBackMock, times(2)).gatewayGeneratedMessage(captor.capture());
         String arg = captor.getValue();
         JSONObject json = new JSONObject(convertStandardJSONString(arg));
         assertEquals(instanceIdentifier1, json.getString("result"));
@@ -169,9 +188,9 @@ public class RpcRemoteObjectControllerTests
     {
         remoteObjectController.flushInstances();
 
-        RPCClass rpcClass = MyRPCTestObject.registerRpcClass();
+        RPCClass rpcClass = MyWisperTestObject.registerRpcClass();
         remoteObjectController.registerClass(rpcClass);
-        remoteObjectController.handle(new RPCRequest(new JSONObject("{ \"method\" : \"wisp.ai.MyRPCTestObject~\", \"params\" : [], \"id\": \"abcd4\" }"), null).toJsonString());
+        remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject~\", \"params\" : [], \"id\": \"abcd4\" }"), null).toJsonString());
     }
 
     public String convertStandardJSONString(String data_json){

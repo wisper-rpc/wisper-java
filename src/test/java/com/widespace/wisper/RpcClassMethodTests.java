@@ -4,8 +4,8 @@ import com.widespace.wisper.classrepresentation.CallBlock;
 import com.widespace.wisper.classrepresentation.RPCClassInstance;
 import com.widespace.wisper.classrepresentation.RPCClassMethod;
 import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
-import com.widespace.wisper.controller.RPCRemoteObjectController;
-import com.widespace.wisper.messagetype.RPCRequest;
+import com.widespace.wisper.controller.RemoteObjectController;
+import com.widespace.wisper.messagetype.Request;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,7 +48,7 @@ public class RpcClassMethodTests
         assertEquals(HashMap.class, classList.get(0));
         assertEquals(String.class, classList.get(1));
         assertEquals(Number.class, classList.get(2));
-        assertEquals(List.class, classList.get(3));
+        assertEquals(Object[].class, classList.get(3));
     }
 
     @Test
@@ -57,7 +57,7 @@ public class RpcClassMethodTests
         CallBlock sampleCallBlock = new CallBlock()
         {
             @Override
-            public void perform(RPCRemoteObjectController remoteObjectController, RPCClassInstance classInstance, RPCClassMethod method, RPCRequest request)
+            public void perform(RemoteObjectController remoteObjectController, RPCClassInstance classInstance, RPCClassMethod method, Request request)
             {
 
             }

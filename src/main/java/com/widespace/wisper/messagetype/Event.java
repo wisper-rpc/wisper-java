@@ -2,36 +2,38 @@ package com.widespace.wisper.messagetype;
 
 import com.widespace.wisper.controller.RPCRemoteObjectCall;
 import com.widespace.wisper.controller.RPCRemoteObjectCallType;
-import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
 /**
  * Model object representing an event to be sent or received.
- * <p/>
+ * <p>
  * Created by Ehssan Hoorvash on 17/06/14.
  */
-public class RPCEvent extends RPCNotification
+public class Event extends Notification
 {
-    private String methodName;
     private String instanceIdentifier;
     private String name;
     private Object value;
 
-    public RPCEvent(String methodName, String instanceIdentifier, String name, Object value) throws JSONException
+    public Event()
+    {
+        super();
+    }
+
+    public Event(String methodName, String instanceIdentifier, String name, Object value) throws JSONException
     {
         this.methodName = methodName;
         this.instanceIdentifier = instanceIdentifier;
         this.name = name;
         this.value = value;
-
-        fillJsonForm(methodName, instanceIdentifier, name, value);
     }
 
-    public RPCEvent(RPCRemoteObjectCall remoteObjectCall) throws JSONException
+    public Event(RPCRemoteObjectCall remoteObjectCall) throws JSONException
     {
         RPCRemoteObjectCallType callType = remoteObjectCall.getCallType();
         List<Object> parameters = Arrays.asList(remoteObjectCall.getParams());
@@ -49,8 +51,6 @@ public class RPCEvent extends RPCNotification
             break;
             case INSTANCE_EVENT:
             {
-                // theName = (String) (parameters.size() > 1 ? parameters.get(1) : null);
-                // theValue = (parameters.size() > 2 ? parameters.get(2) : null);
                 theName = (String) parameters.get(0);
                 theValue = (parameters.size() > 1) ? parameters.get(1) : null;
             }
@@ -59,30 +59,32 @@ public class RPCEvent extends RPCNotification
                 break;
         }
 
-        String theMethodName = remoteObjectCall.getMethodName();
-        this.methodName = theMethodName;
-        String theIdentifier = remoteObjectCall.getInstanceIdentifier();
-        this.instanceIdentifier = theIdentifier;
+        this.methodName = remoteObjectCall.getMethodName();
+        this.instanceIdentifier = remoteObjectCall.getInstanceIdentifier();
 
         this.name = theName;
         this.value = theValue;
-
-        fillJsonForm(theMethodName, theIdentifier, theName, theValue);
     }
 
-    private void fillJsonForm(String methodName, String instanceIdentifier, String name, Object value) throws JSONException
+
+    public String getInstanceIdentifier()
     {
-        jsonForm.put("method", methodName);
-        JSONArray paramsArray = new JSONArray();
-        paramsArray.put(instanceIdentifier);
-        paramsArray.put(name);
-        paramsArray.put(value); //TODO: investigate if this works as intended
-        jsonForm.put("params", paramsArray);
+        return instanceIdentifier;
+    }
+
+    public void setInstanceIdentifier(String instanceIdentifier)
+    {
+        this.instanceIdentifier = instanceIdentifier;
     }
 
     public String getName()
     {
         return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
     }
 
     public Object getValue()
@@ -94,4 +96,21 @@ public class RPCEvent extends RPCNotification
     {
         this.value = value;
     }
+
+    @Override
+    public Object[] getParams()
+    {
+        ArrayList<Object> params = new ArrayList<Object>();
+        if (instanceIdentifier != null)
+        {
+            params.add(instanceIdentifier);
+        }
+
+        params.add(name == null ? "" : name);
+        params.add(value == null ? "" : value);
+
+        return params.toArray(new Object[params.size()]);
+    }
+
+
 }

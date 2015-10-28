@@ -1,7 +1,8 @@
 package com.widespace.wisper.controller;
 
-import com.widespace.wisper.messagetype.RPCNotification;
-import com.widespace.wisper.messagetype.RPCRequest;
+import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -18,23 +19,22 @@ public class RPCRemoteObjectCall
 
     private String instanceIdentifier;
 
-    private RPCRequest request;
+    private Request request;
 
-    private RPCNotification notification;
+    private Notification notification;
 
-
-    // Constructors
-    public RPCRemoteObjectCall(RPCRequest request)
+    public RPCRemoteObjectCall(AbstractMessage message)
     {
-        this.request = request;
-        determineInstanceIdentifier();
-    }
+        if (message instanceof Request)
+        {
+            this.request = (Request) message;
+        }
+        else if (message instanceof Notification)
+        {
+            this.notification = (Notification) message;
+        }
 
-    public RPCRemoteObjectCall(RPCNotification notification)
-    {
-        this.notification = notification;
         determineInstanceIdentifier();
-
     }
 
     private void determineInstanceIdentifier()
@@ -72,6 +72,7 @@ public class RPCRemoteObjectCall
                     }
                     else
                     {
+                        //TODO: Handle "params":[null] case. causes a crash here.
                         instanceIdentifier = (String) request.getParams()[0];
                     }
                 }
@@ -137,7 +138,7 @@ public class RPCRemoteObjectCall
         return RPCRemoteObjectCallType.UNKNOWN;
     }
 
-    public RPCRequest getRequest()
+    public Request getRequest()
     {
         return request;
     }
@@ -173,7 +174,9 @@ public class RPCRemoteObjectCall
 
                     break;
                 case STATIC_EVENT:
+                    result = className.split("!")[0];
                     break;
+
                 case INSTANCE:
                 {
                     result = className.split(":")[0];
@@ -239,6 +242,9 @@ public class RPCRemoteObjectCall
             case INSTANCE_EVENT:
                 index = 1;
                 break;
+            case STATIC_EVENT:
+                index = 0;
+                break;
             default:
                 break;
         }
@@ -273,13 +279,13 @@ public class RPCRemoteObjectCall
 
         if (request != null)
         {
-            return request.getMethodName();
+            return request.getMethod();
         }
 
         return null;
     }
 
-    public RPCNotification getNotification()
+    public Notification getNotification()
     {
         return notification;
     }

@@ -1,9 +1,9 @@
 package com.widespace.wisper;
 
-import com.widespace.wisper.controller.RPCController;
-import com.widespace.wisper.controller.RPCControllerCallback;
-import com.widespace.wisper.messagetype.RPCNotification;
-import com.widespace.wisper.messagetype.RPCRequest;
+import com.widespace.wisper.controller.Gateway;
+import com.widespace.wisper.controller.GatewayCallback;
+import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.Request;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,29 +19,29 @@ public class RpcControllerTests
     public static final String SAMPLE_INSTANCE_METHOD_CALL_REQUEST = "{\"method\":\"wisp.ai.TestObject:sampleMethodName\", \"params\":[\"sample_instance_identifier\"],\"id\":\"abcd1\"}";
     private static final String SAMPLE_NOTIFICATION = "{ \"method\" : \"swipeTo\", \"params\" : [\"face\", 2] }";
 
-    private RPCController rpcController;
-    private RPCControllerCallback callbackMock;
+    private Gateway gateway;
+    private GatewayCallback callbackMock;
 
     @Before
     public void setUp() throws Exception
     {
-        callbackMock = mock(RPCControllerCallback.class);
-        rpcController = new RPCController(callbackMock);
+        callbackMock = mock(GatewayCallback.class);
+        gateway = new Gateway(callbackMock);
     }
 
 
     @Test
     public void testCallBackRequestReceivedIsCalled() throws Exception
     {
-        rpcController.handle(SAMPLE_INSTANCE_METHOD_CALL_REQUEST);
-        verify(callbackMock).rpcControllerReceivedRequest(any(RPCRequest.class));
+        gateway.handleMessage(SAMPLE_INSTANCE_METHOD_CALL_REQUEST);
+        verify(callbackMock).gatewayReceivedMessage(any(Request.class));
     }
 
     @Test
     public void testCallBackNotificationReceivedIsCalled() throws Exception
     {
-        rpcController.handle(SAMPLE_NOTIFICATION);
-        verify(callbackMock).rpcControllerReceivedNotification(any(RPCNotification.class));
+        gateway.handleMessage(SAMPLE_NOTIFICATION);
+        verify(callbackMock).gatewayReceivedMessage(any(Notification.class));
     }
 
 }

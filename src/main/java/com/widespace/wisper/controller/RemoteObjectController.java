@@ -1,30 +1,32 @@
 package com.widespace.wisper.controller;
 
-import com.widespace.wisper.base.RPCProtocol;
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.base.RPCUtilities;
 import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.*;
+import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import org.json.JSONException;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
 
 /**
- * Subclass of the RPCController to extend functionality for handling instances
+ * Subclass of the Gateway to extend functionality for handling instances
  * with rpc messages. This class will allow you to register classes to be used
  * by the rpc bridge through exposed methods.
- * <p/>
+ * <p>
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class RPCRemoteObjectController extends RPCController
+public class RemoteObjectController extends Gateway
 {
     HashMap<String, RPCClass> classMap;
     HashMap<String, RPCClassInstance> instanceMap;
 
-    public RPCRemoteObjectController(RPCControllerCallback callback)
+    public RemoteObjectController(GatewayCallback callback)
     {
         super(callback);
         classMap = new HashMap<String, RPCClass>();
@@ -72,9 +74,14 @@ public class RPCRemoteObjectController extends RPCController
      * @param instance an instance of a class that implements the RPC protocol
      *                 and has the static registerClass() method implemented.
      */
-    public RPCClassInstance getRpcClassInstance(RPCProtocol instance)
+    public RPCClassInstance getRpcClassInstance(Wisper instance)
     {
-        return instanceMap.get(instance.toString());
+        return getRpcClassInstance(instance.toString());
+    }
+
+    public RPCClassInstance getRpcClassInstance(String instanceIdentifier)
+    {
+        return instanceMap.get(instanceIdentifier);
     }
 
     /**
@@ -98,10 +105,10 @@ public class RPCRemoteObjectController extends RPCController
      * Sends a wisper event to an instance.
      *
      * @param rpcInstance the instance to which the event is sent.
-     * @param key event key.
-     * @param value the value wrapped in the event.
+     * @param key         event key.
+     * @param value       the value wrapped in the event.
      */
-    public void sendInstanceEvent(RPCProtocol rpcInstance, String key, Object value)
+    public void sendInstanceEvent(Wisper rpcInstance, String key, Object value)
     {
         RPCClassInstance rpcClassInstance = getRpcClassInstance(rpcInstance);
 
@@ -115,11 +122,11 @@ public class RPCRemoteObjectController extends RPCController
         RPCClass rpcClass = getRpcClassForClass(rpcInstance.getClass());
         String mapName = rpcClass.getMapName();
 
-        RPCEvent event;
+        Event event;
         try
         {
             event = new RPCEventBuilder().withInstanceIdentifier(instanceIdentifier).withMethodName(mapName).withName(key).withValue(value).buildInstanceEvent();
-            respondToRequest(event);
+            sendMessage(event);
         }
         catch (JSONException e)
         {
@@ -129,20 +136,11 @@ public class RPCRemoteObjectController extends RPCController
 
     }
 
-    // Overridden methods
     @Override
-    protected void handleRPCNotification(RPCNotification notification)
+    public void handleMessage(AbstractMessage message)
     {
-        super.handleRPCNotification(notification);
-        RPCRemoteObjectCall remoteObjectCall = new RPCRemoteObjectCall(notification);
-        makeCall(remoteObjectCall);
-    }
-
-    @Override
-    protected void handleRPCRequest(RPCRequest request)
-    {
-        super.handleRPCRequest(request);
-        RPCRemoteObjectCall remoteObjectCall = new RPCRemoteObjectCall(request);
+        super.handleMessage(message);
+        RPCRemoteObjectCall remoteObjectCall = new RPCRemoteObjectCall(message);
         makeCall(remoteObjectCall);
     }
 
@@ -167,7 +165,7 @@ public class RPCRemoteObjectController extends RPCController
                     break;
                 case STATIC_EVENT:
                     // TODO: IMPLEMENT
-
+                    handleStaticEvent(remoteObjectCall);
                     break;
                 case INSTANCE:
                     rpcRemoteObjectCallInstanceMethod(remoteObjectCall);
@@ -181,7 +179,12 @@ public class RPCRemoteObjectController extends RPCController
         }
         catch (InvocationTargetException e)
         {
-            handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
+            String id = null;
+            if (remoteObjectCall.getRequest() != null)
+            {
+                id = remoteObjectCall.getRequest().getIdentifier();
+            }
+            sendMessage(new RPCErrorMessageBuilder(ErrorDomain.ANDROID, -1).withMessage(e.getLocalizedMessage()).withId(id).build());
             e.printStackTrace();
         }
         catch (IllegalAccessException e)
@@ -220,6 +223,19 @@ public class RPCRemoteObjectController extends RPCController
         }
     }
 
+    private void handleStaticEvent(RPCRemoteObjectCall remoteObjectCall) throws Exception
+    {
+        if (classMap.containsKey(remoteObjectCall.getClassName()))
+        {
+            RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
+            String proprtyName = (String) remoteObjectCall.getParams()[0];
+            String proprtyValue = (String) remoteObjectCall.getParams()[1];
+            Field field = rpcClass.getClassRef().getField(proprtyName);
+            field.setAccessible(true);
+            field.set(null, proprtyValue);
+        }
+    }
+
     private void handleInstanceEvent(RPCRemoteObjectCall remoteObjectCall) throws Exception
     {
         if (instanceMap.containsKey(remoteObjectCall.getInstanceIdentifier()))
@@ -236,7 +252,7 @@ public class RPCRemoteObjectController extends RPCController
     private void handlePropertySetWithInstanceEvent(RPCClassInstance rpcClassInstance, RPCRemoteObjectCall remoteObjectCall) throws Exception
     {
 
-        RPCEvent event = new RPCEvent(remoteObjectCall);
+        Event event = new Event(remoteObjectCall);
         HashMap<String, RPCClassProperty> properties = rpcClassInstance.getRpcClass().getProperties();
         if (properties == null || !properties.containsKey(event.getName()))
         {
@@ -253,7 +269,7 @@ public class RPCRemoteObjectController extends RPCController
 
 
         String setterMethodName = property.getSetterName();
-        RPCProtocol instance = rpcClassInstance.getInstance();
+        Wisper instance = rpcClassInstance.getInstance();
 
         // Instance method
         Class[] parameterTypes = RPCUtilities.convertRpcParameterTypeToClassType(property.getSetterMethodParameterType());
@@ -264,10 +280,11 @@ public class RPCRemoteObjectController extends RPCController
             {
                 RPCClassInstance classInstancePointer = instanceMap.get(event.getValue().toString());
                 event.setValue(classInstancePointer.getInstance());
-                parameterTypes[0] = RPCProtocol.class;
+                parameterTypes[0] = classInstancePointer.getInstance().getClass();
             }
         }
         Method method = instance.getClass().getMethod(setterMethodName, parameterTypes);
+        method.setAccessible(true);
         checkParameterTypes(parameterTypes, remoteObjectCall.getParams());
         method.invoke(instance, event.getValue());
     }
@@ -278,7 +295,7 @@ public class RPCRemoteObjectController extends RPCController
         {
             RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
             Class<?> classRef = rpcClass.getClassRef();
-            RPCProtocol instance = (RPCProtocol) Class.forName(classRef.getName()).newInstance();
+            Wisper instance = (Wisper) Class.forName(classRef.getName()).newInstance();
 
             String key = instance.toString();
             RPCClassInstance rpcClassInstance = new RPCClassInstance(rpcClass, instance, key);
@@ -287,9 +304,9 @@ public class RPCRemoteObjectController extends RPCController
 
             if (remoteObjectCall.getRequest() != null)
             {
-                RPCResponse response = remoteObjectCall.getRequest().createResponse();
+                Response response = remoteObjectCall.getRequest().createResponse();
                 response.setResult(key);
-                remoteObjectCall.getRequest().getResponseBlock().perform(response);
+                remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
             }
         }
         else
@@ -325,9 +342,9 @@ public class RPCRemoteObjectController extends RPCController
         rpcClassInstance.getInstance().destruct();
         if (remoteObjectCall.getRequest() != null)
         {
-            RPCResponse response = remoteObjectCall.getRequest().createResponse();
+            Response response = remoteObjectCall.getRequest().createResponse();
             response.setResult(remoteObjectCall.getInstanceIdentifier());
-            remoteObjectCall.getRequest().getResponseBlock().perform(response);
+            remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
         }
     }
 
@@ -382,8 +399,8 @@ public class RPCRemoteObjectController extends RPCController
         {
             Identifier = remoteObjectCall.getRequest().getIdentifier();
         }
-        RPCError error = new RPCErrorBuilder(ErrorDomain.REMOTE_OBJECT, errorCode.getErrorCode()).withMessage(message).withName(errorCode.getErrorName()).withId(Identifier).build();
-        respondToRequest(error);
+        RPCErrorMessage error = new RPCErrorMessageBuilder(ErrorDomain.REMOTE_OBJECT, errorCode.getErrorCode()).withMessage(message).withName(errorCode.getErrorName()).withId(Identifier).build();
+        sendMessage(error);
     }
 
     private void handleRpcError(RPCErrorCodes rpcErrorCode, String message, RPCRemoteObjectCall remoteObjectCall)
@@ -393,8 +410,8 @@ public class RPCRemoteObjectController extends RPCController
         {
             Identifier = remoteObjectCall.getRequest().getIdentifier();
         }
-        RPCError error = new RPCErrorBuilder(ErrorDomain.RPC, rpcErrorCode.getErrorCode()).withMessage(message).withName(rpcErrorCode.getErrorName()).withId(Identifier).build();
-        respondToRequest(error);
+        RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.RPC, rpcErrorCode.getErrorCode()).withMessage(message).withName(rpcErrorCode.getErrorName()).withId(Identifier).build();
+        sendMessage(errorMessage);
     }
 
     private void callRpcClassMethodOnInstance(RPCClassMethod rpcClassMethod, RPCClassInstance rpcInstance, RPCClass rpcClass, RPCRemoteObjectCall remoteObjectCall)
@@ -435,10 +452,11 @@ public class RPCRemoteObjectController extends RPCController
 
         if (rpcInstance != null)
         {
-            RPCProtocol instance = rpcInstance.getInstance();
+            Wisper instance = rpcInstance.getInstance();
 
             // Instance method
             method = instance.getClass().getMethod(methodName, parameterTypes);
+            method.setAccessible(true);
             checkParameterTypes(parameterTypes, params);
             returnedValue = method.invoke(instance, params);
         }
@@ -446,17 +464,18 @@ public class RPCRemoteObjectController extends RPCController
         {
             // Static method
             method = rpcClass.getClassRef().getMethod(methodName, parameterTypes);
+            method.setAccessible(true);
             returnedValue = method.invoke(null, params);
         }
 
         if (remoteObjectCall.getRequest() != null)
         {
-            RPCResponse response = remoteObjectCall.getRequest().createResponse();
+            Response response = remoteObjectCall.getRequest().createResponse();
             if (returnedValue != null)
             {
                 response.setResult(returnedValue);
             }
-            remoteObjectCall.getRequest().getResponseBlock().perform(response);
+            remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
         }
     }
 
@@ -478,7 +497,7 @@ public class RPCRemoteObjectController extends RPCController
     }
 
 
-    public RPCClassInstance addRpcObjectInstance(RPCProtocol rpcObjectInstance, RPCClass rpcClass)
+    public RPCClassInstance addRpcObjectInstance(Wisper rpcObjectInstance, RPCClass rpcClass)
     {
         rpcObjectInstance.setRemoteObjectController(this);
         String key = rpcObjectInstance.toString();

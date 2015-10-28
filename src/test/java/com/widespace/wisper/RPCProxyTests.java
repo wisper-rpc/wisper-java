@@ -1,9 +1,8 @@
 package com.widespace.wisper;
 
-import com.widespace.wisper.controller.RPCController;
-import com.widespace.wisper.controller.RPCControllerCallback;
-import com.widespace.wisper.messagetype.RPCNotification;
-import com.widespace.wisper.messagetype.RPCRequest;
+import com.widespace.wisper.controller.Gateway;
+import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.proxy.RPCProxy;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -36,9 +35,9 @@ public class RPCProxyTests
     @Test
     public void testReceiverWorks() throws Exception
     {
-        RPCController rpcController = mock(RPCController.class);
-        proxy.setReceiver(rpcController);
-        assertEquals(rpcController, proxy.getReceiver());
+        Gateway gateway = mock(Gateway.class);
+        proxy.setReceiver(gateway);
+        assertEquals(gateway, proxy.getReceiver());
     }
 
     @Test
@@ -52,16 +51,16 @@ public class RPCProxyTests
     public void testHandlingRequestCallsReceiverCorrectly() throws Exception
     {
         proxy.setReceiverMapName("my.receiver.mapname");
-        RPCController receiverMock = mock(RPCController.class);
+        Gateway receiverMock = mock(Gateway.class);
         proxy.setReceiver(receiverMock);
         proxy.setMapName("proxy.map.name");
-        RPCRequest sampleRequest = new RPCRequest(new JSONObject("{ \"method\" : \"proxy.map.name.wisp.ai.MyRPCTestObject:~\", \"params\" : [\"" + SAMPLE_INSTANCE_ID + "\"], \"id\": \"abcd5\" }"),  null);
+        Request sampleRequest = new Request(new JSONObject("{ \"method\" : \"proxy.map.name.wisp.ai.MyWisperTestObject:~\", \"params\" : [\"" + SAMPLE_INSTANCE_ID + "\"], \"id\": \"abcd5\" }"),  null);
 
-        String expected = "{\"method\":\"my.receiver.mapname.wisp.ai.MyRPCTestObject:~\",\"params\":[\"1234\"],\"id\":\"abcd5\"}";
+        String expected = "{\"method\":\"my.receiver.mapname.wisp.ai.MyWisperTestObject:~\",\"params\":[\"1234\"],\"id\":\"abcd5\"}";
         proxy.handleRequest(sampleRequest);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(receiverMock).handle(argument.capture());
+        verify(receiverMock).handleMessage(argument.capture());
         JSONAssert.assertEquals(expected, argument.getValue(), false);
     }
 
@@ -69,16 +68,16 @@ public class RPCProxyTests
     public void testHandlingNotificationsCallsReceiverCorrectly() throws Exception
     {
         proxy.setReceiverMapName("my.receiver.mapname");
-        RPCController receiverMock = mock(RPCController.class);
+        Gateway receiverMock = mock(Gateway.class);
         proxy.setReceiver(receiverMock);
         proxy.setMapName("proxy.map.name");
-        RPCNotification sampleNotification = new RPCNotification(new JSONObject("{ \"method\" : \"proxy.map.name.wisp.ai.MyRPCTestObject:~\", \"params\" : [\"" + SAMPLE_INSTANCE_ID + "\"] }"), mock(RPCControllerCallback.class));
+        Notification sampleNotification = new Notification(new JSONObject("{ \"method\" : \"proxy.map.name.wisp.ai.MyWisperTestObject:~\", \"params\" : [\"" + SAMPLE_INSTANCE_ID + "\"] }"));
 
-        String expected = "{\"method\":\"my.receiver.mapname.wisp.ai.MyRPCTestObject:~\",\"params\":[\"1234\"]}";
+        String expected = "{\"method\":\"my.receiver.mapname.wisp.ai.MyWisperTestObject:~\",\"params\":[\"1234\"]}";
         proxy.handleNotification(sampleNotification);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(receiverMock).handle(argument.capture());
+        verify(receiverMock).handleMessage(argument.capture());
         JSONAssert.assertEquals(expected, argument.getValue(), false);
     }
 }

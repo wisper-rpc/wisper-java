@@ -1,11 +1,11 @@
 package com.widespace.wisper;
 
-import com.widespace.wisper.base.RPCObject;
-import com.widespace.wisper.base.RPCProtocol;
+import com.widespace.wisper.base.WisperObject;
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
 
 // This class is needed for RPC tests.
-public class MyRPCTestObject extends RPCObject
+public class MyWisperTestObject extends WisperObject
 {
     public static final String TEST_INSTANCE_METHOD_MAPPING_NAME = "testMethod1";
     public static final String TEST_STATIC_METHOD_MAPPING_NAME = "testStaticMethod1";
@@ -15,13 +15,17 @@ public class MyRPCTestObject extends RPCObject
     public static final String TEST_PROPERTY_MAPPING_NAME = "prop";
     public static final String TEST_PASSBYREF_METHOD_MAPPING_NAME = "passByRef";
     public static final String TEST_INSTANCE_PROPERTY_MAPPING_NAME = "instanceProp";
+    public static final String TEST_STATIC_PROPERTY_MAPPING_NAME = "staticProp";
 
     public static String propertyValue = null;
 
-    public RPCProtocol instanceProperty = null;
+    public Wisper instanceProperty = null;
 
     private static String lasteMethodCalled = null;
+
     private String property = null;
+    public static String staticProp = null;
+
 
     public static String testStaticMethod1(String message)
     {
@@ -34,7 +38,7 @@ public class MyRPCTestObject extends RPCObject
         lasteMethodCalled = null;
 
         //1.Build a class model
-        RPCClass classModel = new RPCClass(MyRPCTestObject.class, "wisp.ai.MyRPCTestObject");
+        RPCClass classModel = new RPCClass(MyWisperTestObject.class, "wisp.ai.MyWisperTestObject");
 
         //2.Build class methods of instance or static methods you might need
         RPCClassMethod testMethod1 = new RPCClassMethod(TEST_INSTANCE_METHOD_MAPPING_NAME, "testMethod1", RPCMethodParameterType.STRING);
@@ -87,12 +91,12 @@ public class MyRPCTestObject extends RPCObject
         propertyValue = this.property;
     }
 
-    public void setInstanceProperty(RPCProtocol instanceProperty)
+    public void setInstanceProperty(Wisper instanceProperty)
     {
         this.instanceProperty = instanceProperty;
     }
 
-    public String printObject(MyRPCTestObject obj)
+    public String printObject(MyWisperTestObject obj)
     {
         return obj.property;
     }

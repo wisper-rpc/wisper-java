@@ -1,8 +1,8 @@
 package com.widespace.wisper;
 
-import com.widespace.wisper.base.RPCProtocol;
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.RPCClassInstance;
-import com.widespace.wisper.controller.RPCRemoteObjectController;
+import com.widespace.wisper.controller.RemoteObjectController;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,15 +13,15 @@ public class RPCClassInstanceTests
 
     public static final String INSTANCE_IDENTIFIER = "myTestId123";
     private RPCClassInstance rpcClassInstance;
-    private RPCProtocol sampleInstance;
+    private Wisper sampleInstance;
 
     @Before
     public void setUp() throws Exception
     {
-        sampleInstance = new RPCProtocol()
+        sampleInstance = new Wisper()
         {
             @Override
-            public void setRemoteObjectController(RPCRemoteObjectController remoteObjectController)
+            public void setRemoteObjectController(RemoteObjectController remoteObjectController)
             {
 
             }
