@@ -8,7 +8,7 @@ import com.widespace.wisper.controller.RemoteObjectController;
  * <p/>
  * Created by Ehssan Hoorvash on 21/05/14.
  */
-public abstract class RPCObject implements Wisper
+public abstract class WisperObject implements Wisper
 {
     protected RemoteObjectController remoteObjectController;
 
@@ -26,7 +26,6 @@ public abstract class RPCObject implements Wisper
     @Override
     public void setRemoteObjectController(RemoteObjectController remoteObjectController)
     {
-
         this.remoteObjectController = remoteObjectController;
     }
 
