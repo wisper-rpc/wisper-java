@@ -9,7 +9,7 @@ import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
  * Merely for testing purposes
  * Created by Ehssan Hoorvash on 21/05/14.
  */
-public class RPCTestObject extends RPCObject
+public class WisperTestObject extends WisperObject
 {
     public static String appendStringStatic(String first, String second)
     {
@@ -25,7 +25,7 @@ public class RPCTestObject extends RPCObject
     public static RPCClass registerRpcClass()
     {
         //1.Build a class model
-        RPCClass classModel = new RPCClass(RPCTestObject.class, "wisp.test.TestObject");
+        RPCClass classModel = new RPCClass(WisperTestObject.class, "wisp.test.TestObject");
 
         //2.Build class methods of instance or static methods you might need
         RPCClassMethod appendMethod = new RPCClassMethod("append", "appendString", RPCMethodParameterType.STRING, RPCMethodParameterType.STRING);
