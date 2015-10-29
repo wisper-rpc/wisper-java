@@ -5,7 +5,9 @@ import com.widespace.wisper.classrepresentation.RPCClass;
 import com.widespace.wisper.classrepresentation.RPCClassMethod;
 import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
 import com.widespace.wisper.controller.Gateway;
+import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.controller.RemoteObjectController;
+import com.widespace.wisper.messagetype.AbstractMessage;
 
 
 /**
@@ -18,7 +20,7 @@ public class RemoteGateway extends WisperObject
 
     public static RPCClass registerRpcClass()
     {
-        RPCClass rpcClass = new RPCClass(RemoteGateway.class, "wisper.gateway");
+        RPCClass rpcClass = new RPCClass(RemoteGateway.class, "wisper.Gateway");
         rpcClass.addInstanceMethod(new RPCClassMethod("setChannel", "setChannel", RPCMethodParameterType.INSTANCE));
         return rpcClass;
     }
@@ -40,6 +42,26 @@ public class RemoteGateway extends WisperObject
     public void setRemoteObjectController(RemoteObjectController remoteObjectController)
     {
         super.setRemoteObjectController(remoteObjectController);
-        gateway = remoteObjectController;
+        gateway = new Gateway(new GatewayCallback()
+        {
+            @Override
+            public void gatewayReceivedMessage(AbstractMessage message)
+            {
+                if (channel != null)
+                {
+                   //Not implemented by channel
+                }
+            }
+
+            @Override
+            public void gatewayGeneratedMessage(String message)
+            {
+                if (channel!=null)
+                {
+                    channel.sendMessage(message);
+                }
+
+            }
+        });
     }
 }

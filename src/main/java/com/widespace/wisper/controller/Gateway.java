@@ -138,14 +138,14 @@ public class Gateway
                 public void perform(Response response, RPCErrorMessage error)
                 {
                     sendMessage(response);
-                    request.setResponseBlock(new ResponseBlock()
-                    {
-                        @Override
-                        public void perform(Response response, RPCErrorMessage error)
-                        {
-                            //Empty, to avoid re-running the block
-                        }
-                    });
+//                    request.setResponseBlock(new ResponseBlock()
+//                    {
+//                        @Override
+//                        public void perform(Response response, RPCErrorMessage error)
+//                        {
+//                            //Empty, to avoid re-running the block
+//                        }
+//                    });
                 }
             });
         }
