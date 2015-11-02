@@ -1,11 +1,13 @@
 package com.widespace.wisper.controller;
 
-import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.base.RPCUtilities;
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
-import com.widespace.wisper.messagetype.*;
+import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.Event;
+import com.widespace.wisper.messagetype.RPCEventBuilder;
+import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.*;
-import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import org.json.JSONException;
 
 import java.lang.reflect.Field;
@@ -18,7 +20,7 @@ import java.util.HashMap;
  * Subclass of the Gateway to extend functionality for handling instances
  * with rpc messages. This class will allow you to register classes to be used
  * by the rpc bridge through exposed methods.
- * <p>
+ * <p/>
  * Created by Ehssan Hoorvash on 22/05/14.
  */
 public class RemoteObjectController extends Gateway
@@ -127,8 +129,7 @@ public class RemoteObjectController extends Gateway
         {
             event = new RPCEventBuilder().withInstanceIdentifier(instanceIdentifier).withMethodName(mapName).withName(key).withValue(value).buildInstanceEvent();
             sendMessage(event);
-        }
-        catch (JSONException e)
+        } catch (JSONException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -176,8 +177,7 @@ public class RemoteObjectController extends Gateway
                 default:
                     break;
             }
-        }
-        catch (InvocationTargetException e)
+        } catch (InvocationTargetException e)
         {
             String id = null;
             if (remoteObjectCall.getRequest() != null)
@@ -186,38 +186,31 @@ public class RemoteObjectController extends Gateway
             }
             sendMessage(new RPCErrorMessageBuilder(ErrorDomain.ANDROID, -1).withMessage(e.getLocalizedMessage()).withId(id).build());
             e.printStackTrace();
-        }
-        catch (IllegalAccessException e)
+        } catch (IllegalAccessException e)
         {
             handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
             e.printStackTrace();
-        }
-        catch (ClassNotFoundException e)
+        } catch (ClassNotFoundException e)
         {
             handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
             e.printStackTrace();
-        }
-        catch (InstantiationException e)
+        } catch (InstantiationException e)
         {
             handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
             e.printStackTrace();
-        }
-        catch (JSONException e)
+        } catch (JSONException e)
         {
             handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
             e.printStackTrace();
-        }
-        catch (NoSuchMethodException e)
+        } catch (NoSuchMethodException e)
         {
             handleRemoteObjectError(RemoteObjectErrorCode.MISSING_METHOD_ERROR, e.getMessage(), remoteObjectCall);
             e.printStackTrace();
-        }
-        catch (IllegalArgumentException e)
+        } catch (IllegalArgumentException e)
         {
             handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
             e.printStackTrace();
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -242,8 +235,7 @@ public class RemoteObjectController extends Gateway
         {
             RPCClassInstance rpcClassInstance = instanceMap.get(remoteObjectCall.getInstanceIdentifier());
             handlePropertySetWithInstanceEvent(rpcClassInstance, remoteObjectCall);
-        }
-        else
+        } else
         {
             handleRemoteObjectError(RemoteObjectErrorCode.INVALID_INSTANCE_ERROR, "No such instance found : " + remoteObjectCall.getInstanceIdentifier(), remoteObjectCall);
         }
@@ -283,7 +275,7 @@ public class RemoteObjectController extends Gateway
                 parameterTypes[0] = classInstancePointer.getInstance().getClass();
             }
         }
-        Method method = instance.getClass().getMethod(setterMethodName, parameterTypes);
+        Method method = getMethod(instance.getClass(), setterMethodName, parameterTypes);
         method.setAccessible(true);
         checkParameterTypes(parameterTypes, remoteObjectCall.getParams());
         method.invoke(instance, event.getValue());
@@ -308,8 +300,7 @@ public class RemoteObjectController extends Gateway
                 response.setResult(key);
                 remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
             }
-        }
-        else
+        } else
         {
             handleRemoteObjectError(RemoteObjectErrorCode.MISSING_CLASS_ERROR, "No class is registered for RPC with name " + remoteObjectCall.getClassName(), remoteObjectCall);
         }
@@ -322,8 +313,7 @@ public class RemoteObjectController extends Gateway
             if (!classMap.containsKey(remoteObjectCall.getClassName()))
             {
                 handleRemoteObjectError(RemoteObjectErrorCode.MISSING_CLASS_ERROR, "No such class registered : " + remoteObjectCall.getClassName(), remoteObjectCall);
-            }
-            else
+            } else
             {
                 handleRemoteObjectError(RemoteObjectErrorCode.INVALID_INSTANCE_ERROR, "No such instance found : " + remoteObjectCall.getInstanceIdentifier(), remoteObjectCall);
             }
@@ -372,8 +362,7 @@ public class RemoteObjectController extends Gateway
             theMethod = rpcClass.getInstanceMethods().get(remoteObjectCall.getMethodName());
             callRpcClassMethodOnInstance(theMethod, rpcClassInstance, rpcClass, remoteObjectCall);
 
-        }
-        else if (callType == RPCRemoteObjectCallType.STATIC && rpcClass != null)
+        } else if (callType == RPCRemoteObjectCallType.STATIC && rpcClass != null)
         {
             theMethod = rpcClass.getStaticMethods().get(remoteObjectCall.getMethodName());
             callRpcClassMethodOnInstance(theMethod, null, rpcClass, remoteObjectCall);
@@ -455,15 +444,14 @@ public class RemoteObjectController extends Gateway
             Wisper instance = rpcInstance.getInstance();
 
             // Instance method
-            method = instance.getClass().getMethod(methodName, parameterTypes);
+            method = getMethod(instance.getClass(), methodName, parameterTypes);
             method.setAccessible(true);
             checkParameterTypes(parameterTypes, params);
             returnedValue = method.invoke(instance, params);
-        }
-        else
+        } else
         {
             // Static method
-            method = rpcClass.getClassRef().getMethod(methodName, parameterTypes);
+            method = getMethod(rpcClass.getClassRef(), methodName, parameterTypes);
             method.setAccessible(true);
             returnedValue = method.invoke(null, params);
         }
@@ -477,6 +465,30 @@ public class RemoteObjectController extends Gateway
             }
             remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
         }
+    }
+
+    private Method getMethod(Class<?> clasRef, String methodName, Class[] parameterTypes) throws NoSuchMethodException
+    {
+        nextMethod:
+        for (Method method : clasRef.getMethods())
+        {
+            if (!methodName.equals(method.getName()))
+                continue;
+
+            final Class<?>[] methodParameterTypes = method.getParameterTypes();
+            if (methodParameterTypes.length != parameterTypes.length)
+                continue;
+
+            for (int i = 0; i < methodParameterTypes.length; i++)
+            {
+                if (!methodParameterTypes[i].isAssignableFrom(parameterTypes[i]))
+                    continue nextMethod;
+            }
+
+            return method;
+        }
+
+        throw new NoSuchMethodException("No such method found with name " + methodName + "and parameter types " + parameterTypes.toString());
     }
 
     private void checkParameterTypes(Class<?>[] parameterTypes, Object[] params) throws IllegalArgumentException
