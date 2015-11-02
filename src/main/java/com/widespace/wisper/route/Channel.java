@@ -26,18 +26,21 @@ public abstract class Channel extends WisperObject implements GatewayCallback
         this.gateway = gateway;
     }
 
+    //Actions
+    protected abstract void sendMessage(String message);
+    protected abstract void receiveMessage(String message);
+
+
+    // Gateway callbacks
     @Override
     public void gatewayReceivedMessage(AbstractMessage message)
     {
-       // Do Nothing
+        //no-op
     }
 
     @Override
     public void gatewayGeneratedMessage(String message)
     {
-       sendMessage(message);
+        sendMessage(message);
     }
-
-    protected abstract void sendMessage(String message);
-    protected abstract void receiveMessage(String message);
 }

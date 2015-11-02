@@ -47,20 +47,14 @@ public class RemoteGateway extends WisperObject
             @Override
             public void gatewayReceivedMessage(AbstractMessage message)
             {
-                if (channel != null)
-                {
-                   //Not implemented by channel
-                }
+
+                System.out.println("");
             }
 
             @Override
             public void gatewayGeneratedMessage(String message)
             {
-                if (channel!=null)
-                {
-                    channel.sendMessage(message);
-                }
-
+                System.out.println("");
             }
         });
     }
