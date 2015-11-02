@@ -11,11 +11,6 @@ import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
  */
 public class WisperTestObject extends WisperObject
 {
-    public static String appendStringStatic(String first, String second)
-    {
-        return first + second;
-    }
-
     /**
      * This method must be implemented by any object desiring to register itself as RPC
      * unfortunately prior to Java 8 we cannot have static methods in Interfaces which is why we need to take this approach instead.
@@ -42,6 +37,11 @@ public class WisperTestObject extends WisperObject
 
         //4. Return the class model
         return classModel;
+    }
+
+    public static String appendStringStatic(String first, String second)
+    {
+        return first + second;
     }
 
     public String appendString(String first, String second)
