@@ -8,5 +8,5 @@ import com.widespace.wisper.messagetype.Request;
  */
 public interface CallBlock
 {
-    void perform(RemoteObjectController remoteObjectController, RPCClassInstance classInstance, RPCClassMethod method, Request request);
+    void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, RPCClassMethod method, Request request);
 }

@@ -1,7 +1,7 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.classrepresentation.CallBlock;
-import com.widespace.wisper.classrepresentation.RPCClassInstance;
+import com.widespace.wisper.classrepresentation.WisperClassInstance;
 import com.widespace.wisper.classrepresentation.RPCClassMethod;
 import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
 import com.widespace.wisper.controller.RemoteObjectController;
@@ -57,7 +57,7 @@ public class RpcClassMethodTests
         CallBlock sampleCallBlock = new CallBlock()
         {
             @Override
-            public void perform(RemoteObjectController remoteObjectController, RPCClassInstance classInstance, RPCClassMethod method, Request request)
+            public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, RPCClassMethod method, Request request)
             {
 
             }

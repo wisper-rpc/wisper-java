@@ -8,14 +8,14 @@ import com.widespace.wisper.base.Wisper;
  * <p/>
  * Created by Ehssan Hoorvash on 23/05/14.
  */
-public class RPCClassInstance
+public class WisperClassInstance
 {
     private RPCClass rpcClass;
     private String instanceIdentifier;
     private Wisper instance;
 
 
-    public RPCClassInstance(RPCClass rpcClass, Wisper instance, String instanceIdentifier)
+    public WisperClassInstance(RPCClass rpcClass, Wisper instance, String instanceIdentifier)
     {
         this.setRpcClass(rpcClass);
         this.instanceIdentifier = instanceIdentifier;
