@@ -24,6 +24,7 @@ public class WisperControllerTestObject implements Wisper
 
     public WisperControllerTestObject(String constructorParam)
     {
+        this();
         this.constructorParam = constructorParam;
     }
 
