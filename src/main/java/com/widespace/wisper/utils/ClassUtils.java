@@ -24,7 +24,18 @@ public class ClassUtils
     public static boolean isPrimitive(Class clazz)
     {
         return (clazz.isPrimitive() || objectTobuiltInMap.containsKey(clazz) && objectTobuiltInMap.get(clazz).isPrimitive());
+    }
 
+
+    public static Class<?>[] getParameterClasses(Object[] parameters)
+    {
+        Class<?>[] classes = new Class<?>[parameters.length];
+        for (int i = 0; i < parameters.length; i++)
+        {
+            classes[i] = parameters[i].getClass();
+        }
+
+        return classes;
     }
 
 }

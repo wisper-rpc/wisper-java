@@ -115,7 +115,7 @@ public class Gateway
         AbstractMessage message = messageFactory.createMessage(json);
         if (message == null)
         {
-            sendMessage(new RPCErrorMessageBuilder(ErrorDomain.RPC, RPCErrorCodes.FORMAT_ERROR.getErrorCode()).withMessage("The message could not be parsed as a valid RPC message. Wrong format? " + json.toString()).build());
+            sendMessage(new RPCErrorMessageBuilder(ErrorDomain.RPC, RPCErrorCodes.FORMAT_ERROR.getErrorCode()).withMessage("The message could not be parsed as a valid RPC message. Invalid Json or Wrong format? " + json.toString()).build());
             return;
         }
 
@@ -207,7 +207,7 @@ public class Gateway
 
     public void sendMessage(String message)
     {
-        callback.gatewayGeneratedMessage(StringEscapeUtils.escapeJavaScript(message));
+        callback.gatewayGeneratedMessage(message);
     }
 
     public GatewayCallback getCallback()

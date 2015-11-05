@@ -88,10 +88,10 @@ public class MyWisperTestObject extends WisperObject
     public void setProperty(String property)
     {
         this.property = property;
-        propertyValue = this.property;
+        propertyValue = property;
     }
 
-    public void setInstanceProperty(Wisper instanceProperty)
+    public void setInstanceProperty(MyWisperTestObject instanceProperty)
     {
         this.instanceProperty = instanceProperty;
     }
