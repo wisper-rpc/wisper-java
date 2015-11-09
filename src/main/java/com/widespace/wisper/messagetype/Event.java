@@ -1,6 +1,6 @@
 package com.widespace.wisper.messagetype;
 
-import com.widespace.wisper.controller.RPCRemoteObjectCall;
+import com.widespace.wisper.controller.RemoteObjectCall;
 import com.widespace.wisper.controller.RPCRemoteObjectCallType;
 import org.json.JSONException;
 
@@ -33,7 +33,7 @@ public class Event extends Notification
         this.value = value;
     }
 
-    public Event(RPCRemoteObjectCall remoteObjectCall) throws JSONException
+    public Event(RemoteObjectCall remoteObjectCall) throws JSONException
     {
         RPCRemoteObjectCallType callType = remoteObjectCall.getCallType();
         List<Object> parameters = Arrays.asList(remoteObjectCall.getParams());

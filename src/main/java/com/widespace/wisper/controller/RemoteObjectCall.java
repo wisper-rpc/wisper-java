@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Ehssan Hoorvash on 23/05/14.
  */
-public class RPCRemoteObjectCall
+public class RemoteObjectCall
 {
     public static final String CONSTRUCT_METHOD_NAME = "~";
     public static final String DESTRUCT_METHOD_NAME = "~";
@@ -23,7 +23,7 @@ public class RPCRemoteObjectCall
 
     private Notification notification;
 
-    public RPCRemoteObjectCall(AbstractMessage message)
+    public RemoteObjectCall(AbstractMessage message)
     {
         if (message instanceof Request)
         {
@@ -39,7 +39,6 @@ public class RPCRemoteObjectCall
 
     private void determineInstanceIdentifier()
     {
-
         switch (getCallType())
         {
 
@@ -151,9 +150,6 @@ public class RPCRemoteObjectCall
         String className = getFullMethodName();
         if (className != null)
         {
-            ArrayList<String> classComponents = new ArrayList<String>(Arrays.asList(className.split("\\.")));
-            String lastComponent = classComponents.get(classComponents.size() - 1);
-
             switch (getCallType())
             {
                 case UNKNOWN:

@@ -145,12 +145,12 @@ public class RemoteObjectController extends Gateway
     public void handleMessage(AbstractMessage message)
     {
         super.handleMessage(message);
-        RPCRemoteObjectCall remoteObjectCall = new RPCRemoteObjectCall(message);
+        RemoteObjectCall remoteObjectCall = new RemoteObjectCall(message);
         makeCall(remoteObjectCall);
     }
 
     // Private Methods
-    private void makeCall(RPCRemoteObjectCall remoteObjectCall)
+    private void makeCall(RemoteObjectCall remoteObjectCall)
     {
         try
         {
@@ -227,7 +227,7 @@ public class RemoteObjectController extends Gateway
         }
     }
 
-    private void handleStaticEvent(RPCRemoteObjectCall remoteObjectCall) throws Exception
+    private void handleStaticEvent(RemoteObjectCall remoteObjectCall) throws Exception
     {
         if (classMap.containsKey(remoteObjectCall.getClassName()))
         {
@@ -240,7 +240,7 @@ public class RemoteObjectController extends Gateway
         }
     }
 
-    private void handleInstanceEvent(RPCRemoteObjectCall remoteObjectCall) throws Exception
+    private void handleInstanceEvent(RemoteObjectCall remoteObjectCall) throws Exception
     {
         if (instanceMap.containsKey(remoteObjectCall.getInstanceIdentifier()))
         {
@@ -253,7 +253,7 @@ public class RemoteObjectController extends Gateway
         }
     }
 
-    private void handlePropertySetWithInstanceEvent(WisperClassInstance wisperClassInstance, RPCRemoteObjectCall remoteObjectCall) throws Exception
+    private void handlePropertySetWithInstanceEvent(WisperClassInstance wisperClassInstance, RemoteObjectCall remoteObjectCall) throws Exception
     {
 
         Event event = new Event(remoteObjectCall);
@@ -296,7 +296,7 @@ public class RemoteObjectController extends Gateway
         method.invoke(instance, event.getValue());
     }
 
-    private void createRemoteObject(RPCRemoteObjectCall remoteObjectCall) throws ClassNotFoundException, IllegalAccessException, InstantiationException, JSONException, InvocationTargetException, NoSuchMethodException
+    private void createRemoteObject(RemoteObjectCall remoteObjectCall) throws ClassNotFoundException, IllegalAccessException, InstantiationException, JSONException, InvocationTargetException, NoSuchMethodException
     {
         if (classMap.containsKey(remoteObjectCall.getClassName()))
         {
@@ -375,7 +375,7 @@ public class RemoteObjectController extends Gateway
         return initializedProperties;
     }
 
-    private void rpcRemoteObjectDestruct(RPCRemoteObjectCall remoteObjectCall) throws JSONException
+    private void rpcRemoteObjectDestruct(RemoteObjectCall remoteObjectCall) throws JSONException
     {
         if (!instanceMap.containsKey(remoteObjectCall.getInstanceIdentifier()))
         {
@@ -408,19 +408,19 @@ public class RemoteObjectController extends Gateway
         }
     }
 
-    private void rpcRemoteObjectCallInstanceMethod(RPCRemoteObjectCall remoteObjectCall) throws InvocationTargetException, IllegalAccessException, JSONException,
+    private void rpcRemoteObjectCallInstanceMethod(RemoteObjectCall remoteObjectCall) throws InvocationTargetException, IllegalAccessException, JSONException,
             NoSuchMethodException
     {
         remoteMethodCall(remoteObjectCall, RPCRemoteObjectCallType.INSTANCE);
     }
 
-    private void rpcRemoteObjectCallStaticMethod(RPCRemoteObjectCall remoteObjectCall) throws InvocationTargetException, IllegalAccessException, JSONException,
+    private void rpcRemoteObjectCallStaticMethod(RemoteObjectCall remoteObjectCall) throws InvocationTargetException, IllegalAccessException, JSONException,
             NoSuchMethodException
     {
         remoteMethodCall(remoteObjectCall, RPCRemoteObjectCallType.STATIC);
     }
 
-    private void remoteMethodCall(RPCRemoteObjectCall remoteObjectCall, RPCRemoteObjectCallType callType) throws InvocationTargetException, IllegalAccessException, JSONException,
+    private void remoteMethodCall(RemoteObjectCall remoteObjectCall, RPCRemoteObjectCallType callType) throws InvocationTargetException, IllegalAccessException, JSONException,
             NoSuchMethodException
     {
         RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
@@ -452,7 +452,7 @@ public class RemoteObjectController extends Gateway
 
     }
 
-    private void handleRemoteObjectError(RemoteObjectErrorCode errorCode, String message, RPCRemoteObjectCall remoteObjectCall)
+    private void handleRemoteObjectError(RemoteObjectErrorCode errorCode, String message, RemoteObjectCall remoteObjectCall)
     {
         String Identifier = null;
         if (remoteObjectCall != null && remoteObjectCall.getRequest() != null)
@@ -463,7 +463,7 @@ public class RemoteObjectController extends Gateway
         sendMessage(error);
     }
 
-    private void handleRpcError(RPCErrorCodes rpcErrorCode, String message, RPCRemoteObjectCall remoteObjectCall)
+    private void handleRpcError(RPCErrorCodes rpcErrorCode, String message, RemoteObjectCall remoteObjectCall)
     {
         String Identifier = null;
         if (remoteObjectCall != null && remoteObjectCall.getRequest() != null)
@@ -474,7 +474,7 @@ public class RemoteObjectController extends Gateway
         sendMessage(errorMessage);
     }
 
-    private void callRpcClassMethodOnInstance(RPCClassMethod rpcClassMethod, WisperClassInstance rpcInstance, RPCClass rpcClass, RPCRemoteObjectCall remoteObjectCall)
+    private void callRpcClassMethodOnInstance(RPCClassMethod rpcClassMethod, WisperClassInstance rpcInstance, RPCClass rpcClass, RemoteObjectCall remoteObjectCall)
             throws InvocationTargetException, IllegalAccessException, JSONException, NoSuchMethodException
     {
         if (rpcClassMethod == null)
