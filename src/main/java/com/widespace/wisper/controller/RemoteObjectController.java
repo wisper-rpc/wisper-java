@@ -156,9 +156,6 @@ public class RemoteObjectController extends Gateway
         {
             switch (remoteObjectCall.getCallType())
             {
-                case UNKNOWN:
-                    // IGNORE
-                    break;
                 case CREATE:
                     createRemoteObject(remoteObjectCall);
                     break;
@@ -177,6 +174,7 @@ public class RemoteObjectController extends Gateway
                 case INSTANCE_EVENT:
                     handleInstanceEvent(remoteObjectCall);
                     break;
+                case UNKNOWN:
                 default:
                     break;
             }
@@ -328,7 +326,11 @@ public class RemoteObjectController extends Gateway
                 idWithProperties.put("id", nativeInstanceId);
                 idWithProperties.put("props", fetchInitializedProperties(wisperClassInstance));
                 response.setResult(idWithProperties);
-                remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
+
+                if (remoteObjectCall.getRequest().getResponseBlock() != null)
+                {
+                    remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
+                }
             }
         }
         else
@@ -404,7 +406,10 @@ public class RemoteObjectController extends Gateway
         {
             Response response = remoteObjectCall.getRequest().createResponse();
             response.setResult(remoteObjectCall.getInstanceIdentifier());
-            remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
+            if (remoteObjectCall.getRequest().getResponseBlock() != null)
+            {
+                remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
+            }
         }
     }
 
@@ -454,23 +459,33 @@ public class RemoteObjectController extends Gateway
 
     private void handleRemoteObjectError(RemoteObjectErrorCode errorCode, String message, RemoteObjectCall remoteObjectCall)
     {
-        String Identifier = null;
-        if (remoteObjectCall != null && remoteObjectCall.getRequest() != null)
-        {
-            Identifier = remoteObjectCall.getRequest().getIdentifier();
-        }
-        RPCErrorMessage error = new RPCErrorMessageBuilder(ErrorDomain.REMOTE_OBJECT, errorCode.getErrorCode()).withMessage(message).withName(errorCode.getErrorName()).withId(Identifier).build();
-        sendMessage(error);
+        if (remoteObjectCall == null)
+             return;
+
+         RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.REMOTE_OBJECT, errorCode.getErrorCode()).withMessage(message).withName(errorCode.getErrorName()).build();
+         if (remoteObjectCall.getRequest() != null)
+         {
+             errorMessage.setId(remoteObjectCall.getRequest().getIdentifier());
+             remoteObjectCall.getRequest().getResponseBlock().perform(null,errorMessage);
+             return;
+         }
+
+         sendMessage(errorMessage);
     }
 
     private void handleRpcError(RPCErrorCodes rpcErrorCode, String message, RemoteObjectCall remoteObjectCall)
     {
-        String Identifier = null;
-        if (remoteObjectCall != null && remoteObjectCall.getRequest() != null)
+        if (remoteObjectCall == null)
+            return;
+
+        RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.RPC, rpcErrorCode.getErrorCode()).withMessage(message).withName(rpcErrorCode.getErrorName()).build();
+        if (remoteObjectCall.getRequest() != null)
         {
-            Identifier = remoteObjectCall.getRequest().getIdentifier();
+            errorMessage.setId(remoteObjectCall.getRequest().getIdentifier());
+            remoteObjectCall.getRequest().getResponseBlock().perform(null,errorMessage);
+            return;
         }
-        RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.RPC, rpcErrorCode.getErrorCode()).withMessage(message).withName(rpcErrorCode.getErrorName()).withId(Identifier).build();
+
         sendMessage(errorMessage);
     }
 
@@ -535,7 +550,11 @@ public class RemoteObjectController extends Gateway
             {
                 response.setResult(returnedValue);
             }
-            remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
+
+            if (remoteObjectCall.getRequest().getResponseBlock() != null)
+            {
+                remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
+            }
         }
     }
 
