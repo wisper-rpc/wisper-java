@@ -126,6 +126,9 @@ public abstract class AbstractMessage
 
     protected Object serialize(Object newResult)
     {
+        if(newResult==null)
+            return null;
+
         if (newResult.getClass().isArray())
         {
             JSONArray array = new JSONArray();

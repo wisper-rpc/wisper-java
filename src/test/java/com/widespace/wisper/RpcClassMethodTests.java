@@ -13,33 +13,34 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
-/**
- * Created by Ehssan Hoorvash on 10/06/14.
- */
+
 public class RpcClassMethodTests
 {
 
+    private final String SAMPLE_MAP_NAME = "SAMPLE_MAP_NAME";
     private RPCClassMethod rpcClassMethod;
 
     @Before
     public void setUp() throws Exception
     {
-        rpcClassMethod = new RPCClassMethod("mapName", "methodName");
+        rpcClassMethod = new RPCClassMethod(SAMPLE_MAP_NAME, "methodName");
     }
 
     @Test
     public void testMapNameIsCorrect() throws Exception
     {
-        assertEquals("mapName", rpcClassMethod.getMapName());
+        assertThat(SAMPLE_MAP_NAME, is(rpcClassMethod.getMapName()));
     }
 
 
     @Test
     public void testParameterTypesAreCorrect() throws Exception
     {
-        rpcClassMethod = new RPCClassMethod("mapName", "methodName", RPCMethodParameterType.HASHMAP,
+        rpcClassMethod = new RPCClassMethod(SAMPLE_MAP_NAME, "methodName", RPCMethodParameterType.HASHMAP,
                 RPCMethodParameterType.STRING, RPCMethodParameterType.NUMBER, RPCMethodParameterType.ARRAY);
         Class[] parameterTypes = rpcClassMethod.getParameterTypes();
         List<Class> classList = Arrays.asList(parameterTypes);
