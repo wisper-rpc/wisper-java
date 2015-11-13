@@ -2,8 +2,10 @@ package com.widespace.wisper.controller;
 
 
 import com.widespace.wisper.messagetype.*;
-import com.widespace.wisper.messagetype.error.*;
-import com.widespace.wisper.utils.StringEscapeUtils;
+import com.widespace.wisper.messagetype.error.ErrorDomain;
+import com.widespace.wisper.messagetype.error.RPCErrorCodes;
+import com.widespace.wisper.messagetype.error.RPCErrorMessage;
+import com.widespace.wisper.messagetype.error.RPCErrorMessageBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -138,14 +140,14 @@ public class Gateway
                 public void perform(Response response, RPCErrorMessage error)
                 {
                     sendMessage(response);
-//                    request.setResponseBlock(new ResponseBlock()
-//                    {
-//                        @Override
-//                        public void perform(Response response, RPCErrorMessage error)
-//                        {
-//                            //Empty, to avoid re-running the block
-//                        }
-//                    });
+                    request.setResponseBlock(new ResponseBlock()
+                    {
+                        @Override
+                        public void perform(Response response, RPCErrorMessage error)
+                        {
+                            //NO-OP
+                        }
+                    });
                 }
             });
         }
