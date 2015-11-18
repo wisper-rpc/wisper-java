@@ -1,70 +1,96 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.classrepresentation.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 
-/**
- * Created by Ehssan Hoorvash on 10/06/14.
- */
 
 public class RpcClassTests
 {
+    private final String SAMPLE_MAP_NAME = "SAMPLE_MAP_NAME";
     private RPCClass rpcClass;
-    private String myTestObject;
+    private String SAMPLE_OBJECT;
 
 
     @Before
     public void setUp() throws Exception
     {
-        myTestObject = "my Test Object";
-        rpcClass = new RPCClass(myTestObject.getClass(), "theMapName");
+        SAMPLE_OBJECT = "my Test Object";
     }
 
     @Test
     public void testMapNameIsCorrect() throws Exception
     {
-        assertEquals("RPC map name is not correct", rpcClass.getMapName(), "theMapName");
+        rpcClass = new RPCClass(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+        assertThat(SAMPLE_MAP_NAME, is(equalTo(rpcClass.getMapName())));
+    }
+
+    @Test
+    public void testMapNameCanBeChanged() throws Exception
+    {
+        rpcClass = new RPCClass(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+        rpcClass.setMapName("NEW");
+        assertThat("NEW", is(equalTo(rpcClass.getMapName())));
     }
 
     @Test
     public void testClassRefIsCorrect() throws Exception
     {
-        assertEquals("RPC map name is not correct", rpcClass.getClassRef(), myTestObject.getClass());
+        rpcClass = new RPCClass(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+        assertThat(SAMPLE_OBJECT, is(instanceOf(rpcClass.getClassRef())));
     }
+
+    @Test
+    public void testClassRefCouldBeOverwritten() throws Exception
+    {
+        rpcClass = new RPCClass(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+        rpcClass.setClassRef(this.getClass());
+        assertThat(this, is(instanceOf(rpcClass.getClassRef())));
+    }
+
 
     @Test
     public void testAddingStaticMethod() throws Exception
     {
+        rpcClass = new RPCClass(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
         RPCClassMethod someMethod = new RPCClassMethod("methodMap", "someName");
         rpcClass.addStaticMethod(someMethod);
-        assertTrue(rpcClass.getStaticMethods().containsKey("methodMap"));
+        assertThat(rpcClass.getStaticMethods().containsKey("methodMap"), is(true));
     }
 
     @Test
     public void testAddingInstanceMethod() throws Exception
     {
+        rpcClass = new RPCClass(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
         RPCClassMethod someMethod = new RPCClassMethod("methodMap", "someName");
         rpcClass.addInstanceMethod(someMethod);
-        assertTrue(rpcClass.getInstanceMethods().containsKey("methodMap"));
+        assertThat(rpcClass.getInstanceMethods().containsKey("methodMap"), is(true));
     }
 
     @Test
     public void testPropertiesAreAddedCorrectly() throws Exception
     {
+        rpcClass = new RPCClass(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+
         RPCClassProperty property1 = new RPCClassProperty("prop1");
         RPCClassProperty property2 = new RPCClassProperty("prop2", RPCClassPropertyMode.READ_WRITE, "setterName", RPCMethodParameterType.STRING);
 
         rpcClass.addProperty(property1);
         rpcClass.addProperty(property2);
 
-        assertNotNull(rpcClass.getProperties());
-        assertEquals(2, rpcClass.getProperties().size());
-        assertEquals(property1, rpcClass.getProperties().get(property1.getMappingName()));
-        assertEquals(property2, rpcClass.getProperties().get(property2.getMappingName()));
+        assertThat(rpcClass.getProperties(), is(notNullValue()));
+        assertThat(rpcClass.getProperties().size(), is(2));
+        assertThat(rpcClass.getProperties().get(property1.getMappingName()), is(property1));
+        assertThat(rpcClass.getProperties().get(property2.getMappingName()), is(property2));
+    }
+
+    @After
+    public void tearDown() throws Exception
+    {
+        rpcClass = null;
     }
 }

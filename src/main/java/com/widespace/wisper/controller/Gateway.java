@@ -2,8 +2,10 @@ package com.widespace.wisper.controller;
 
 
 import com.widespace.wisper.messagetype.*;
-import com.widespace.wisper.messagetype.error.*;
-import com.widespace.wisper.utils.StringEscapeUtils;
+import com.widespace.wisper.messagetype.error.ErrorDomain;
+import com.widespace.wisper.messagetype.error.RPCErrorCodes;
+import com.widespace.wisper.messagetype.error.RPCErrorMessage;
+import com.widespace.wisper.messagetype.error.RPCErrorMessageBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -115,7 +117,7 @@ public class Gateway
         AbstractMessage message = messageFactory.createMessage(json);
         if (message == null)
         {
-            sendMessage(new RPCErrorMessageBuilder(ErrorDomain.RPC, RPCErrorCodes.FORMAT_ERROR.getErrorCode()).withMessage("The message could not be parsed as a valid RPC message. Wrong format? " + json.toString()).build());
+            sendMessage(new RPCErrorMessageBuilder(ErrorDomain.RPC, RPCErrorCodes.FORMAT_ERROR.getErrorCode()).withMessage("The message could not be parsed as a valid RPC message. Invalid Json or Wrong format? " + json.toString()).build());
             return;
         }
 
@@ -138,14 +140,14 @@ public class Gateway
                 public void perform(Response response, RPCErrorMessage error)
                 {
                     sendMessage(response);
-//                    request.setResponseBlock(new ResponseBlock()
-//                    {
-//                        @Override
-//                        public void perform(Response response, RPCErrorMessage error)
-//                        {
-//                            //Empty, to avoid re-running the block
-//                        }
-//                    });
+                    request.setResponseBlock(new ResponseBlock()
+                    {
+                        @Override
+                        public void perform(Response response, RPCErrorMessage error)
+                        {
+                            //NO-OP
+                        }
+                    });
                 }
             });
         }
@@ -207,7 +209,7 @@ public class Gateway
 
     public void sendMessage(String message)
     {
-        callback.gatewayGeneratedMessage(StringEscapeUtils.escapeJavaScript(message));
+        callback.gatewayGeneratedMessage(message);
     }
 
     public GatewayCallback getCallback()

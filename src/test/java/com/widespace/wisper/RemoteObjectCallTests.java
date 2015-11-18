@@ -1,6 +1,6 @@
 package com.widespace.wisper;
 
-import com.widespace.wisper.controller.RPCRemoteObjectCall;
+import com.widespace.wisper.controller.RemoteObjectCall;
 import com.widespace.wisper.controller.RPCRemoteObjectCallType;
 import com.widespace.wisper.messagetype.Request;
 import org.json.JSONException;
@@ -16,7 +16,7 @@ public class RemoteObjectCallTests
 {
 
     public static final String SAMPLE_INSTANCE_METHOD_CALL = "{\"method\":\"wisp.ai.TestObject:sampleMethodName\", \"params\":[\"sample_instance_identifier\"],\"id\":\"abcd1\"}";
-    private RPCRemoteObjectCall remoteObjectCall;
+    private RemoteObjectCall remoteObjectCall;
     private Request sampleRequest;
 
     @Before
@@ -30,78 +30,88 @@ public class RemoteObjectCallTests
     public void testRequestInitializesProperly() throws Exception
     {
         sampleRequest = new Request(new JSONObject(SAMPLE_INSTANCE_METHOD_CALL), null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertEquals(sampleRequest, remoteObjectCall.getRequest());
     }
 
+    @Test
     public void testInstanceIdentifierCanBeDetermined() throws Exception
     {
         sampleRequest = new Request(new JSONObject(SAMPLE_INSTANCE_METHOD_CALL), null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertEquals("sample_instance_identifier", remoteObjectCall.getInstanceIdentifier());
     }
 
+    @Test
     public void testNullInstanceIdentifierInStaticMethodCall() throws JSONException
     {
         sampleRequest = new Request(new JSONObject("{ \"method\" : \"wisp.ai.TestObject.sampleMethodName\", \"params\" : [{\"status\":\"OK\"}], \"id\": \"abcd4\" }"),
                 null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertNull(remoteObjectCall.getInstanceIdentifier());
     }
 
+    @Test
     public void testMethodName() throws Exception
     {
         sampleRequest = new Request(new JSONObject(SAMPLE_INSTANCE_METHOD_CALL), null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertEquals("sampleMethodName", remoteObjectCall.getMethodName());
     }
 
+    @Test
     public void testFullMethodName() throws Exception
     {
         sampleRequest = new Request(new JSONObject(SAMPLE_INSTANCE_METHOD_CALL), null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertEquals("wisp.ai.TestObject:sampleMethodName", remoteObjectCall.getFullMethodName());
     }
 
+    @Test
     public void testCallTypeForInstanceMethodCalls() throws Exception
     {
         sampleRequest = new Request(new JSONObject(SAMPLE_INSTANCE_METHOD_CALL), null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertEquals(RPCRemoteObjectCallType.INSTANCE, remoteObjectCall.getCallType());
     }
 
+    @Test
     public void testCallTypeForStaticMethodCalls() throws Exception
     {
         sampleRequest = new Request(new JSONObject("{\"method\":\"wisp.ai.TestObject.sampleMethodName\", \"params\":[],\"id\":\"abcd1\"}"), null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertEquals(RPCRemoteObjectCallType.STATIC, remoteObjectCall.getCallType());
     }
 
+    @Test
     public void testCallTypeForConstructors() throws Exception
     {
         sampleRequest = new Request(new JSONObject("{ \"method\" : \"ClassName~\", \"params\" : [], \"id\": \"abcd4\" }"), null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertEquals(RPCRemoteObjectCallType.CREATE, remoteObjectCall.getCallType());
     }
 
+    @Test
     public void testCallTypeForDestructors() throws Exception
     {
         sampleRequest = new Request(new JSONObject("{ \"method\" : \"ClassName:~\", \"params\" : [\"some_random_instance_id\"], \"id\": \"abcd4\" }"), null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertEquals(RPCRemoteObjectCallType.DESTROY, remoteObjectCall.getCallType());
     }
 
+    @Test
     public void testCallTypeForInstanceEvents() throws Exception
     {
         sampleRequest = new Request(new JSONObject("{ \"method\" : \"ClassName:!\", \"params\" : [\"some_random_event_name\"], \"id\": \"abcd4\" }"), null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertEquals(RPCRemoteObjectCallType.INSTANCE_EVENT, remoteObjectCall.getCallType());
     }
 
+    @Test
     public void testCallTypeForStaticEvents() throws Exception
     {
         sampleRequest = new Request(new JSONObject("{ \"method\" : \"ClassName!\", \"params\" : [\"some_random_event_name\"], \"id\": \"abcd4\" }"), null);
-        remoteObjectCall = new RPCRemoteObjectCall(sampleRequest);
+        remoteObjectCall = new RemoteObjectCall(sampleRequest);
         assertEquals(RPCRemoteObjectCallType.STATIC_EVENT, remoteObjectCall.getCallType());
     }
 

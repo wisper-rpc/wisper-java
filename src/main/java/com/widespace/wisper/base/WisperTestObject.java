@@ -1,9 +1,7 @@
 package com.widespace.wisper.base;
 
 
-import com.widespace.wisper.classrepresentation.RPCClass;
-import com.widespace.wisper.classrepresentation.RPCClassMethod;
-import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
+import com.widespace.wisper.classrepresentation.*;
 
 /**
  * Merely for testing purposes
@@ -11,6 +9,14 @@ import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
  */
 public class WisperTestObject extends WisperObject
 {
+
+    private String sampleProperty;
+
+    public WisperTestObject(String sampleProperty)
+    {
+        this.sampleProperty = sampleProperty;
+    }
+
     /**
      * This method must be implemented by any object desiring to register itself as RPC
      * unfortunately prior to Java 8 we cannot have static methods in Interfaces which is why we need to take this approach instead.
@@ -28,12 +34,15 @@ public class WisperTestObject extends WisperObject
         RPCClassMethod exceptionInMethodCallMethod = new RPCClassMethod("exceptionInMethodCall", "exceptionInMethodCall");
         RPCClassMethod exceptionInMethodCallStaticMethod = new RPCClassMethod("exceptionInMethodCall", "exceptionInMethodCallStatic");
 
+        RPCClassProperty sampleProp = new RPCClassProperty("testProperty", RPCClassPropertyMode.READ_WRITE, "setSampleProperty", RPCMethodParameterType.STRING);
+
         //3. Add the method models to your class model
         classModel.addInstanceMethod(appendMethod);
         classModel.addStaticMethod(appendStaticMethod);
 
         classModel.addInstanceMethod(exceptionInMethodCallMethod);
         classModel.addStaticMethod(exceptionInMethodCallStaticMethod);
+        classModel.addProperty(sampleProp);
 
         //4. Return the class model
         return classModel;
@@ -65,5 +74,15 @@ public class WisperTestObject extends WisperObject
         throw new Exception("Test Exception");
     }
 
+
+    public String getSampleProperty()
+    {
+        return sampleProperty;
+    }
+
+    public void setSampleProperty(String sampleProperty)
+    {
+        this.sampleProperty = sampleProperty;
+    }
 }
 

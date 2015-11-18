@@ -40,7 +40,7 @@ public class RPCUtilitiesTests
         List<Class> classList = Arrays.asList(classes);
         try
         {
-            RPCMethodParameterType[] rpcMethodParameterTypes = RPCUtilities.convertParameterTypesToRPCParameterType(classList);
+            RPCUtilities.convertParameterTypesToRPCParameterType(classList);
             fail("An illegal argument exception was supposed to be thrown.");
         }
         catch (IllegalArgumentException e)
