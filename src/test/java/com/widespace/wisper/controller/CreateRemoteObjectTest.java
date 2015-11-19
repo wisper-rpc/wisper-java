@@ -108,4 +108,50 @@ public class CreateRemoteObjectTest
         verify(callbackMock).gatewayGeneratedMessage(captor.capture());
         System.out.println(captor.getValue());
     }
+
+    //Override constructor tests
+    @Test
+    public void testCreateCanBeOverriddenWithInstanceBlocks() throws Exception
+    {
+        remoteObjectController.registerClass(OverriddenConstructorTestObject.registerRpcClassWithInstanceBlock());
+        creationRequest = new Request(new JSONObject("{ \"method\" : \"wisp.test.OverrideConstructorTest~\", \"params\" : [\"testString\"], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"), null);
+        remoteObjectController.handleMessage(creationRequest);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(callbackMock).gatewayGeneratedMessage(captor.capture());
+
+        JSONObject response = new JSONObject(captor.getValue());
+        JSONObject result = response.getJSONObject("result");
+
+        assertThat(result.has("props"), is(true));
+        assertThat(result.get("props"), CoreMatchers.<Object>is(instanceOf(JSONObject.class)));
+
+        JSONObject props = result.getJSONObject("props");
+        assertThat(props.has("property"), is(true));
+        assertThat(props.getString("property"), is(equalTo("initialized")));
+
+    }
+
+    @Test
+    public void testCreateCanBeOverriddenWithStaticBlocks() throws Exception
+    {
+        remoteObjectController = new RemoteObjectController(callbackMock);
+        remoteObjectController.registerClass(OverriddenConstructorTestObject.registerRpcClassWithStaticBlock());
+        creationRequest = new Request(new JSONObject("{ \"method\" : \"wisp.test.OverrideConstructorTest~\", \"params\" : [\"testString\"], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"), null);
+        remoteObjectController.handleMessage(creationRequest);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(callbackMock).gatewayGeneratedMessage(captor.capture());
+
+        JSONObject response = new JSONObject(captor.getValue());
+        JSONObject result = response.getJSONObject("result");
+
+        assertThat(result.has("props"), is(true));
+        assertThat(result.get("props"), CoreMatchers.<Object>is(instanceOf(JSONObject.class)));
+
+        JSONObject props = result.getJSONObject("props");
+        assertThat(props.has("property"), is(true));
+        assertThat(props.getString("property"), is(equalTo("initialized")));
+
+    }
 }

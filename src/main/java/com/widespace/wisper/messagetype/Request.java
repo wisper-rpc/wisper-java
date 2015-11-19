@@ -99,7 +99,7 @@ public class Request extends AbstractMessage
         return method;
     }
 
-    public void setMethod(String methodName) throws JSONException
+    public void setMethod(String methodName)
     {
         this.method = methodName;
     }
@@ -109,7 +109,7 @@ public class Request extends AbstractMessage
         return params;
     }
 
-    public void setParams(Object[] params) throws JSONException
+    public void setParams(Object[] params)
     {
         this.params = params;
     }
@@ -119,9 +119,8 @@ public class Request extends AbstractMessage
      * A response to this request must have the exact same requestIdentifier.
      *
      * @return Response with the same ID and
-     * @throws JSONException
      */
-    public Response createResponse() throws JSONException
+    public Response createResponse()
     {
         return new Response(this);
     }
