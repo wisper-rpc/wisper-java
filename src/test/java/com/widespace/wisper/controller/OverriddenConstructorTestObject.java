@@ -70,7 +70,7 @@ public class OverriddenConstructorTestObject implements Wisper
 
         classModel.addProperty(new RPCClassProperty("property", RPCClassPropertyMode.READ_WRITE, "setProperty", RPCMethodParameterType.STRING));
 
-        classModel.addInstanceMethod(new RPCClassMethod(Constants.CONSTRUCTOR_TOKEN.getValue(), new CallBlock()
+        classModel.addInstanceMethod(new RPCClassMethod(Constants.CONSTRUCTOR_TOKEN, new CallBlock()
         {
             @Override
             public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, RPCClassMethod method, Request request)
@@ -79,7 +79,7 @@ public class OverriddenConstructorTestObject implements Wisper
                 WisperClassInstance wisperClassInstance = remoteObjectController.addRpcObjectInstance(instance, classModel);
 
                 HashMap<String, Object> resultMap = new HashMap<String, Object>();
-                resultMap.put(Constants.ID.getValue(), wisperClassInstance.getInstanceIdentifier());
+                resultMap.put(Constants.ID, wisperClassInstance.getInstanceIdentifier());
                 HashMap<String, Object> properties = new HashMap<String, Object>();
                 try
                 {
@@ -92,7 +92,7 @@ public class OverriddenConstructorTestObject implements Wisper
                     e.printStackTrace();
                 } finally
                 {
-                    resultMap.put(Constants.PROPERTIES.getValue(), properties);
+                    resultMap.put(Constants.PROPERTIES, properties);
                 }
 
                 Response response = request.createResponse();
@@ -110,7 +110,7 @@ public class OverriddenConstructorTestObject implements Wisper
 
         classModel.addProperty(new RPCClassProperty("property", RPCClassPropertyMode.READ_WRITE, "setProperty", RPCMethodParameterType.STRING));
 
-        classModel.addStaticMethod(new RPCClassMethod(Constants.CONSTRUCTOR_TOKEN.getValue(), new CallBlock()
+        classModel.addStaticMethod(new RPCClassMethod(Constants.CONSTRUCTOR_TOKEN, new CallBlock()
         {
             @Override
             public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, RPCClassMethod method, Request request)
@@ -119,7 +119,7 @@ public class OverriddenConstructorTestObject implements Wisper
                 WisperClassInstance wisperClassInstance = remoteObjectController.addRpcObjectInstance(instance, classModel);
 
                 HashMap<String, Object> resultMap = new HashMap<String, Object>();
-                resultMap.put(Constants.ID.getValue(), wisperClassInstance.getInstanceIdentifier());
+                resultMap.put(Constants.ID, wisperClassInstance.getInstanceIdentifier());
                 HashMap<String, Object> properties = new HashMap<String, Object>();
                 try
                 {
@@ -132,7 +132,7 @@ public class OverriddenConstructorTestObject implements Wisper
                     e.printStackTrace();
                 } finally
                 {
-                    resultMap.put(Constants.PROPERTIES.getValue(), properties);
+                    resultMap.put(Constants.PROPERTIES, properties);
                 }
 
                 Response response = request.createResponse();

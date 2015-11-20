@@ -1,5 +1,6 @@
 package com.widespace.wisper.messagetype;
 
+import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.controller.ResponseBlock;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,19 +35,19 @@ public class Request extends AbstractMessage
             return;
         }
 
-        if (json.has("id"))
+        if (json.has(Constants.ID))
         {
-            identifier = json.getString("id");
+            identifier = json.getString(Constants.ID);
         }
 
-        if (json.has("method"))
+        if (json.has(Constants.METHOD))
         {
-            method = json.getString("method");
+            method = json.getString(Constants.METHOD);
         }
 
-        if (json.has("params"))
+        if (json.has(Constants.PARAMS))
         {
-            params = (Object[]) deserialize(json.getJSONArray("params"));
+            params = (Object[]) deserialize(json.getJSONArray(Constants.PARAMS));
         }
     }
 
@@ -129,9 +130,9 @@ public class Request extends AbstractMessage
     public JSONObject toJson() throws JSONException
     {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", identifier == null ? "" : identifier);
-        jsonObject.put("method", method == null ? "" : method);
-        jsonObject.put("params", params == null ? new String[]{} : (JSONArray) serialize(params));
+        jsonObject.put(Constants.ID, identifier == null ? "" : identifier);
+        jsonObject.put(Constants.METHOD, method == null ? "" : method);
+        jsonObject.put(Constants.PARAMS, params == null ? new String[]{} : (JSONArray) serialize(params));
 
         return jsonObject;
     }

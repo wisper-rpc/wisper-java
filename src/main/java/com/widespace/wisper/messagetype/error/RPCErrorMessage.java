@@ -1,9 +1,13 @@
 package com.widespace.wisper.messagetype.error;
 
+import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.RPCMessageType;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static com.widespace.wisper.base.Constants.ERROR;
+import static com.widespace.wisper.base.Constants.ID;
 
 /**
  * Created by Ehssan Hoorvash on 22/05/14.
@@ -28,13 +32,13 @@ public class RPCErrorMessage extends AbstractMessage
 
     public RPCErrorMessage(JSONObject json)
     {
-        if (json.has("id"))
+        if (json.has(ID))
         {
-            this.id = json.getString("id");
+            this.id = json.getString(ID);
         }
-        if (json.has("error"))
+        if (json.has(ERROR))
         {
-            this.error = new RPCError(json.getJSONObject("error"));
+            this.error = new RPCError(json.getJSONObject(ERROR));
         }
     }
 
@@ -70,10 +74,10 @@ public class RPCErrorMessage extends AbstractMessage
         JSONObject jsonObject = new JSONObject();
         if (id != null)
         {
-            jsonObject.put("id", id);
+            jsonObject.put(ID, id);
         }
 
-        jsonObject.put("error", serialize(error));
+        jsonObject.put(ERROR, serialize(error));
 
         return jsonObject;
     }

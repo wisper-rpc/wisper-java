@@ -1,5 +1,6 @@
 package com.widespace.wisper.messagetype;
 
+import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import org.json.JSONObject;
 
@@ -34,19 +35,19 @@ public class MessageFactory
             return RPCMessageType.UNKNOWN;
         }
 
-        if (jsonMessage.has("method") && jsonMessage.has("params"))
+        if (jsonMessage.has(Constants.METHOD) && jsonMessage.has(Constants.PARAMS))
         {
-            if (jsonMessage.has("id"))
+            if (jsonMessage.has(Constants.ID))
             {
                 result = RPCMessageType.REQUEST;
             } else
             {
                 result = RPCMessageType.NOTIFICATION;
             }
-        } else if (jsonMessage.has("result") && jsonMessage.has("id"))
+        } else if (jsonMessage.has(Constants.RESULT) && jsonMessage.has(Constants.ID))
         {
             result = RPCMessageType.RESPONSE;
-        } else if (jsonMessage.has("error"))
+        } else if (jsonMessage.has(Constants.ERROR))
         {
             result = RPCMessageType.ERROR;
         }

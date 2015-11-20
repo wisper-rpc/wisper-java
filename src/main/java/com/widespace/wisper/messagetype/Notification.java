@@ -1,5 +1,6 @@
 package com.widespace.wisper.messagetype;
 
+import com.widespace.wisper.base.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,14 +30,14 @@ public class Notification extends AbstractMessage
             return;
         }
 
-        if (jsonObject.has("method"))
+        if (jsonObject.has(Constants.METHOD))
         {
-            this.methodName = jsonObject.getString("method");
+            this.methodName = jsonObject.getString(Constants.METHOD);
         }
 
-        if (jsonObject.has("params"))
+        if (jsonObject.has(Constants.PARAMS))
         {
-            params = (Object[]) deserialize(jsonObject.getJSONArray("params"));
+            params = (Object[]) deserialize(jsonObject.getJSONArray(Constants.PARAMS));
         }
     }
 
@@ -70,8 +71,8 @@ public class Notification extends AbstractMessage
     public JSONObject toJson() throws JSONException
     {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("method", methodName == null ? "" : methodName);
-        jsonObject.put("params", getParams() == null ? "" :  serialize(getParams()));
+        jsonObject.put(Constants.METHOD, methodName == null ? "" : methodName);
+        jsonObject.put(Constants.PARAMS, getParams() == null ? "" : serialize(getParams()));
 
         return jsonObject;
     }

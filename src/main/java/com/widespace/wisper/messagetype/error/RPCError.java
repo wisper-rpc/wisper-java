@@ -2,11 +2,14 @@ package com.widespace.wisper.messagetype.error;
 
 import org.json.JSONObject;
 
+import static com.widespace.wisper.base.Constants.*;
+
 /**
  * Created by ehssanhoorvash on 21/10/15.
  */
 public class RPCError
 {
+
     private int code;
     private int domain;
     private String name;
@@ -22,34 +25,34 @@ public class RPCError
 
     public RPCError(JSONObject jsonObject)
     {
-        if (jsonObject.has("domain"))
+        if (jsonObject.has(DOMAIN))
         {
-            this.domain = jsonObject.getInt("domain");
+            this.domain = jsonObject.getInt(DOMAIN);
         }
 
-        if (jsonObject.has("code"))
+        if (jsonObject.has(CODE))
         {
-            this.code = jsonObject.getInt("code");
+            this.code = jsonObject.getInt(CODE);
         }
 
-        if (jsonObject.has("message"))
+        if (jsonObject.has(MESSAGE))
         {
-            this.message = jsonObject.getString("message");
+            this.message = jsonObject.getString(MESSAGE);
         }
 
-        if (jsonObject.has("name"))
+        if (jsonObject.has(NAME))
         {
-            this.name = jsonObject.getString("name");
+            this.name = jsonObject.getString(NAME);
         }
 
-        if (jsonObject.has("data"))
+        if (jsonObject.has(DATA))
         {
-            this.data = jsonObject.get("data");
+            this.data = jsonObject.get(DATA);
         }
 
-        if (jsonObject.has("underlying"))
+        if (jsonObject.has(UNDERLYING_ERROR))
         {
-            this.underlyingError = new RPCError(jsonObject.getJSONObject("underlyingError"));
+            this.underlyingError = new RPCError(jsonObject.getJSONObject(UNDERLYING_ERROR));
         }
     }
 

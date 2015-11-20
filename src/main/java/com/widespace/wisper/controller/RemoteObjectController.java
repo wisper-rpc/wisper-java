@@ -1,5 +1,6 @@
 package com.widespace.wisper.controller;
 
+import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.base.RPCUtilities;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
@@ -294,13 +295,13 @@ public class RemoteObjectController extends Gateway
             Wisper instance;
 
             // Make it possible for the Wisper class to override constructor using a callBlock.
-            if (rpcClass.getInstanceMethods().containsKey("~"))
+            if (rpcClass.getInstanceMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
             {
                 callRpcClassMethodOnInstance(rpcClass.getInstanceMethods().get("~"), null, rpcClass, remoteObjectCall);
                 return;
             }
 
-            if (rpcClass.getStaticMethods().containsKey("~"))
+            if (rpcClass.getStaticMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
             {
                 callRpcClassMethodOnInstance(rpcClass.getStaticMethods().get("~"), null, rpcClass, remoteObjectCall);
             }

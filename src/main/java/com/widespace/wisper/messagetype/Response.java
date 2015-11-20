@@ -1,17 +1,21 @@
 package com.widespace.wisper.messagetype;
 
 
+import com.widespace.wisper.base.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static com.widespace.wisper.base.Constants.EMPTY;
 
 /**
  * When an instance handling an Request has finished, it should generate an instance of this object and fill it with the results.
  * This object is then passed to the other endpoint either through the Response's responseBlock or through the Gateway.
- * <p>
+ * <p/>
  * Created by Ehssan Hoorvash on 22/05/14.
  */
 public class Response extends AbstractMessage
 {
+
     private String identifier;
     private Object result;
 
@@ -39,14 +43,14 @@ public class Response extends AbstractMessage
             return;
         }
 
-        if (json.has("id"))
+        if (json.has(Constants.ID))
         {
-            this.identifier = json.getString("id");
+            this.identifier = json.getString(Constants.ID);
         }
 
-        if (json.has("result"))
+        if (json.has(Constants.RESULT))
         {
-            this.result = deserialize(json.get("result"));
+            this.result = deserialize(json.get(Constants.RESULT));
         }
     }
 
@@ -88,8 +92,8 @@ public class Response extends AbstractMessage
     public JSONObject toJson() throws JSONException
     {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", identifier == null ? "" : identifier);
-        jsonObject.put("result", result == null ? "" : serialize(result));
+        jsonObject.put(Constants.ID, identifier == null ? EMPTY : identifier);
+        jsonObject.put(Constants.RESULT, result == null ? EMPTY : serialize(result));
 
         return jsonObject;
     }

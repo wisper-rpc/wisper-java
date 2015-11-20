@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 import java.util.*;
 
+import static com.widespace.wisper.base.Constants.*;
+
 /**
  * Abstract message type calss for RPC. All message types will be children of this abstract class.
  * <p>
@@ -169,11 +171,11 @@ public abstract class AbstractMessage
         {
             JSONObject json = new JSONObject();
             RPCError error = (RPCError) newResult;
-            json.put("code", error.getCode());
-            json.put("domain", error.getDomain());
-            json.put("name", error.getName() == null ? "" : error.getName());
-            json.put("data", error.getData() == null ? "" : serialize(error.getData()));
-            json.put("underlying", error.getUnderlyingError() == null ? "" : serialize(error.getUnderlyingError()));
+            json.put(CODE, error.getCode());
+            json.put(DOMAIN, error.getDomain());
+            json.put(NAME, error.getName() == null ? "" : error.getName());
+            json.put(DATA, error.getData() == null ? "" : serialize(error.getData()));
+            json.put(UNDERLYING_ERROR, error.getUnderlyingError() == null ? "" : serialize(error.getUnderlyingError()));
 
             return json;
         }
