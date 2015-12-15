@@ -62,6 +62,7 @@ public class MyWisperTestObject extends WisperObject
         return classModel;
     }
 
+
     public static String getLastMethodCalled()
     {
         return lasteMethodCalled;
@@ -89,6 +90,11 @@ public class MyWisperTestObject extends WisperObject
     {
         this.property = property;
         propertyValue = property;
+    }
+
+    public String getProperty()
+    {
+        return property;
     }
 
     public void setInstanceProperty(MyWisperTestObject instanceProperty)

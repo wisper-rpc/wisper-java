@@ -40,7 +40,7 @@ public class RPCErrorMessageBuilder
 
     public RPCErrorMessageBuilder withUnderlyingError(RPCError underlying)
     {
-        error.setUnderlyingError(error);
+        error.setUnderlyingError(underlying);
         return this;
     }
 
