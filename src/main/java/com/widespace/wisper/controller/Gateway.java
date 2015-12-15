@@ -2,10 +2,8 @@ package com.widespace.wisper.controller;
 
 
 import com.widespace.wisper.messagetype.*;
-import com.widespace.wisper.messagetype.error.ErrorDomain;
-import com.widespace.wisper.messagetype.error.RPCErrorCodes;
-import com.widespace.wisper.messagetype.error.RPCErrorMessage;
-import com.widespace.wisper.messagetype.error.RPCErrorMessageBuilder;
+import com.widespace.wisper.messagetype.error.*;
+import com.widespace.wisper.messagetype.error.Error;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,9 +19,6 @@ import java.util.HashMap;
 
 public class Gateway
 {
-    public static final String EXTRA_KEY_ADSPACE = "adspace";
-    public static final String EXTRA_KEY_WEBVIEW = "webview";
-
     protected GatewayCallback callback;
     private HashMap<String, Request> requests;
 
@@ -47,8 +42,7 @@ public class Gateway
      */
     public String uniqueRequestIdentifier()
     {
-        //return UUID.randomUUID().toString();
-        requestCount ++;
+        requestCount++;
         return "WISPER-ANDROID-" + String.valueOf(requestCount);
     }
 
@@ -76,6 +70,11 @@ public class Gateway
     }
 
 
+    /**
+     * Returns all the extras currently registered with this Gateway.
+     *
+     * @return a HashMap of the extras containing a String as key and an Object as the value of the extra.
+     */
     public HashMap getExtras()
     {
         return extras;
@@ -87,6 +86,8 @@ public class Gateway
      * handleMessage this request or not, will also handleMessage the request. This is the
      * only method you need to call from the webView delegate to handleMessage RPC
      * Communication.
+     * <p/>
+     * If the message is not meaningful to this gateway, a Wisper Error will be sent back.
      *
      * @param message a string representation of the message, the message is
      *                a JSON object and if it is malformed an error will be returned
@@ -94,15 +95,17 @@ public class Gateway
      */
     public void handleMessage(String message)
     {
-        System.out.println(" JS ----> N :  "+ message);
+        System.out.println(" JS ----> N :  " + message);
         try
         {
             handleMessage(new JSONObject(message));
-        }
-        catch (JSONException e)
+        } catch (JSONException e)
         {
-            RPCErrorMessage err = new RPCErrorMessageBuilder(ErrorDomain.RPC, RPCErrorCodes.PARSE_ERROR.getErrorCode()).withMessage(e.getMessage()).build();
-            sendMessage(err);
+            RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.NATIVE, Error.PARSE_ERROR.getCode())
+                    .withMessage("Message could not be prased as a valid JSON message.")
+                    .withName(Error.PARSE_ERROR.getDescription())
+                    .build();
+            sendMessage(errorMessage);
         }
     }
 
@@ -112,12 +115,16 @@ public class Gateway
      * @param json json object that contains the Wisper message.
      * @throws JSONException
      */
-    private void handleMessage(JSONObject json) throws JSONException
+    private void handleMessage(JSONObject json)
     {
         AbstractMessage message = messageFactory.createMessage(json);
         if (message == null)
         {
-            sendMessage(new RPCErrorMessageBuilder(ErrorDomain.RPC, RPCErrorCodes.FORMAT_ERROR.getErrorCode()).withMessage("The message could not be parsed as a valid RPC message. Invalid Json or Wrong format? " + json.toString()).build());
+            RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.NATIVE, Error.PARSE_ERROR.getCode())
+                    .withMessage("The message could not be parsed as a valid RPC message. Invalid Json or Wrong format? ")
+                    .withName(Error.FORMAT_ERROR.getDescription())
+                    .build();
+            sendMessage(errorMessage);
             return;
         }
 
@@ -125,9 +132,9 @@ public class Gateway
     }
 
     /**
-     * Send a message to the other endpoint with a message type
+     * Handles incoming Wisper message.
      *
-     * @param message the message to be sent to the other endpoint.
+     * @param message the message.
      */
     public void handleMessage(AbstractMessage message)
     {
@@ -150,12 +157,10 @@ public class Gateway
                     });
                 }
             });
-        }
-        else if (message.type() == RPCMessageType.RESPONSE)
+        } else if (message.type() == RPCMessageType.RESPONSE)
         {
             respondBackOnMessage(message);
-        }
-        else if (message.type() == RPCMessageType.ERROR)
+        } else if (message.type() == RPCMessageType.ERROR)
         {
             respondBackOnMessage(message);
         }
@@ -184,8 +189,7 @@ public class Gateway
                 if (message instanceof RPCErrorMessage)
                 {
                     theRequest.getResponseBlock().perform(null, (RPCErrorMessage) message);
-                }
-                else if (message instanceof Response)
+                } else if (message instanceof Response)
                 {
                     theRequest.getResponseBlock().perform((Response) message, null);
                 }
@@ -193,13 +197,20 @@ public class Gateway
         }
     }
 
-    // Handlers of outgoing messages
+    /**
+     * Sends the message to the the callback. If the message is a Request,
+     * a unique identifier per session is appended to the message.
+     *
+     * @param message the Wisper message to be sent.
+     * @see Request
+     * @see AbstractMessage
+     */
     public void sendMessage(AbstractMessage message)
     {
         if (message.type() == RPCMessageType.REQUEST)
         {
             String identifier = uniqueRequestIdentifier();
-            ((Request)message).setIdentifier(identifier);
+            ((Request) message).setIdentifier(identifier);
 
             requests.put(identifier, (Request) message);
         }
@@ -207,16 +218,32 @@ public class Gateway
         sendMessage(message.toJsonString());
     }
 
+    /**
+     * Sends the message to the the callback directly. The message must be meaningful to the other endpoint.
+     *
+     * @param message The message.
+     */
     public void sendMessage(String message)
     {
         callback.gatewayGeneratedMessage(message);
     }
 
+    /**
+     * The WisperCallback that receives the generated messages from this Gateway and knows
+     * when a message has been received by this endpoint.
+     *
+     * @return The callback.
+     */
     public GatewayCallback getCallback()
     {
         return callback;
     }
 
+    /**
+     * Replaces the callback. The previous callback will no longer receive calls.
+     *
+     * @param callback The new callback.
+     */
     public void setCallback(GatewayCallback callback)
     {
         this.callback = callback;
