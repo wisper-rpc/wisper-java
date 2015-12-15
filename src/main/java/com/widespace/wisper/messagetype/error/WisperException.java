@@ -1,9 +1,9 @@
 package com.widespace.wisper.messagetype.error;
 
-/**
- * Created by ehssanhoorvash on 20/11/15.
- */
-public class WisperException extends Exception
+
+import java.util.Arrays;
+
+public class WisperException extends RuntimeException
 {
     private final Error error;
     private final String message;
@@ -14,5 +14,27 @@ public class WisperException extends Exception
         this.error = error;
         this.message = message;
         this.underlyingException = underlyingException;
+
+    }
+
+    public Error getError()
+    {
+        return error;
+    }
+
+    public int getErrorCode()
+    {
+        return error.getCode();
+    }
+
+    @Override
+    public String getMessage()
+    {
+        return message;
+    }
+
+    public Exception getUnderlyingException()
+    {
+        return underlyingException;
     }
 }
