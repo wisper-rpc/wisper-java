@@ -8,25 +8,48 @@ public enum Error
     UNKNOWN_ERROR(-1, "An unknown error has occurred"),
 
     //=============================================================
+    //region Messages
+    //=============================================================
+    PARSE_ERROR(101, "Parse error"),
+    FORMAT_ERROR(102, "Invalid message format"),
+    UNEXPECTED_TYPE_ERROR(103, "Message type is wrong"),
+
+
+    //=============================================================
     //region Wisper Properties
     //=============================================================
-    NO_SUCH_PROPERTY(111, "Property not defined"),
-    PROPERTY_NOT_ACCESSIBLE(112, "Property not accessible"),
-    SETTER_METHOD_NOT_FOUND(113, "Setter method name not found"),
-    SETTER_METHOD_NOT_ACCESSIBLE(114, "Setter method not accessible"),
-    SETTER_METHOD_INVOCATION_ERROR(115, "Setter method could not be invoked"),
-    SETTER_METHOD_WRONG_ARGUMENTS(116, "Setter method argument type error."),
+    PROPERTY_NOT_REGISTERED(402, "Property not registered"),
+    SETTER_METHOD_NOT_FOUND(403, "Setter method name not found"),
+    PROPERTY_NOT_ACCESSIBLE(404, "Property not accessible"),
+
+    SETTER_METHOD_NOT_ACCESSIBLE(405, "Setter method not accessible"),
+    SETTER_METHOD_INVOCATION_ERROR(405, "Setter method could not be invoked"),
+    SETTER_METHOD_WRONG_ARGUMENTS(405, "Setter method argument type error"),
+
+    GETTER_METHOD_NOT_FOUND(406, "Getter method not found"),
+    GETTER_METHOD_NOT_ACCESSIBLE(406, "Getter not accessible"),
+    GETTER_METHOD_INVOCATION_ERROR(406, "Getter method invocation error"),
 
     //=============================================================
     //region Wisper Classes
     //=============================================================
-    UNREGISTERED_WISPER_CLASS(201, "Class not registered"),
-    INSTANTIATION_ERROR(202, "instantiation error when constructing."),
-    CLASS_NOT_FOUND(203, "Native class not found"),
-    CONSTRUCTOR_NOT_FOUND(204, "Constructor not found"),
-    CONSTRUCTOR_NOT_ACCESSIBLE(205, "Constructor not accessible"),
-    CONSTRUCTOR_NOT_INVOKED(206, "Constructor invocation error");
+    ROUTE_NOT_FOUND(202, "Route not found or class not registered"),
+    WISPER_INSTANCE_INVALID(203, "Invalid instance."),
+    NATIVE_CLASS_NOT_FOUND(204, "Native class not found"),
 
+    INSTANTIATION_ERROR(501, "instantiation error when constructing"),
+    CONSTRUCTOR_NOT_FOUND(502, "Constructor not found"),
+    CONSTRUCTOR_NOT_ACCESSIBLE(503, "Constructor not accessible"),
+    CONSTRUCTOR_NOT_INVOKED(504, "Constructor invocation error"),
+
+    //=============================================================
+    //region Wisper Methods
+    //=============================================================
+    METHOD_NOT_REGISTERED(302, "Method not registered"),
+    METHOD_NOT_ACCESSIBLE(303, "Method not accessible"),
+    METHOD_NOT_FOUND(304, "Method not found"),
+    METHOD_INVALID_ARGUMENTS(305, "Method arguments not matching"),
+    METHOD_INVOCATION_ERROR(306, "Method not invoked");
 
     private final int code;
     private final String description;
