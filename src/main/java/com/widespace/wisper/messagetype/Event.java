@@ -25,7 +25,7 @@ public class Event extends Notification
         super();
     }
 
-    public Event(String methodName, String instanceIdentifier, String name, Object value) throws JSONException
+    public Event(String methodName, String instanceIdentifier, String name, Object value)
     {
         this.methodName = methodName;
         this.instanceIdentifier = instanceIdentifier;
@@ -33,7 +33,7 @@ public class Event extends Notification
         this.value = value;
     }
 
-    public Event(RemoteObjectCall remoteObjectCall) throws JSONException
+    public Event(RemoteObjectCall remoteObjectCall)
     {
         RPCRemoteObjectCallType callType = remoteObjectCall.getCallType();
         List<Object> parameters = Arrays.asList(remoteObjectCall.getParams());
