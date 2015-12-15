@@ -9,8 +9,8 @@ import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.RPCEventBuilder;
 import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.*;
+import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.utils.ClassUtils;
-import org.json.JSONException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -31,6 +31,7 @@ public class RemoteObjectController extends Gateway
 {
     HashMap<String, RPCClass> classMap;
     HashMap<String, WisperClassInstance> instanceMap;
+    private WisperExceptionHandler wisperExceptionHandler;
 
     public RemoteObjectController(GatewayCallback callback)
     {
@@ -102,9 +103,48 @@ public class RemoteObjectController extends Gateway
         instanceMap.clear();
     }
 
+    /**
+     * Returns all instances currently under control of this remote object controller.
+     *
+     * @return instances.
+     */
     public HashMap<String, WisperClassInstance> getInstanceMap()
     {
         return instanceMap;
+    }
+
+    /**
+     * Add an existing instance under this remote object controller.
+     *
+     * @param wisperInstance an existing instance.
+     * @param rpcClass       class model.
+     * @return the wisper class instance
+     */
+    public WisperClassInstance addRpcObjectInstance(Wisper wisperInstance, RPCClass rpcClass)
+    {
+        wisperInstance.setRemoteObjectController(this);
+        String key = wisperInstance.toString();
+        WisperClassInstance wisperClassInstance = new WisperClassInstance(rpcClass, wisperInstance, key);
+        instanceMap.put(key, wisperClassInstance);
+        return wisperClassInstance;
+    }
+
+    /**
+     * Removes an instance from the remote object controller.
+     *
+     * @param wisperClassInstance the wisper class instance to be removed.
+     * @return true if removed, false of instance did not exist.
+     */
+    public boolean removeRpcObjectInstance(WisperClassInstance wisperClassInstance)
+    {
+        if (instanceMap.containsValue(wisperClassInstance))
+        {
+            wisperClassInstance.getInstance().setRemoteObjectController(null);
+            instanceMap.remove(wisperClassInstance);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -128,121 +168,94 @@ public class RemoteObjectController extends Gateway
         RPCClass rpcClass = getRpcClassForClass(rpcInstance.getClass());
         String mapName = rpcClass.getMapName();
 
-        Event event;
-        try
-        {
-            event = new RPCEventBuilder().withInstanceIdentifier(instanceIdentifier).withMethodName(mapName).withName(key).withValue(value).buildInstanceEvent();
-            sendMessage(event);
-        } catch (JSONException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+        Event event = new RPCEventBuilder().withInstanceIdentifier(instanceIdentifier).withMethodName(mapName).withName(key).withValue(value).buildInstanceEvent();
+        sendMessage(event);
     }
 
     @Override
     public void handleMessage(AbstractMessage message)
     {
-        super.handleMessage(message);
-        RemoteObjectCall remoteObjectCall = new RemoteObjectCall(message);
-        makeCall(remoteObjectCall);
+        try
+        {
+            super.handleMessage(message);
+            RemoteObjectCall remoteObjectCall = new RemoteObjectCall(message);
+            wisperExceptionHandler = new WisperExceptionHandler(this, remoteObjectCall);
+            makeCall(remoteObjectCall);
+        } catch (WisperException ex)
+        {
+            wisperExceptionHandler.handle(ex);
+        }
     }
 
     // Private Methods
-    private void makeCall(RemoteObjectCall remoteObjectCall)
+    private void makeCall(RemoteObjectCall remoteObjectCall) throws WisperException
+    {
+        switch (remoteObjectCall.getCallType())
+        {
+            case CREATE:
+                createRemoteObject(remoteObjectCall);
+                break;
+            case DESTROY:
+                rpcRemoteObjectDestruct(remoteObjectCall);
+                break;
+            case STATIC:
+                rpcRemoteObjectCallStaticMethod(remoteObjectCall);
+                break;
+            case STATIC_EVENT:
+                handleStaticEvent(remoteObjectCall);
+                break;
+            case INSTANCE:
+                rpcRemoteObjectCallInstanceMethod(remoteObjectCall);
+                break;
+            case INSTANCE_EVENT:
+                handleInstanceEvent(remoteObjectCall);
+                break;
+            case UNKNOWN:
+            default:
+                break;
+        }
+    }
+
+
+    //=====================================================================================
+    //region Events
+    //=====================================================================================
+    private void handleStaticEvent(RemoteObjectCall remoteObjectCall) throws WisperException
     {
         try
         {
-            switch (remoteObjectCall.getCallType())
+            if (classMap.containsKey(remoteObjectCall.getClassName()))
             {
-                case CREATE:
-                    createRemoteObject(remoteObjectCall);
-                    break;
-                case DESTROY:
-                    rpcRemoteObjectDestruct(remoteObjectCall);
-                    break;
-                case STATIC:
-                    rpcRemoteObjectCallStaticMethod(remoteObjectCall);
-                    break;
-                case STATIC_EVENT:
-                    handleStaticEvent(remoteObjectCall);
-                    break;
-                case INSTANCE:
-                    rpcRemoteObjectCallInstanceMethod(remoteObjectCall);
-                    break;
-                case INSTANCE_EVENT:
-                    handleInstanceEvent(remoteObjectCall);
-                    break;
-                case UNKNOWN:
-                default:
-                    break;
+                RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
+                String proprtyName = (String) remoteObjectCall.getParams()[0];
+                String proprtyValue = (String) remoteObjectCall.getParams()[1];
+                Field field = rpcClass.getClassRef().getField(proprtyName);
+                field.setAccessible(true);
+                field.set(null, proprtyValue);
             }
-        } catch (InvocationTargetException e)
+        } catch (NoSuchFieldException e)
         {
-            String id = null;
-            if (remoteObjectCall.getRequest() != null)
-            {
-                id = remoteObjectCall.getRequest().getIdentifier();
-            }
-            sendMessage(new RPCErrorMessageBuilder(ErrorDomain.ANDROID, -1).withMessage(e.getLocalizedMessage()).withId(id).build());
-            e.printStackTrace();
+            String errorMessage = "No such field defined as " + remoteObjectCall.getParams()[0] + ".Is the property registered with the class model?";
+            throw new WisperException(Error.PROPERTY_NOT_REGISTERED, e, errorMessage);
         } catch (IllegalAccessException e)
         {
-            handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
-            e.printStackTrace();
-        } catch (ClassNotFoundException e)
-        {
-            handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
-            e.printStackTrace();
-        } catch (InstantiationException e)
-        {
-            handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
-            e.printStackTrace();
-        } catch (JSONException e)
-        {
-            handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
-            e.printStackTrace();
-        } catch (NoSuchMethodException e)
-        {
-            handleRemoteObjectError(RemoteObjectErrorCode.MISSING_METHOD_ERROR, e.getMessage(), remoteObjectCall);
-            e.printStackTrace();
-        } catch (IllegalArgumentException e)
-        {
-            handleRemoteObjectError(RemoteObjectErrorCode.INVALID_ARGUMENTS_ERROR, e.getMessage(), remoteObjectCall);
-            e.printStackTrace();
-        } catch (Exception e)
-        {
-            e.printStackTrace();
+            String errorMessage = "Property " + remoteObjectCall.getParams()[0] + " is not accessible in class " + remoteObjectCall.getClassName() + ". Is the property public?";
+            throw new WisperException(Error.PROPERTY_NOT_ACCESSIBLE, e, errorMessage);
         }
     }
 
-    private void handleStaticEvent(RemoteObjectCall remoteObjectCall) throws Exception
+    private void handleInstanceEvent(RemoteObjectCall remoteObjectCall) throws WisperException
     {
-        if (classMap.containsKey(remoteObjectCall.getClassName()))
+        if (!instanceMap.containsKey(remoteObjectCall.getInstanceIdentifier()))
         {
-            RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
-            String proprtyName = (String) remoteObjectCall.getParams()[0];
-            String proprtyValue = (String) remoteObjectCall.getParams()[1];
-            Field field = rpcClass.getClassRef().getField(proprtyName);
-            field.setAccessible(true);
-            field.set(null, proprtyValue);
+            throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "No such instance has been registered with this controller under route :" + remoteObjectCall.getClassName());
         }
+
+        WisperClassInstance wisperClassInstance = instanceMap.get(remoteObjectCall.getInstanceIdentifier());
+        handlePropertySetWithInstanceEvent(wisperClassInstance, remoteObjectCall);
     }
 
-    private void handleInstanceEvent(RemoteObjectCall remoteObjectCall) throws Exception
-    {
-        if (instanceMap.containsKey(remoteObjectCall.getInstanceIdentifier()))
-        {
-            WisperClassInstance wisperClassInstance = instanceMap.get(remoteObjectCall.getInstanceIdentifier());
-            handlePropertySetWithInstanceEvent(wisperClassInstance, remoteObjectCall);
-        } else
-        {
-            handleRemoteObjectError(RemoteObjectErrorCode.INVALID_INSTANCE_ERROR, "No such instance found : " + remoteObjectCall.getInstanceIdentifier(), remoteObjectCall);
-        }
-    }
-
-    private void handlePropertySetWithInstanceEvent(WisperClassInstance wisperClassInstance, RemoteObjectCall remoteObjectCall) throws Exception
+    private void handlePropertySetWithInstanceEvent(WisperClassInstance wisperClassInstance, RemoteObjectCall remoteObjectCall) throws WisperException
     {
 
         Event event = new Event(remoteObjectCall);
@@ -269,9 +282,6 @@ public class RemoteObjectController extends Gateway
         // If property is pointing to an RPC instance, replace the pointer to the actual value
         if (property.getSetterMethodParameterType() == RPCMethodParameterType.INSTANCE)
         {
-//            WisperClassInstance wisperClassInstance1 = getWisperClassInstance((Wisper) event.getValue());
-//            parameterTypes[0] = wisperClassInstance1.getInstance().getClass();
-
             if (instanceMap.containsKey(event.getValue().toString()))
             {
                 WisperClassInstance classInstancePointer = instanceMap.get(event.getValue().toString());
@@ -279,15 +289,44 @@ public class RemoteObjectController extends Gateway
                 parameterTypes[0] = classInstancePointer.getInstance().getClass();
             }
         }
-        Method method = getMethod(instance.getClass(), setterMethodName, parameterTypes);
-        method.setAccessible(true);
-        checkParameterTypes(parameterTypes, remoteObjectCall.getParams());
-        method.invoke(instance, event.getValue());
+        try
+        {
+            Method method = getMethod(instance.getClass(), setterMethodName, parameterTypes);
+            method.setAccessible(true);
+            checkParameterTypes(parameterTypes, remoteObjectCall.getParams());
+            method.invoke(instance, event.getValue());
+
+        } catch (NoSuchMethodException e)
+        {
+            String errorMessage = "Setter method for the property " + property.getMappingName() + "not found in class " + wisperClassInstance.getRpcClass().getMapName() + ". Does the setter method actually exist in the class? ";
+            throw new WisperException(Error.SETTER_METHOD_NOT_FOUND, e, errorMessage);
+        } catch (IllegalAccessException e)
+        {
+            String errorMessage = "Setter method for the property " + property.getMappingName() + "was not accessible in class  " + wisperClassInstance.getRpcClass().getMapName() + ".Is the setter method public?";
+            throw new WisperException(Error.SETTER_METHOD_NOT_ACCESSIBLE, e, errorMessage);
+        } catch (InvocationTargetException e)
+        {
+            String errorMessage = "Setter method for the property " + property.getMappingName() + "could not be invoked in class  " + wisperClassInstance.getRpcClass().getMapName();
+            throw new WisperException(Error.SETTER_METHOD_INVOCATION_ERROR, e, errorMessage);
+        } catch (IllegalArgumentException e)
+        {
+            String errorMessage = "Setter method for the property " + property.getMappingName() + "rejected the argument sent in class  " + wisperClassInstance.getRpcClass().getMapName() + "Are the arguments passed correctly?";
+            throw new WisperException(Error.SETTER_METHOD_WRONG_ARGUMENTS, e, errorMessage);
+        }
     }
 
-    private void createRemoteObject(RemoteObjectCall remoteObjectCall) throws ClassNotFoundException, IllegalAccessException, InstantiationException, JSONException, InvocationTargetException, NoSuchMethodException
+
+    //=====================================================================================
+    //region Construct
+    //=====================================================================================
+    private void createRemoteObject(RemoteObjectCall remoteObjectCall) throws WisperException
     {
-        if (classMap.containsKey(remoteObjectCall.getClassName()))
+        if (!classMap.containsKey(remoteObjectCall.getClassName()))
+        {
+            throw new WisperException(Error.ROUTE_NOT_FOUND, null, "No such class has been registered with this controller under route :" + remoteObjectCall.getClassName());
+        }
+
+        try
         {
             RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
             Class<?> classRef = rpcClass.getClassRef();
@@ -306,7 +345,8 @@ public class RemoteObjectController extends Gateway
                 callRpcClassMethodOnInstance(rpcClass.getStaticMethods().get("~"), null, rpcClass, remoteObjectCall);
             }
 
-            if (remoteObjectCall.getParams() != null)
+            //If constructor has parameters it must be handled
+            if (remoteObjectCall.getParams() != null && remoteObjectCall.getParams().length > 0)
             {
                 Class<?> aClass = Class.forName(classRef.getName());
                 Constructor<?> constructor = aClass.getConstructor(ClassUtils.getParameterClasses(remoteObjectCall.getParams()));
@@ -335,23 +375,46 @@ public class RemoteObjectController extends Gateway
                     remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
                 }
             }
-        } else
+        } catch (InvocationTargetException e)
         {
-            handleRemoteObjectError(RemoteObjectErrorCode.MISSING_CLASS_ERROR, "No class is registered for RPC with name " + remoteObjectCall.getClassName(), remoteObjectCall);
+            String errorMessage = "Could not invoked on this class. " + classMap.get(remoteObjectCall.getClassName()).getClassRef();
+            throw new WisperException(Error.CONSTRUCTOR_NOT_INVOKED, e, errorMessage);
+        } catch (IllegalAccessException e)
+        {
+            String errorMessage = "Could not access the specified constructor for this class. " + classMap.get(remoteObjectCall.getClassName()).getClassRef() + ". Is the constructor public?";
+            throw new WisperException(Error.CONSTRUCTOR_NOT_ACCESSIBLE, e, errorMessage);
+        } catch (NoSuchMethodException e)
+        {
+            String errorMessage = "Could not find the specified constructor for this class. " + classMap.get(remoteObjectCall.getClassName()).getClassRef() + ". Are the arguments passed correct?";
+            throw new WisperException(Error.CONSTRUCTOR_NOT_FOUND, e, errorMessage);
+        } catch (ClassNotFoundException e)
+        {
+            String errorMessage = "Could not find this class. " + classMap.get(remoteObjectCall.getClassName()).getClassRef() + "Has the class been registered properly?";
+            throw new WisperException(Error.NATIVE_CLASS_NOT_FOUND, e, errorMessage);
+        } catch (InstantiationException e)
+        {
+            String errorMessage = "Could not instantiate this class. " + classMap.get(remoteObjectCall.getClassName()).getClassRef() + ". Is the class Abstract?";
+            throw new WisperException(Error.INSTANTIATION_ERROR, e, errorMessage);
         }
     }
 
-    private HashMap<String, Object> fetchInitializedProperties(WisperClassInstance wisperClassInstance) throws InvocationTargetException, IllegalAccessException
+
+    private HashMap<String, Object> fetchInitializedProperties(WisperClassInstance wisperClassInstance) throws WisperException
     {
         HashMap<String, Object> initializedProperties = new HashMap<String, Object>();
         HashMap<String, RPCClassProperty> properties = wisperClassInstance.getRpcClass().getProperties();
-        for (String propertyName : properties.keySet())
-        {
-            RPCClassProperty property = properties.get(propertyName);
-            Wisper instance = wisperClassInstance.getInstance();
 
-            try
+        String currentPropertyName = null;
+        try
+        {
+            for (String propertyName : properties.keySet())
             {
+                currentPropertyName = propertyName;
+
+                RPCClassProperty property = properties.get(propertyName);
+                Wisper instance = wisperClassInstance.getInstance();
+
+
                 //Check if there is a getter implemented.
                 Method getter = instance.getClass().getMethod(property.getSetterName().replace("set", "get"));
                 Object value = getter.invoke(instance);
@@ -369,35 +432,50 @@ public class RemoteObjectController extends Gateway
                 }
 
                 initializedProperties.put(propertyName, value);
-            } catch (NoSuchMethodException e)
-            {
-                //Do nothing. The Getter has just not been implemented.
+
+
             }
+        } catch (NoSuchMethodException e)
+        {
+            String errorMessage = "Getter method for the property " + currentPropertyName + "not found in class " + wisperClassInstance.getRpcClass().getMapName() + ". Does the getter method actually exist in the class? ";
+            throw new WisperException(Error.GETTER_METHOD_NOT_FOUND, e, errorMessage);
+        } catch (IllegalAccessException e)
+        {
+            String errorMessage = "Getter method for the property " + currentPropertyName + "not accessible in class " + wisperClassInstance.getRpcClass().getMapName() + ". Is the getter method public?";
+            throw new WisperException(Error.GETTER_METHOD_NOT_ACCESSIBLE, e, errorMessage);
+        } catch (InvocationTargetException e)
+        {
+            String errorMessage = "Getter method for the property " + currentPropertyName + "could not be invoked in class  " + wisperClassInstance.getRpcClass().getMapName();
+            throw new WisperException(Error.GETTER_METHOD_INVOCATION_ERROR, e, errorMessage);
         }
 
         return initializedProperties;
     }
 
-    private void rpcRemoteObjectDestruct(RemoteObjectCall remoteObjectCall) throws JSONException
+    //=====================================================================================
+    //region Destruct
+    //=====================================================================================
+
+    private void rpcRemoteObjectDestruct(RemoteObjectCall remoteObjectCall) throws WisperException
     {
+        //First check to see if this instance exists at all.
         if (!instanceMap.containsKey(remoteObjectCall.getInstanceIdentifier()))
         {
             if (!classMap.containsKey(remoteObjectCall.getClassName()))
             {
-                handleRemoteObjectError(RemoteObjectErrorCode.MISSING_CLASS_ERROR, "No such class registered : " + remoteObjectCall.getClassName(), remoteObjectCall);
+                throw new WisperException(Error.ROUTE_NOT_FOUND, null, "No such class has been registered with this controller under route :" + remoteObjectCall.getClassName());
             } else
             {
-                handleRemoteObjectError(RemoteObjectErrorCode.INVALID_INSTANCE_ERROR, "No such instance found : " + remoteObjectCall.getInstanceIdentifier(), remoteObjectCall);
+                throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "No such instance has been registered with this controller under route :" + remoteObjectCall.getClassName());
             }
-            return;
         }
+
 
         WisperClassInstance wisperClassInstance = instanceMap.get(remoteObjectCall.getInstanceIdentifier());
         RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
         if (!wisperClassInstance.getInstance().getClass().getName().equals(rpcClass.getClassRef().getName()))
         {
-            handleRemoteObjectError(RemoteObjectErrorCode.INVALID_INSTANCE_ERROR, "No such instance was found with identifier " + remoteObjectCall.getInstanceIdentifier()
-                    + "of type :" + remoteObjectCall.getClassName(), remoteObjectCall);
+            throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "Instance type does not match with the registered class.");
         }
 
         instanceMap.remove(remoteObjectCall.getInstanceIdentifier());
@@ -413,101 +491,71 @@ public class RemoteObjectController extends Gateway
         }
     }
 
-    private void rpcRemoteObjectCallInstanceMethod(RemoteObjectCall remoteObjectCall) throws InvocationTargetException, IllegalAccessException, JSONException,
-            NoSuchMethodException
+
+    //=====================================================================================
+    //region Method Call
+    //=====================================================================================
+    private void rpcRemoteObjectCallInstanceMethod(RemoteObjectCall remoteObjectCall) throws WisperException
     {
         remoteMethodCall(remoteObjectCall, RPCRemoteObjectCallType.INSTANCE);
     }
 
-    private void rpcRemoteObjectCallStaticMethod(RemoteObjectCall remoteObjectCall) throws InvocationTargetException, IllegalAccessException, JSONException,
-            NoSuchMethodException
+    private void rpcRemoteObjectCallStaticMethod(RemoteObjectCall remoteObjectCall) throws WisperException
     {
         remoteMethodCall(remoteObjectCall, RPCRemoteObjectCallType.STATIC);
     }
 
-    private void remoteMethodCall(RemoteObjectCall remoteObjectCall, RPCRemoteObjectCallType callType) throws InvocationTargetException, IllegalAccessException, JSONException,
-            NoSuchMethodException
+    private void remoteMethodCall(RemoteObjectCall remoteObjectCall, RPCRemoteObjectCallType callType) throws WisperException
     {
         RPCClass rpcClass = classMap.get(remoteObjectCall.getClassName());
         WisperClassInstance wisperClassInstance = instanceMap.get(remoteObjectCall.getInstanceIdentifier());
 
-        RPCClassMethod theMethod = null;
-        if (callType == RPCRemoteObjectCallType.INSTANCE && wisperClassInstance != null && wisperClassInstance.getInstance().getClass().getName().equals(rpcClass.getClassRef().getName()))
+        if (rpcClass == null)
         {
-            theMethod = rpcClass.getInstanceMethods().get(remoteObjectCall.getMethodName());
-            callRpcClassMethodOnInstance(theMethod, wisperClassInstance, rpcClass, remoteObjectCall);
-
-        } else if (callType == RPCRemoteObjectCallType.STATIC && rpcClass != null)
-        {
-            theMethod = rpcClass.getStaticMethods().get(remoteObjectCall.getMethodName());
-            callRpcClassMethodOnInstance(theMethod, null, rpcClass, remoteObjectCall);
+            throw new WisperException(Error.ROUTE_NOT_FOUND, null, "No such class has been registered with this controller under route :" + remoteObjectCall.getClassName());
         }
 
-        if (theMethod == null)
+        if (wisperClassInstance == null && callType == RPCRemoteObjectCallType.INSTANCE)
         {
-            if (wisperClassInstance == null)
-            {
-                handleRpcError(RPCErrorCodes.MISSING_PROCEDURE_ERROR, "No such method found with name " + remoteObjectCall.getMethodName() + " on RPC object named " + remoteObjectCall.getClassName(), remoteObjectCall);
-                return;
-            }
+            throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "No such instance has been registered with this controller under route :" + remoteObjectCall.getClassName());
+        }
 
-            handleRemoteObjectError(RemoteObjectErrorCode.MISSING_METHOD_ERROR, "No such method found with name " + remoteObjectCall.getMethodName(), remoteObjectCall);
+        RPCClassMethod wisperMethod = null;
+        if (callType == RPCRemoteObjectCallType.INSTANCE && wisperClassInstance.getInstance().getClass().getName().equals(rpcClass.getClassRef().getName()))
+        {
+            wisperMethod = rpcClass.getInstanceMethods().get(remoteObjectCall.getMethodName());
+            callRpcClassMethodOnInstance(wisperMethod, wisperClassInstance, rpcClass, remoteObjectCall);
+
+        } else if (callType == RPCRemoteObjectCallType.STATIC)
+        {
+            wisperMethod = rpcClass.getStaticMethods().get(remoteObjectCall.getMethodName());
+            callRpcClassMethodOnInstance(wisperMethod, null, rpcClass, remoteObjectCall);
         }
 
     }
 
-    private void handleRemoteObjectError(RemoteObjectErrorCode errorCode, String message, RemoteObjectCall remoteObjectCall)
+    private void callRpcClassMethodOnInstance(RPCClassMethod wisperMethod, WisperClassInstance wisperInstance, RPCClass rpcClass, RemoteObjectCall remoteObjectCall)
+            throws WisperException
     {
-        if (remoteObjectCall == null)
-            return;
-
-        RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.REMOTE_OBJECT, errorCode.getErrorCode()).withMessage(message).withName(errorCode.getErrorName()).build();
-        if (remoteObjectCall.getRequest() != null)
+        if (wisperMethod == null)
         {
-            errorMessage.setId(remoteObjectCall.getRequest().getIdentifier());
-            remoteObjectCall.getRequest().getResponseBlock().perform(null, errorMessage);
+            String methodtype = (wisperInstance == null) ? "Static" : "Instance";
+            throw new WisperException(Error.METHOD_NOT_REGISTERED, null, methodtype + "method " + remoteObjectCall.getMethodName() + " not registered on Wisper class " + remoteObjectCall.getClassName());
+        }
+
+        //If there is a call block instead of the method body there, just handle the call block and return.
+        if (wisperMethod.getCallBlock() != null)
+        {
+            wisperMethod.getCallBlock().perform(this, wisperInstance, wisperMethod, remoteObjectCall.getRequest());
             return;
         }
 
-        sendMessage(errorMessage);
-    }
 
-    private void handleRpcError(RPCErrorCodes rpcErrorCode, String message, RemoteObjectCall remoteObjectCall)
-    {
-        if (remoteObjectCall == null)
-            return;
-
-        RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.RPC, rpcErrorCode.getErrorCode()).withMessage(message).withName(rpcErrorCode.getErrorName()).build();
-        if (remoteObjectCall.getRequest() != null)
-        {
-            errorMessage.setId(remoteObjectCall.getRequest().getIdentifier());
-            remoteObjectCall.getRequest().getResponseBlock().perform(null, errorMessage);
-            return;
-        }
-
-        sendMessage(errorMessage);
-    }
-
-    private void callRpcClassMethodOnInstance(RPCClassMethod rpcClassMethod, WisperClassInstance rpcInstance, RPCClass rpcClass, RemoteObjectCall remoteObjectCall)
-            throws InvocationTargetException, IllegalAccessException, JSONException, NoSuchMethodException
-    {
-        if (rpcClassMethod == null)
-        {
-            handleRemoteObjectError(RemoteObjectErrorCode.MISSING_METHOD_ERROR, "No such method found with name " + remoteObjectCall.getMethodName(), remoteObjectCall);
-            return;
-        }
-
-        if (rpcClassMethod.getCallBlock() != null)
-        {
-            rpcClassMethod.getCallBlock().perform(this, rpcInstance, rpcClassMethod, remoteObjectCall.getRequest());
-            return;
-        }
-
-        String methodName = rpcClassMethod.getMethodName();
+        String methodName = wisperMethod.getMethodName();
         Method method;
         Object returnedValue;
 
-        Class[] parameterTypes = rpcClassMethod.getParameterTypes();
+        Class[] parameterTypes = wisperMethod.getParameterTypes();
         Object[] params = remoteObjectCall.getParams();
 
         for (int i = 0; i < parameterTypes.length; i++)
@@ -524,35 +572,54 @@ public class RemoteObjectController extends Gateway
         }
 
 
-        if (rpcInstance != null)
+        try
         {
-            Wisper instance = rpcInstance.getInstance();
-
-            // Instance method
-            method = getMethod(instance.getClass(), methodName, parameterTypes);
-            method.setAccessible(true);
-            checkParameterTypes(parameterTypes, params);
-            returnedValue = method.invoke(instance, params);
-        } else
-        {
-            // Static method
-            method = getMethod(rpcClass.getClassRef(), methodName, parameterTypes);
-            method.setAccessible(true);
-            returnedValue = method.invoke(null, params);
-        }
-
-        if (remoteObjectCall.getRequest() != null)
-        {
-            Response response = remoteObjectCall.getRequest().createResponse();
-            if (returnedValue != null)
+            if (wisperInstance != null)
             {
-                response.setResult(returnedValue);
+                Wisper instance = wisperInstance.getInstance();
+
+                // Instance method
+                method = getMethod(instance.getClass(), methodName, parameterTypes);
+                method.setAccessible(true);
+                checkParameterTypes(parameterTypes, params);
+                returnedValue = method.invoke(instance, params);
+            } else
+            {
+                // Static method
+                method = getMethod(rpcClass.getClassRef(), methodName, parameterTypes);
+                method.setAccessible(true);
+                returnedValue = method.invoke(null, params);
             }
 
-            if (remoteObjectCall.getRequest().getResponseBlock() != null)
+            if (remoteObjectCall.getRequest() != null)
             {
-                remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
+                Response response = remoteObjectCall.getRequest().createResponse();
+                if (returnedValue != null)
+                {
+                    response.setResult(returnedValue);
+                }
+
+                if (remoteObjectCall.getRequest().getResponseBlock() != null)
+                {
+                    remoteObjectCall.getRequest().getResponseBlock().perform(response, null);
+                }
             }
+        } catch (IllegalAccessException e)
+        {
+            String errorMessage = "Method " + methodName + " exists but is not accessible on wisper class " + remoteObjectCall.getClassName() + ". Is the method public?";
+            throw new WisperException(Error.METHOD_NOT_ACCESSIBLE, e, errorMessage);
+        } catch (IllegalArgumentException e)
+        {
+            String errorMessage = "Method " + methodName + " could not be invoked on wisper class " + remoteObjectCall.getClassName() + ". Are passed parameters of correct type?";
+            throw new WisperException(Error.METHOD_INVALID_ARGUMENTS, e, errorMessage);
+        } catch (InvocationTargetException e)
+        {
+            String errorMessage = "Method " + methodName + " could not be invoked on wisper class " + remoteObjectCall.getClassName();
+            throw new WisperException(Error.METHOD_INVOCATION_ERROR, e, errorMessage);
+        } catch (NoSuchMethodException e)
+        {
+            String errorMessage = "Method " + methodName + " could not be found on class " + remoteObjectCall.getClassName() + "with argument types " + Arrays.toString(parameterTypes) + ". Is the method defined in the class?";
+            throw new WisperException(Error.METHOD_NOT_FOUND, e, errorMessage);
         }
     }
 
@@ -584,7 +651,8 @@ public class RemoteObjectController extends Gateway
             return method;
         }
 
-        throw new NoSuchMethodException("No such method found with name " + methodName + " and parameter types " + Arrays.toString(parameterTypes));
+        throw new NoSuchMethodException();
+
     }
 
     private void checkParameterTypes(Class<?>[] parameterTypes, Object[] params) throws IllegalArgumentException
@@ -602,28 +670,6 @@ public class RemoteObjectController extends Gateway
                 }
             }
         }
-    }
-
-
-    public WisperClassInstance addRpcObjectInstance(Wisper rpcObjectInstance, RPCClass rpcClass)
-    {
-        rpcObjectInstance.setRemoteObjectController(this);
-        String key = rpcObjectInstance.toString();
-        WisperClassInstance wisperClassInstance = new WisperClassInstance(rpcClass, rpcObjectInstance, key);
-        instanceMap.put(key, wisperClassInstance);
-        return wisperClassInstance;
-    }
-
-    public boolean removeRpcObjectInstance(WisperClassInstance rpcObjectInstance)
-    {
-        if (instanceMap.containsValue(rpcObjectInstance))
-        {
-            rpcObjectInstance.getInstance().setRemoteObjectController(null);
-            instanceMap.remove(rpcObjectInstance);
-            return true;
-        }
-
-        return false;
     }
 
 }
