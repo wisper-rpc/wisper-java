@@ -146,7 +146,11 @@ public class Gateway
                 @Override
                 public void perform(Response response, RPCErrorMessage error)
                 {
-                    sendMessage(response);
+                    if (response != null)
+                        sendMessage(response);
+                    else
+                        sendMessage(error);
+
                     request.setResponseBlock(new ResponseBlock()
                     {
                         @Override
