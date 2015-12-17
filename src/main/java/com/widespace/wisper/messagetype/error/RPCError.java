@@ -20,7 +20,7 @@ public class RPCError
 
     public RPCError()
     {
-        domain = ErrorDomain.ANDROID.getDomainCode();
+        domain = ErrorDomain.NATIVE.getDomainCode();
     }
 
     public RPCError(JSONObject jsonObject)

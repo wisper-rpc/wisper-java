@@ -5,10 +5,8 @@ package com.widespace.wisper.messagetype.error;
  */
 public enum ErrorDomain
 {
-    ANDROID(20),
-    JAVASCRIPT(0),
-    RPC(1),
-    REMOTE_OBJECT(2);
+    JAVASCRIPT(1),
+    NATIVE(2);
 
     private final int domainCode;
 
