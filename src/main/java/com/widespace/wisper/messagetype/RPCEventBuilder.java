@@ -1,6 +1,5 @@
 package com.widespace.wisper.messagetype;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Map;
@@ -16,13 +15,13 @@ public class RPCEventBuilder
     private Object value;
 
 
-    public Event buildStaticEvent() throws JSONException
+    public Event buildStaticEvent()
     {
         methodName += "!";
         return new Event(methodName, instanceIdentifier, name, value);
     }
 
-    public Event buildInstanceEvent() throws JSONException
+    public Event buildInstanceEvent()
     {
         methodName += ":!";
         return new Event(methodName, instanceIdentifier, name, value);
@@ -48,7 +47,7 @@ public class RPCEventBuilder
 
     public RPCEventBuilder withValue(Object value)
     {
-        if (value instanceof Map)
+        if (value!=null && value instanceof Map)
         {
             this.value = new JSONObject((Map) value);
         }
