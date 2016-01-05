@@ -3,7 +3,7 @@ package com.widespace.wisper.classrepresentation;
 /**
  * Enumeration describing what modes of access is available for the property.
  */
-public enum RPCClassPropertyMode
+public enum WisperPropertyAccess
 {
     /**
      * The property can be both written and read. (events will be listened to and sent)

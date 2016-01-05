@@ -267,7 +267,7 @@ public class RemoteObjectController extends Gateway
         }
 
         RPCClassProperty property = properties.get(event.getName());
-        if (property.getMode() == RPCClassPropertyMode.READ_ONLY)
+        if (property.getMode() == WisperPropertyAccess.READ_ONLY)
         {
             //RPCLogger.log(RPCLogger.LogType.SDK_2_AD, "Insufficient access rights on property. Cannot write to the property with read only access.");
             return;

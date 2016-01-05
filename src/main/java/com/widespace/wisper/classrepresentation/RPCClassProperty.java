@@ -7,11 +7,11 @@ package com.widespace.wisper.classrepresentation;
 public class RPCClassProperty
 {
     private final String mappingName;
-    private final RPCClassPropertyMode mode;
+    private final WisperPropertyAccess mode;
     private final String setterName;
     private final WisperParameterType setterMethodParameterType;
 
-    public RPCClassProperty(String mappingName, RPCClassPropertyMode mode, String setterName, WisperParameterType setterMethodParameterType)
+    public RPCClassProperty(String mappingName, WisperPropertyAccess mode, String setterName, WisperParameterType setterMethodParameterType)
     {
         this.mappingName = mappingName;
         this.mode = mode;
@@ -26,7 +26,7 @@ public class RPCClassProperty
      */
     public RPCClassProperty(String mappingName)
     {
-        this(mappingName, RPCClassPropertyMode.READ_ONLY, null, null);
+        this(mappingName, WisperPropertyAccess.READ_ONLY, null, null);
     }
 
     public String getMappingName()
@@ -34,7 +34,7 @@ public class RPCClassProperty
         return mappingName;
     }
 
-    public RPCClassPropertyMode getMode()
+    public WisperPropertyAccess getMode()
     {
         return mode;
     }

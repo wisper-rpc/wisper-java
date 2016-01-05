@@ -34,7 +34,7 @@ public class WisperTestObject extends WisperObject
         WisperMethod exceptionInMethodCallMethod = new WisperMethod("exceptionInMethodCall", "exceptionInMethodCall");
         WisperMethod exceptionInMethodCallStaticMethod = new WisperMethod("exceptionInMethodCall", "exceptionInMethodCallStatic");
 
-        RPCClassProperty sampleProp = new RPCClassProperty("testProperty", RPCClassPropertyMode.READ_WRITE, "setSampleProperty", WisperParameterType.STRING);
+        RPCClassProperty sampleProp = new RPCClassProperty("testProperty", WisperPropertyAccess.READ_WRITE, "setSampleProperty", WisperParameterType.STRING);
 
         //3. Add the method models to your class model
         classModel.addInstanceMethod(appendMethod);

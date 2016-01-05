@@ -1,6 +1,6 @@
 package com.widespace.wisper.annotations;
 
-import com.widespace.wisper.classrepresentation.RPCClassPropertyMode;
+import com.widespace.wisper.classrepresentation.WisperPropertyAccess;
 import com.widespace.wisper.classrepresentation.WisperParameterType;
 
 import java.lang.annotation.Retention;
@@ -15,7 +15,7 @@ public @interface RPCProperty
 {
     String name();
 
-    RPCClassPropertyMode mode();
+    WisperPropertyAccess mode();
 
     String setter() default "[Unassigned]";
 

@@ -42,7 +42,7 @@ public class WisperClassModelRegistryTest
         HashMap<String, RPCClassProperty> properties = registeredClass.getProperties();
 
         assertEquals(1, properties.size());
-        assertEquals(RPCClassPropertyMode.READ_WRITE, properties.get("value").getMode());
+        assertEquals(WisperPropertyAccess.READ_WRITE, properties.get("value").getMode());
         assertEquals("setTestProperty", properties.get("value").getSetterName());
         assertEquals(WisperParameterType.NUMBER, properties.get("value").getSetterMethodParameterType());
     }
