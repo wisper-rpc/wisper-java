@@ -8,14 +8,14 @@ import com.widespace.wisper.base.Wisper;
  * <p/>
  * Created by Ehssan Hoorvash on 23/05/14.
  */
-public class WisperClassInstance
+public class WisperInstanceModel
 {
     private WisperClassModel wisperClassModel;
     private String instanceIdentifier;
     private Wisper instance;
 
 
-    public WisperClassInstance(WisperClassModel wisperClassModel, Wisper instance, String instanceIdentifier)
+    public WisperInstanceModel(WisperClassModel wisperClassModel, Wisper instance, String instanceIdentifier)
     {
         this.setWisperClassModel(wisperClassModel);
         this.instanceIdentifier = instanceIdentifier;

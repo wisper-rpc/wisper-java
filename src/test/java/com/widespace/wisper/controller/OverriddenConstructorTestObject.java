@@ -73,13 +73,13 @@ public class OverriddenConstructorTestObject implements Wisper
         classModel.addInstanceMethod(new WisperMethod(Constants.CONSTRUCTOR_TOKEN, new CallBlock()
         {
             @Override
-            public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, WisperMethod method, Request request)
+            public void perform(RemoteObjectController remoteObjectController, WisperInstanceModel classInstance, WisperMethod method, Request request)
             {
                 WisperControllerTestObject instance = new WisperControllerTestObject();
-                WisperClassInstance wisperClassInstance = remoteObjectController.addRpcObjectInstance(instance, classModel);
+                WisperInstanceModel wisperInstanceModel = remoteObjectController.addRpcObjectInstance(instance, classModel);
 
                 HashMap<String, Object> resultMap = new HashMap<String, Object>();
-                resultMap.put(Constants.ID, wisperClassInstance.getInstanceIdentifier());
+                resultMap.put(Constants.ID, wisperInstanceModel.getInstanceIdentifier());
                 HashMap<String, Object> properties = new HashMap<String, Object>();
                 try
                 {
@@ -113,13 +113,13 @@ public class OverriddenConstructorTestObject implements Wisper
         classModel.addStaticMethod(new WisperMethod(Constants.CONSTRUCTOR_TOKEN, new CallBlock()
         {
             @Override
-            public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, WisperMethod method, Request request)
+            public void perform(RemoteObjectController remoteObjectController, WisperInstanceModel classInstance, WisperMethod method, Request request)
             {
                 WisperControllerTestObject instance = new WisperControllerTestObject();
-                WisperClassInstance wisperClassInstance = remoteObjectController.addRpcObjectInstance(instance, classModel);
+                WisperInstanceModel wisperInstanceModel = remoteObjectController.addRpcObjectInstance(instance, classModel);
 
                 HashMap<String, Object> resultMap = new HashMap<String, Object>();
-                resultMap.put(Constants.ID, wisperClassInstance.getInstanceIdentifier());
+                resultMap.put(Constants.ID, wisperInstanceModel.getInstanceIdentifier());
                 HashMap<String, Object> properties = new HashMap<String, Object>();
                 try
                 {

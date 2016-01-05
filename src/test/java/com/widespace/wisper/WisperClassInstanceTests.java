@@ -1,7 +1,7 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.base.Wisper;
-import com.widespace.wisper.classrepresentation.WisperClassInstance;
+import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.controller.RemoteObjectController;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +12,7 @@ public class WisperClassInstanceTests
 {
 
     public static final String INSTANCE_IDENTIFIER = "myTestId123";
-    private WisperClassInstance wisperClassInstance;
+    private WisperInstanceModel wisperInstanceModel;
     private Wisper sampleInstance;
 
     @Before
@@ -32,20 +32,20 @@ public class WisperClassInstanceTests
 
             }
         };
-        wisperClassInstance = new WisperClassInstance(null, sampleInstance, INSTANCE_IDENTIFIER);
+        wisperInstanceModel = new WisperInstanceModel(null, sampleInstance, INSTANCE_IDENTIFIER);
     }
 
     @Test
     public void testIdentifierIsCorrect() throws Exception
     {
-        assertEquals(INSTANCE_IDENTIFIER, wisperClassInstance.getInstanceIdentifier());
+        assertEquals(INSTANCE_IDENTIFIER, wisperInstanceModel.getInstanceIdentifier());
     }
 
 
     @Test
     public void testInstanceIsCorrect() throws Exception
     {
-        assertEquals(sampleInstance, wisperClassInstance.getInstance());
+        assertEquals(sampleInstance, wisperInstanceModel.getInstance());
 
     }
 }
