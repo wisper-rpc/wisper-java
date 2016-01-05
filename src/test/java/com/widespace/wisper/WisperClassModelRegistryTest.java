@@ -39,7 +39,7 @@ public class WisperClassModelRegistryTest
     @Test
     public void testShouldRegisterClassWithCorrectProperties() throws Exception
     {
-        HashMap<String, RPCClassProperty> properties = registeredClass.getProperties();
+        HashMap<String, WisperProperty> properties = registeredClass.getProperties();
 
         assertEquals(1, properties.size());
         assertEquals(WisperPropertyAccess.READ_WRITE, properties.get("value").getMode());

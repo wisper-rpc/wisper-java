@@ -13,7 +13,7 @@ public class WisperClassModel
     private String mapName;
     private HashMap<String, WisperMethod> instanceMethods;
     private HashMap<String, WisperMethod> staticMethods;
-    private HashMap<String, RPCClassProperty> properties;
+    private HashMap<String, WisperProperty> properties;
 
     private Class<?> classRef;
 
@@ -21,7 +21,7 @@ public class WisperClassModel
     {
         instanceMethods = new HashMap<String, WisperMethod>();
         staticMethods = new HashMap<String, WisperMethod>();
-        properties = new HashMap<String, RPCClassProperty>();
+        properties = new HashMap<String, WisperProperty>();
     }
 
     public WisperClassModel(Object object, String mappingName)
@@ -99,11 +99,11 @@ public class WisperClassModel
     }
 
     /**
-     * Adds an RPCClassProperty to the class model
+     * Adds an WisperProperty to the class model
      *
      * @param property
      */
-    public void addProperty(RPCClassProperty property)
+    public void addProperty(WisperProperty property)
     {
         properties.put(property.getMappingName(), property);
     }
@@ -113,7 +113,7 @@ public class WisperClassModel
      *
      * @return hash map of properties
      */
-    public HashMap<String, RPCClassProperty> getProperties()
+    public HashMap<String, WisperProperty> getProperties()
     {
         return properties;
     }

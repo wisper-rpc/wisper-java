@@ -259,14 +259,14 @@ public class RemoteObjectController extends Gateway
     {
 
         Event event = new Event(remoteObjectCall);
-        HashMap<String, RPCClassProperty> properties = wisperInstanceModel.getWisperClassModel().getProperties();
+        HashMap<String, WisperProperty> properties = wisperInstanceModel.getWisperClassModel().getProperties();
         if (properties == null || !properties.containsKey(event.getName()))
         {
             //RPCLogger.log(RPCLogger.LogType.SDK_2_AD, "Property is not registered with the class");
             return;
         }
 
-        RPCClassProperty property = properties.get(event.getName());
+        WisperProperty property = properties.get(event.getName());
         if (property.getMode() == WisperPropertyAccess.READ_ONLY)
         {
             //RPCLogger.log(RPCLogger.LogType.SDK_2_AD, "Insufficient access rights on property. Cannot write to the property with read only access.");
@@ -402,7 +402,7 @@ public class RemoteObjectController extends Gateway
     private HashMap<String, Object> fetchInitializedProperties(WisperInstanceModel wisperInstanceModel) throws WisperException
     {
         HashMap<String, Object> initializedProperties = new HashMap<String, Object>();
-        HashMap<String, RPCClassProperty> properties = wisperInstanceModel.getWisperClassModel().getProperties();
+        HashMap<String, WisperProperty> properties = wisperInstanceModel.getWisperClassModel().getProperties();
 
         String currentPropertyName = null;
         try
@@ -411,7 +411,7 @@ public class RemoteObjectController extends Gateway
             {
                 currentPropertyName = propertyName;
 
-                RPCClassProperty property = properties.get(propertyName);
+                WisperProperty property = properties.get(propertyName);
                 Wisper instance = wisperInstanceModel.getInstance();
 
 

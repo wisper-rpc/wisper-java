@@ -68,7 +68,7 @@ public class OverriddenConstructorTestObject implements Wisper
     {
         final WisperClassModel classModel = new WisperClassModel(WisperControllerTestObject.class, "wisp.test.OverrideConstructorTest");
 
-        classModel.addProperty(new RPCClassProperty("property", WisperPropertyAccess.READ_WRITE, "setProperty", WisperParameterType.STRING));
+        classModel.addProperty(new WisperProperty("property", WisperPropertyAccess.READ_WRITE, "setProperty", WisperParameterType.STRING));
 
         classModel.addInstanceMethod(new WisperMethod(Constants.CONSTRUCTOR_TOKEN, new CallBlock()
         {
@@ -108,7 +108,7 @@ public class OverriddenConstructorTestObject implements Wisper
     {
         final WisperClassModel classModel = new WisperClassModel(WisperControllerTestObject.class, "wisp.test.OverrideConstructorTest");
 
-        classModel.addProperty(new RPCClassProperty("property", WisperPropertyAccess.READ_WRITE, "setProperty", WisperParameterType.STRING));
+        classModel.addProperty(new WisperProperty("property", WisperPropertyAccess.READ_WRITE, "setProperty", WisperParameterType.STRING));
 
         classModel.addStaticMethod(new WisperMethod(Constants.CONSTRUCTOR_TOKEN, new CallBlock()
         {

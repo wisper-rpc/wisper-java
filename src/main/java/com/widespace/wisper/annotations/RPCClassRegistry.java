@@ -3,7 +3,7 @@ package com.widespace.wisper.annotations;
 import com.widespace.wisper.base.RPCUtilities;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperMethod;
-import com.widespace.wisper.classrepresentation.RPCClassProperty;
+import com.widespace.wisper.classrepresentation.WisperProperty;
 import com.widespace.wisper.classrepresentation.WisperParameterType;
 
 import java.lang.annotation.Annotation;
@@ -40,7 +40,7 @@ public class RPCClassRegistry
                     String defaultSetterName = "set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
                     if (fieldAnnotation != null)
                     {
-                        wisperClassModel.addProperty(new RPCClassProperty(fieldAnnotation.name(), fieldAnnotation.mode(), defaultSetterName, fieldAnnotation.paramType()));
+                        wisperClassModel.addProperty(new WisperProperty(fieldAnnotation.name(), fieldAnnotation.mode(), defaultSetterName, fieldAnnotation.paramType()));
                     }
                 }
 

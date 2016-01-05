@@ -47,8 +47,8 @@ public class MyWisperTestObject extends WisperObject
         WisperMethod testPassByRef = new WisperMethod(TEST_PASSBYREF_METHOD_MAPPING_NAME, "printObject", WisperParameterType.INSTANCE);
 
         //3.Add Properties if any
-        RPCClassProperty property = new RPCClassProperty("prop", WisperPropertyAccess.READ_WRITE, "setProperty", WisperParameterType.STRING);
-        RPCClassProperty propertyInstance = new RPCClassProperty(TEST_INSTANCE_PROPERTY_MAPPING_NAME, WisperPropertyAccess.READ_WRITE, "setInstanceProperty", WisperParameterType.INSTANCE);
+        WisperProperty property = new WisperProperty("prop", WisperPropertyAccess.READ_WRITE, "setProperty", WisperParameterType.STRING);
+        WisperProperty propertyInstance = new WisperProperty(TEST_INSTANCE_PROPERTY_MAPPING_NAME, WisperPropertyAccess.READ_WRITE, "setInstanceProperty", WisperParameterType.INSTANCE);
 
         //3. Add the method models to your class model
         classModel.addInstanceMethod(testMethod1);

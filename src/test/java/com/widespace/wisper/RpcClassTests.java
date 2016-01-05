@@ -76,8 +76,8 @@ public class RpcClassTests
     {
         wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
 
-        RPCClassProperty property1 = new RPCClassProperty("prop1");
-        RPCClassProperty property2 = new RPCClassProperty("prop2", WisperPropertyAccess.READ_WRITE, "setterName", WisperParameterType.STRING);
+        WisperProperty property1 = new WisperProperty("prop1");
+        WisperProperty property2 = new WisperProperty("prop2", WisperPropertyAccess.READ_WRITE, "setterName", WisperParameterType.STRING);
 
         wisperClassModel.addProperty(property1);
         wisperClassModel.addProperty(property2);
