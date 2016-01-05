@@ -48,10 +48,10 @@ public class WisperControllerTestObject implements Wisper
     //region  Wisper
     //================================================================================
 
-    public static RPCClass registerRpcClass()
+    public static WisperClassModel registerRpcClass()
     {
         //1.Build a class model
-        RPCClass classModel = new RPCClass(WisperControllerTestObject.class, "wisp.test.ControllerTest");
+        WisperClassModel classModel = new WisperClassModel(WisperControllerTestObject.class, "wisp.test.ControllerTest");
 
         classModel.addProperty(new RPCClassProperty("property", RPCClassPropertyMode.READ_WRITE, "setProperty", RPCMethodParameterType.STRING));
 

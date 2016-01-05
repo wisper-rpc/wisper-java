@@ -21,12 +21,12 @@ public class WisperTestObject extends WisperObject
      * This method must be implemented by any object desiring to register itself as RPC
      * unfortunately prior to Java 8 we cannot have static methods in Interfaces which is why we need to take this approach instead.
      *
-     * @return RPCClass an instance of the RPC class model object containing the models of methods
+     * @return WisperClassModel an instance of the RPC class model object containing the models of methods
      */
-    public static RPCClass registerRpcClass()
+    public static WisperClassModel registerRpcClass()
     {
         //1.Build a class model
-        RPCClass classModel = new RPCClass(WisperTestObject.class, "wisp.test.TestObject");
+        WisperClassModel classModel = new WisperClassModel(WisperTestObject.class, "wisp.test.TestObject");
 
         //2.Build class methods of instance or static methods you might need
         RPCClassMethod appendMethod = new RPCClassMethod("append", "appendString", RPCMethodParameterType.STRING, RPCMethodParameterType.STRING);

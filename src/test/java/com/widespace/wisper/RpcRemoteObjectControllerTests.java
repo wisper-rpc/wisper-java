@@ -1,6 +1,6 @@
 package com.widespace.wisper;
 
-import com.widespace.wisper.classrepresentation.RPCClass;
+import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.controller.RemoteObjectController;
 import com.widespace.wisper.messagetype.Notification;
@@ -34,8 +34,8 @@ public class RpcRemoteObjectControllerTests
     @Test
     public void testClassConversionForNonRegisteredClassReturnsNull() throws Exception
     {
-        RPCClass rpcClassForClass = remoteObjectController.getRpcClassForClass(String.class);
-        assertNull(rpcClassForClass);
+        WisperClassModel wisperClassForClassModel = remoteObjectController.getRpcClassForClass(String.class);
+        assertNull(wisperClassForClassModel);
     }
 
     @Test
@@ -48,9 +48,9 @@ public class RpcRemoteObjectControllerTests
     @Test
     public void testRegisteringClassesWorks() throws Exception
     {
-        RPCClass rpcClass = MyWisperTestObject.registerRpcClass();
-        remoteObjectController.registerClass(rpcClass);
-        assertEquals(remoteObjectController.getRpcClassForClass(MyWisperTestObject.class), rpcClass);
+        WisperClassModel wisperClassModel = MyWisperTestObject.registerRpcClass();
+        remoteObjectController.registerClass(wisperClassModel);
+        assertEquals(remoteObjectController.getRpcClassForClass(MyWisperTestObject.class), wisperClassModel);
     }
 
     @Test
@@ -121,9 +121,9 @@ public class RpcRemoteObjectControllerTests
     {
         //register two remote objects
         remoteObjectController.flushInstances();
-        RPCClass rpcClass = MyWisperTestObject.registerRpcClass();
-        remoteObjectController.registerClass(rpcClass);
-        remoteObjectController.registerClass(rpcClass);
+        WisperClassModel wisperClassModel = MyWisperTestObject.registerRpcClass();
+        remoteObjectController.registerClass(wisperClassModel);
+        remoteObjectController.registerClass(wisperClassModel);
         remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject~\", \"params\" : [], \"id\": \"abcd1\" }"), null).toJsonString());
         remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject~\", \"params\" : [], \"id\": \"abcd2\" }"), null).toJsonString());
         verify(callBackMock, times(2)).gatewayGeneratedMessage(anyString());
@@ -156,9 +156,9 @@ public class RpcRemoteObjectControllerTests
     {
         //register two remote objects
         remoteObjectController.flushInstances();
-        RPCClass rpcClass = MyWisperTestObject.registerRpcClass();
-        remoteObjectController.registerClass(rpcClass);
-        remoteObjectController.registerClass(rpcClass);
+        WisperClassModel wisperClassModel = MyWisperTestObject.registerRpcClass();
+        remoteObjectController.registerClass(wisperClassModel);
+        remoteObjectController.registerClass(wisperClassModel);
         remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject~\", \"params\" : [], \"id\": \"abcd1\" }"), null).toJsonString());
         remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject~\", \"params\" : [], \"id\": \"abcd2\" }"), null).toJsonString());
         verify(callBackMock, times(2)).gatewayGeneratedMessage(anyString());
@@ -183,8 +183,8 @@ public class RpcRemoteObjectControllerTests
     {
         remoteObjectController.flushInstances();
 
-        RPCClass rpcClass = MyWisperTestObject.registerRpcClass();
-        remoteObjectController.registerClass(rpcClass);
+        WisperClassModel wisperClassModel = MyWisperTestObject.registerRpcClass();
+        remoteObjectController.registerClass(wisperClassModel);
         remoteObjectController.handleMessage(new Request(new JSONObject("{ \"method\" : \"wisp.ai.MyWisperTestObject~\", \"params\" : [], \"id\": \"abcd4\" }"), null).toJsonString());
     }
 

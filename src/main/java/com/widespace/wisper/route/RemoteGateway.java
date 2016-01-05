@@ -2,7 +2,7 @@ package com.widespace.wisper.route;
 
 import com.widespace.wisper.base.WisperObject;
 import com.widespace.wisper.base.WisperTestObject;
-import com.widespace.wisper.classrepresentation.RPCClass;
+import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.RPCClassMethod;
 import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
 import com.widespace.wisper.controller.Gateway;
@@ -20,11 +20,11 @@ public class RemoteGateway extends WisperObject
     private Gateway gateway;
 
 
-    public static RPCClass registerRpcClass()
+    public static WisperClassModel registerRpcClass()
     {
-        RPCClass rpcClass = new RPCClass(RemoteGateway.class, "wisper.Gateway");
-        rpcClass.addInstanceMethod(new RPCClassMethod("setChannel", "setChannel", RPCMethodParameterType.INSTANCE));
-        return rpcClass;
+        WisperClassModel wisperClassModel = new WisperClassModel(RemoteGateway.class, "wisper.Gateway");
+        wisperClassModel.addInstanceMethod(new RPCClassMethod("setChannel", "setChannel", RPCMethodParameterType.INSTANCE));
+        return wisperClassModel;
     }
 
     /**

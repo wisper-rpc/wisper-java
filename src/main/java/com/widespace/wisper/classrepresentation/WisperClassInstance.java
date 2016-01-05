@@ -10,14 +10,14 @@ import com.widespace.wisper.base.Wisper;
  */
 public class WisperClassInstance
 {
-    private RPCClass rpcClass;
+    private WisperClassModel wisperClassModel;
     private String instanceIdentifier;
     private Wisper instance;
 
 
-    public WisperClassInstance(RPCClass rpcClass, Wisper instance, String instanceIdentifier)
+    public WisperClassInstance(WisperClassModel wisperClassModel, Wisper instance, String instanceIdentifier)
     {
-        this.setRpcClass(rpcClass);
+        this.setWisperClassModel(wisperClassModel);
         this.instanceIdentifier = instanceIdentifier;
         this.instance = instance;
     }
@@ -44,13 +44,13 @@ public class WisperClassInstance
         return instance;
     }
 
-    public RPCClass getRpcClass()
+    public WisperClassModel getWisperClassModel()
     {
-        return rpcClass;
+        return wisperClassModel;
     }
 
-    public void setRpcClass(RPCClass rpcClass)
+    public void setWisperClassModel(WisperClassModel wisperClassModel)
     {
-        this.rpcClass = rpcClass;
+        this.wisperClassModel = wisperClassModel;
     }
 }

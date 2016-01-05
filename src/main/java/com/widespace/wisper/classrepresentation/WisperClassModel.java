@@ -8,7 +8,7 @@ import java.util.HashMap;
  * <p/>
  * Created by Ehssan Hoorvash on 21/05/14.
  */
-public class RPCClass
+public class WisperClassModel
 {
     private String mapName;
     private HashMap<String, RPCClassMethod> instanceMethods;
@@ -17,21 +17,21 @@ public class RPCClass
 
     private Class<?> classRef;
 
-    private RPCClass()
+    private WisperClassModel()
     {
         instanceMethods = new HashMap<String, RPCClassMethod>();
         staticMethods = new HashMap<String, RPCClassMethod>();
         properties = new HashMap<String, RPCClassProperty>();
     }
 
-    public RPCClass(Object object, String mappingName)
+    public WisperClassModel(Object object, String mappingName)
     {
         this();
         this.classRef = object.getClass();
         this.mapName = mappingName;
     }
 
-    public RPCClass(Class<?> clazz, String mappingName)
+    public WisperClassModel(Class<?> clazz, String mappingName)
     {
         this();
         this.classRef = clazz;

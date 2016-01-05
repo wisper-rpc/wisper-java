@@ -33,12 +33,12 @@ public class MyWisperTestObject extends WisperObject
         return "I just echo " + message;
     }
 
-    public static RPCClass registerRpcClass()
+    public static WisperClassModel registerRpcClass()
     {
         lasteMethodCalled = null;
 
         //1.Build a class model
-        RPCClass classModel = new RPCClass(MyWisperTestObject.class, "wisp.ai.MyWisperTestObject");
+        WisperClassModel classModel = new WisperClassModel(MyWisperTestObject.class, "wisp.ai.MyWisperTestObject");
 
         //2.Build class methods of instance or static methods you might need
         RPCClassMethod testMethod1 = new RPCClassMethod(TEST_INSTANCE_METHOD_MAPPING_NAME, "testMethod1", RPCMethodParameterType.STRING);

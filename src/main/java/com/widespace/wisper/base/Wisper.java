@@ -18,5 +18,5 @@ public interface Wisper
     //void handleEvent(String eventName, Object[] params);
 
     //Interfaces prior to Java 8 do not permit a static method definition, but this method MUST be implemented by all implementers of this interface
-    //public static RPCClass registerRpcClass();
+    //public static WisperClassModel registerRpcClass();
 }

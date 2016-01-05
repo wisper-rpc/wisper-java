@@ -1,6 +1,6 @@
 package com.widespace.wisper.base;
 
-import com.widespace.wisper.classrepresentation.RPCClass;
+import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.controller.RemoteObjectController;
 
 /**
@@ -16,9 +16,9 @@ public abstract class WisperObject implements Wisper
      * This method must be implemented by any object desiring to register itself as RPC
      * unfortunately prior to Java 8 we cannot have static methods in Interfaces which is why we need to take this approach instead.
      *
-     * @return RPCClass an instance of the RPC class model object containing the models of methods
+     * @return WisperClassModel an instance of the RPC class model object containing the models of methods
      */
-    public static RPCClass registerRpcClass()
+    public static WisperClassModel registerRpcClass()
     {
         return null;
     }
@@ -32,6 +32,8 @@ public abstract class WisperObject implements Wisper
     @Override
     public void destruct()
     {
-        this.remoteObjectController = null;
+
     }
+
+
 }

@@ -1,7 +1,7 @@
 package com.widespace.wisper.annotations;
 
 import com.widespace.wisper.base.RPCUtilities;
-import com.widespace.wisper.classrepresentation.RPCClass;
+import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.RPCClassMethod;
 import com.widespace.wisper.classrepresentation.RPCClassProperty;
 import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
@@ -20,9 +20,9 @@ import java.util.Arrays;
  */
 public class RPCClassRegistry
 {
-    public static RPCClass register(Class clazz)
+    public static WisperClassModel register(Class clazz)
     {
-        RPCClass rpcClass = null;
+        WisperClassModel wisperClassModel = null;
 
         for (Annotation annotation : clazz.getDeclaredAnnotations())
         {
@@ -30,7 +30,7 @@ public class RPCClassRegistry
             {
                 //Class
                 String mapName = ((com.widespace.wisper.annotations.RPCClass) annotation).name();
-                rpcClass = new RPCClass(clazz, mapName);
+                wisperClassModel = new WisperClassModel(clazz, mapName);
 
                 //Properties
                 for (Field field : clazz.getDeclaredFields())
@@ -40,7 +40,7 @@ public class RPCClassRegistry
                     String defaultSetterName = "set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
                     if (fieldAnnotation != null)
                     {
-                        rpcClass.addProperty(new RPCClassProperty(fieldAnnotation.name(), fieldAnnotation.mode(), defaultSetterName, fieldAnnotation.paramType()));
+                        wisperClassModel.addProperty(new RPCClassProperty(fieldAnnotation.name(), fieldAnnotation.mode(), defaultSetterName, fieldAnnotation.paramType()));
                     }
                 }
 
@@ -53,20 +53,20 @@ public class RPCClassRegistry
                         {
                             RPCMethodParameterType[] associatedRpcParameters = getAssociatedRpcParameters(method);
                             RPCClassMethod instanceMethod = new RPCClassMethod(((RPCInstanceMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
-                            rpcClass.addInstanceMethod(instanceMethod);
+                            wisperClassModel.addInstanceMethod(instanceMethod);
                         }
                         else if (methodAnnotation instanceof RPCStaticMethod)
                         {
                             RPCMethodParameterType[] associatedRpcParameters = getAssociatedRpcParameters(method);
                             RPCClassMethod staticMethod = new RPCClassMethod(((RPCStaticMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
-                            rpcClass.addStaticMethod(staticMethod);
+                            wisperClassModel.addStaticMethod(staticMethod);
                         }
                     }
                 }
             }
         }
 
-        return rpcClass;
+        return wisperClassModel;
     }
 
     private static RPCMethodParameterType[] getAssociatedRpcParameters(Method method)

@@ -64,9 +64,9 @@ public class OverriddenConstructorTestObject implements Wisper
 
     }
 
-    public static RPCClass registerRpcClassWithInstanceBlock()
+    public static WisperClassModel registerRpcClassWithInstanceBlock()
     {
-        final RPCClass classModel = new RPCClass(WisperControllerTestObject.class, "wisp.test.OverrideConstructorTest");
+        final WisperClassModel classModel = new WisperClassModel(WisperControllerTestObject.class, "wisp.test.OverrideConstructorTest");
 
         classModel.addProperty(new RPCClassProperty("property", RPCClassPropertyMode.READ_WRITE, "setProperty", RPCMethodParameterType.STRING));
 
@@ -104,9 +104,9 @@ public class OverriddenConstructorTestObject implements Wisper
         return classModel;
     }
 
-    public static RPCClass registerRpcClassWithStaticBlock()
+    public static WisperClassModel registerRpcClassWithStaticBlock()
     {
-        final RPCClass classModel = new RPCClass(WisperControllerTestObject.class, "wisp.test.OverrideConstructorTest");
+        final WisperClassModel classModel = new WisperClassModel(WisperControllerTestObject.class, "wisp.test.OverrideConstructorTest");
 
         classModel.addProperty(new RPCClassProperty("property", RPCClassPropertyMode.READ_WRITE, "setProperty", RPCMethodParameterType.STRING));
 

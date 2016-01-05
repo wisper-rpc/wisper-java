@@ -13,10 +13,10 @@ import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
 
 
-public class RPCClassRegistryTest
+public class WisperClassModelRegistryTest
 {
 
-    private RPCClass registeredClass;
+    private WisperClassModel registeredClass;
 
     @Before
     public void setUp() throws Exception
