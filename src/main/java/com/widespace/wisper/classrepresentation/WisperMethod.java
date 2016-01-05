@@ -13,11 +13,11 @@ import java.util.List;
 public class WisperMethod
 {
     private String mapName;
-    private List<RPCMethodParameterType> paramTypes;
+    private List<WisperParameterType> paramTypes;
     private CallBlock callBlock;
     private String methodName;
 
-    public WisperMethod(String mapName, String methodName, RPCMethodParameterType... parameterTypes)
+    public WisperMethod(String mapName, String methodName, WisperParameterType... parameterTypes)
     {
         this.mapName = mapName;
         this.methodName = methodName;
@@ -72,7 +72,7 @@ public class WisperMethod
      * Object)
      *
      * @return an array containing the classes of parameter types.
-     * @see RPCMethodParameterType
+     * @see WisperParameterType
      */
     @SuppressWarnings("rawtypes")
     public Class[] getParameterTypes()

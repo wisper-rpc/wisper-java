@@ -53,7 +53,7 @@ public class WisperControllerTestObject implements Wisper
         //1.Build a class model
         WisperClassModel classModel = new WisperClassModel(WisperControllerTestObject.class, "wisp.test.ControllerTest");
 
-        classModel.addProperty(new RPCClassProperty("property", RPCClassPropertyMode.READ_WRITE, "setProperty", RPCMethodParameterType.STRING));
+        classModel.addProperty(new RPCClassProperty("property", RPCClassPropertyMode.READ_WRITE, "setProperty", WisperParameterType.STRING));
 
         //4. Return the class model
         return classModel;

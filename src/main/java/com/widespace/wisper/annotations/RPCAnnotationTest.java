@@ -1,13 +1,13 @@
 package com.widespace.wisper.annotations;
 
 import com.widespace.wisper.classrepresentation.RPCClassPropertyMode;
-import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
+import com.widespace.wisper.classrepresentation.WisperParameterType;
 
 
 @RPCClass(name = "wisp.test.annotationTest")
 public class RPCAnnotationTest
 {
-    @RPCProperty(name = "value", mode = RPCClassPropertyMode.READ_WRITE, paramType = RPCMethodParameterType.NUMBER)
+    @RPCProperty(name = "value", mode = RPCClassPropertyMode.READ_WRITE, paramType = WisperParameterType.NUMBER)
     private int testProperty;
 
     @RPCInstanceMethod(name = "add")

@@ -280,7 +280,7 @@ public class RemoteObjectController extends Gateway
         // Instance method
         Class[] parameterTypes = RPCUtilities.convertRpcParameterTypeToClassType(property.getSetterMethodParameterType());
         // If property is pointing to an RPC instance, replace the pointer to the actual value
-        if (property.getSetterMethodParameterType() == RPCMethodParameterType.INSTANCE)
+        if (property.getSetterMethodParameterType() == WisperParameterType.INSTANCE)
         {
             if (instanceMap.containsKey(event.getValue().toString()))
             {
@@ -425,7 +425,7 @@ public class RemoteObjectController extends Gateway
                     continue;
                 }
 
-                if (property.getSetterMethodParameterType() == RPCMethodParameterType.INSTANCE)
+                if (property.getSetterMethodParameterType() == WisperParameterType.INSTANCE)
                 {
                     WisperClassInstance WisperClassInstance = getWisperClassInstance((Wisper) value);
                     value = WisperClassInstance.getInstanceIdentifier();
@@ -561,7 +561,7 @@ public class RemoteObjectController extends Gateway
         for (int i = 0; i < parameterTypes.length; i++)
         {
             //In case of instance, it has been replaced by RPCMethodParameter type.
-            if (parameterTypes[i].equals(RPCMethodParameterType.INSTANCE.getClass()))
+            if (parameterTypes[i].equals(WisperParameterType.INSTANCE.getClass()))
             {
                 if (instanceMap.containsKey(params[i].toString()))
                 {

@@ -1,7 +1,7 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.base.RPCUtilities;
-import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
+import com.widespace.wisper.classrepresentation.WisperParameterType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,10 +27,10 @@ public class RPCUtilitiesTests
     {
         Class[] classes = {String.class, Number.class, Boolean.class, HashMap.class};
         List<Class> classList = Arrays.asList(classes);
-        RPCMethodParameterType[] rpcMethodParameterTypes = RPCUtilities.convertParameterTypesToRPCParameterType(classList);
+        WisperParameterType[] wisperParameterTypes = RPCUtilities.convertParameterTypesToRPCParameterType(classList);
 
-        RPCMethodParameterType[] expected = {RPCMethodParameterType.STRING, RPCMethodParameterType.NUMBER, RPCMethodParameterType.BOOLEAN, RPCMethodParameterType.HASHMAP};
-        assertTrue(Arrays.equals(expected, rpcMethodParameterTypes));
+        WisperParameterType[] expected = {WisperParameterType.STRING, WisperParameterType.NUMBER, WisperParameterType.BOOLEAN, WisperParameterType.HASHMAP};
+        assertTrue(Arrays.equals(expected, wisperParameterTypes));
     }
 
     @Test

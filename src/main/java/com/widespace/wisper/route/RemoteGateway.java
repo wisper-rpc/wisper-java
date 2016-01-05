@@ -4,7 +4,7 @@ import com.widespace.wisper.base.WisperObject;
 import com.widespace.wisper.base.WisperTestObject;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperMethod;
-import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
+import com.widespace.wisper.classrepresentation.WisperParameterType;
 import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.controller.RemoteObjectController;
@@ -23,7 +23,7 @@ public class RemoteGateway extends WisperObject
     public static WisperClassModel registerRpcClass()
     {
         WisperClassModel wisperClassModel = new WisperClassModel(RemoteGateway.class, "wisper.Gateway");
-        wisperClassModel.addInstanceMethod(new WisperMethod("setChannel", "setChannel", RPCMethodParameterType.INSTANCE));
+        wisperClassModel.addInstanceMethod(new WisperMethod("setChannel", "setChannel", WisperParameterType.INSTANCE));
         return wisperClassModel;
     }
 

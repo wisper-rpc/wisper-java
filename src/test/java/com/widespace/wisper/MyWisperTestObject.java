@@ -41,14 +41,14 @@ public class MyWisperTestObject extends WisperObject
         WisperClassModel classModel = new WisperClassModel(MyWisperTestObject.class, "wisp.ai.MyWisperTestObject");
 
         //2.Build class methods of instance or static methods you might need
-        WisperMethod testMethod1 = new WisperMethod(TEST_INSTANCE_METHOD_MAPPING_NAME, "testMethod1", RPCMethodParameterType.STRING);
-        WisperMethod testStaticMethod1 = new WisperMethod(TEST_STATIC_METHOD_MAPPING_NAME, "testStaticMethod1", RPCMethodParameterType.STRING);
+        WisperMethod testMethod1 = new WisperMethod(TEST_INSTANCE_METHOD_MAPPING_NAME, "testMethod1", WisperParameterType.STRING);
+        WisperMethod testStaticMethod1 = new WisperMethod(TEST_STATIC_METHOD_MAPPING_NAME, "testStaticMethod1", WisperParameterType.STRING);
 
-        WisperMethod testPassByRef = new WisperMethod(TEST_PASSBYREF_METHOD_MAPPING_NAME, "printObject", RPCMethodParameterType.INSTANCE);
+        WisperMethod testPassByRef = new WisperMethod(TEST_PASSBYREF_METHOD_MAPPING_NAME, "printObject", WisperParameterType.INSTANCE);
 
         //3.Add Properties if any
-        RPCClassProperty property = new RPCClassProperty("prop", RPCClassPropertyMode.READ_WRITE, "setProperty", RPCMethodParameterType.STRING);
-        RPCClassProperty propertyInstance = new RPCClassProperty(TEST_INSTANCE_PROPERTY_MAPPING_NAME, RPCClassPropertyMode.READ_WRITE, "setInstanceProperty", RPCMethodParameterType.INSTANCE);
+        RPCClassProperty property = new RPCClassProperty("prop", RPCClassPropertyMode.READ_WRITE, "setProperty", WisperParameterType.STRING);
+        RPCClassProperty propertyInstance = new RPCClassProperty(TEST_INSTANCE_PROPERTY_MAPPING_NAME, RPCClassPropertyMode.READ_WRITE, "setInstanceProperty", WisperParameterType.INSTANCE);
 
         //3. Add the method models to your class model
         classModel.addInstanceMethod(testMethod1);

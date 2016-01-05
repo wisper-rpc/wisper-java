@@ -3,7 +3,7 @@ package com.widespace.wisper;
 import com.widespace.wisper.classrepresentation.CallBlock;
 import com.widespace.wisper.classrepresentation.WisperClassInstance;
 import com.widespace.wisper.classrepresentation.WisperMethod;
-import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
+import com.widespace.wisper.classrepresentation.WisperParameterType;
 import com.widespace.wisper.controller.RemoteObjectController;
 import com.widespace.wisper.messagetype.Request;
 import org.junit.Before;
@@ -40,8 +40,8 @@ public class RpcClassMethodTests
     @Test
     public void testParameterTypesAreCorrect() throws Exception
     {
-        wisperMethod = new WisperMethod(SAMPLE_MAP_NAME, "methodName", RPCMethodParameterType.HASHMAP,
-                RPCMethodParameterType.STRING, RPCMethodParameterType.NUMBER, RPCMethodParameterType.ARRAY);
+        wisperMethod = new WisperMethod(SAMPLE_MAP_NAME, "methodName", WisperParameterType.HASHMAP,
+                WisperParameterType.STRING, WisperParameterType.NUMBER, WisperParameterType.ARRAY);
         Class[] parameterTypes = wisperMethod.getParameterTypes();
         List<Class> classList = Arrays.asList(parameterTypes);
 

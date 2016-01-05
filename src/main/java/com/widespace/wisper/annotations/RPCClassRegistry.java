@@ -4,7 +4,7 @@ import com.widespace.wisper.base.RPCUtilities;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.classrepresentation.RPCClassProperty;
-import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
+import com.widespace.wisper.classrepresentation.WisperParameterType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -51,13 +51,13 @@ public class RPCClassRegistry
                     {
                         if (methodAnnotation instanceof RPCInstanceMethod)
                         {
-                            RPCMethodParameterType[] associatedRpcParameters = getAssociatedRpcParameters(method);
+                            WisperParameterType[] associatedRpcParameters = getAssociatedRpcParameters(method);
                             WisperMethod instanceMethod = new WisperMethod(((RPCInstanceMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
                             wisperClassModel.addInstanceMethod(instanceMethod);
                         }
                         else if (methodAnnotation instanceof RPCStaticMethod)
                         {
-                            RPCMethodParameterType[] associatedRpcParameters = getAssociatedRpcParameters(method);
+                            WisperParameterType[] associatedRpcParameters = getAssociatedRpcParameters(method);
                             WisperMethod staticMethod = new WisperMethod(((RPCStaticMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
                             wisperClassModel.addStaticMethod(staticMethod);
                         }
@@ -69,7 +69,7 @@ public class RPCClassRegistry
         return wisperClassModel;
     }
 
-    private static RPCMethodParameterType[] getAssociatedRpcParameters(Method method)
+    private static WisperParameterType[] getAssociatedRpcParameters(Method method)
     {
         Class[] methodParameterTypes = method.getParameterTypes();
         try

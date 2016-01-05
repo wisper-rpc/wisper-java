@@ -8,7 +8,7 @@ package com.widespace.wisper.classrepresentation;
  * OBJECT type is actually a key-value (hashmap) type but should be named object
  * accoring to convention of JavaScript for our use
  */
-public enum RPCMethodParameterType
+public enum WisperParameterType
 {
     STRING, NUMBER, ARRAY, HASHMAP, BOOLEAN, INSTANCE
 }

@@ -9,9 +9,9 @@ public class RPCClassProperty
     private final String mappingName;
     private final RPCClassPropertyMode mode;
     private final String setterName;
-    private final RPCMethodParameterType setterMethodParameterType;
+    private final WisperParameterType setterMethodParameterType;
 
-    public RPCClassProperty(String mappingName, RPCClassPropertyMode mode, String setterName, RPCMethodParameterType setterMethodParameterType)
+    public RPCClassProperty(String mappingName, RPCClassPropertyMode mode, String setterName, WisperParameterType setterMethodParameterType)
     {
         this.mappingName = mappingName;
         this.mode = mode;
@@ -44,7 +44,7 @@ public class RPCClassProperty
         return setterName;
     }
 
-    public RPCMethodParameterType getSetterMethodParameterType()
+    public WisperParameterType getSetterMethodParameterType()
     {
         return setterMethodParameterType;
     }

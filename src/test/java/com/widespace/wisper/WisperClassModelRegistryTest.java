@@ -44,7 +44,7 @@ public class WisperClassModelRegistryTest
         assertEquals(1, properties.size());
         assertEquals(RPCClassPropertyMode.READ_WRITE, properties.get("value").getMode());
         assertEquals("setTestProperty", properties.get("value").getSetterName());
-        assertEquals(RPCMethodParameterType.NUMBER, properties.get("value").getSetterMethodParameterType());
+        assertEquals(WisperParameterType.NUMBER, properties.get("value").getSetterMethodParameterType());
     }
 
 

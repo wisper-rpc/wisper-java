@@ -1,6 +1,6 @@
 package com.widespace.wisper.base;
 
-import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
+import com.widespace.wisper.classrepresentation.WisperParameterType;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -12,11 +12,11 @@ import java.util.List;
  */
 public class RPCUtilities
 {
-    public static Class[] convertRpcParameterTypeToClassType(List<RPCMethodParameterType> paramTypes)
+    public static Class[] convertRpcParameterTypeToClassType(List<WisperParameterType> paramTypes)
     {
         ArrayList<Class> result = new ArrayList<Class>();
 
-        for (RPCMethodParameterType paramType : paramTypes)
+        for (WisperParameterType paramType : paramTypes)
         {
             switch (paramType)
             {
@@ -37,7 +37,7 @@ public class RPCUtilities
                     result.add(Boolean.class);
                     break;
                 case INSTANCE:   // leave it as it is!
-                    result.add(RPCMethodParameterType.INSTANCE.getClass());
+                    result.add(WisperParameterType.INSTANCE.getClass());
                 default:
                     break;
             }
@@ -46,26 +46,26 @@ public class RPCUtilities
         return result.toArray(new Class[result.size()]);
     }
 
-    public static RPCMethodParameterType[] convertParameterTypesToRPCParameterType(List<Class> paramTypes) throws IllegalArgumentException
+    public static WisperParameterType[] convertParameterTypesToRPCParameterType(List<Class> paramTypes) throws IllegalArgumentException
     {
-        ArrayList<RPCMethodParameterType> result = new ArrayList<RPCMethodParameterType>();
+        ArrayList<WisperParameterType> result = new ArrayList<WisperParameterType>();
         for (Class paramType : paramTypes)
         {
             if (paramType.equals(String.class))
             {
-                result.add(RPCMethodParameterType.STRING);
+                result.add(WisperParameterType.STRING);
             }
             else if (paramType.equals(Number.class))
             {
-                result.add(RPCMethodParameterType.NUMBER);
+                result.add(WisperParameterType.NUMBER);
             }
             else if (paramType.equals(HashMap.class))
             {
-                result.add(RPCMethodParameterType.HASHMAP);
+                result.add(WisperParameterType.HASHMAP);
             }
             else if (paramType.equals(Boolean.class))
             {
-                result.add(RPCMethodParameterType.BOOLEAN);
+                result.add(WisperParameterType.BOOLEAN);
             }
             else
             {
@@ -73,12 +73,12 @@ public class RPCUtilities
             }
         }
 
-        return result.toArray(new RPCMethodParameterType[result.size()]);
+        return result.toArray(new WisperParameterType[result.size()]);
     }
 
-    public static Class[] convertRpcParameterTypeToClassType(RPCMethodParameterType paramTypes)
+    public static Class[] convertRpcParameterTypeToClassType(WisperParameterType paramTypes)
     {
-        ArrayList<RPCMethodParameterType> types = new ArrayList<RPCMethodParameterType>();
+        ArrayList<WisperParameterType> types = new ArrayList<WisperParameterType>();
         types.add(paramTypes);
         return convertRpcParameterTypeToClassType(types);
     }
