@@ -29,10 +29,10 @@ public class WisperTestObject extends WisperObject
         WisperClassModel classModel = new WisperClassModel(WisperTestObject.class, "wisp.test.TestObject");
 
         //2.Build class methods of instance or static methods you might need
-        RPCClassMethod appendMethod = new RPCClassMethod("append", "appendString", RPCMethodParameterType.STRING, RPCMethodParameterType.STRING);
-        RPCClassMethod appendStaticMethod = new RPCClassMethod("append", "appendStringStatic", RPCMethodParameterType.STRING, RPCMethodParameterType.STRING);
-        RPCClassMethod exceptionInMethodCallMethod = new RPCClassMethod("exceptionInMethodCall", "exceptionInMethodCall");
-        RPCClassMethod exceptionInMethodCallStaticMethod = new RPCClassMethod("exceptionInMethodCall", "exceptionInMethodCallStatic");
+        WisperMethod appendMethod = new WisperMethod("append", "appendString", RPCMethodParameterType.STRING, RPCMethodParameterType.STRING);
+        WisperMethod appendStaticMethod = new WisperMethod("append", "appendStringStatic", RPCMethodParameterType.STRING, RPCMethodParameterType.STRING);
+        WisperMethod exceptionInMethodCallMethod = new WisperMethod("exceptionInMethodCall", "exceptionInMethodCall");
+        WisperMethod exceptionInMethodCallStaticMethod = new WisperMethod("exceptionInMethodCall", "exceptionInMethodCallStatic");
 
         RPCClassProperty sampleProp = new RPCClassProperty("testProperty", RPCClassPropertyMode.READ_WRITE, "setSampleProperty", RPCMethodParameterType.STRING);
 

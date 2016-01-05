@@ -51,7 +51,7 @@ public class WisperClassModelRegistryTest
     @Test
     public void testShouldRegisterClassWithCorrectInstanceMethods() throws Exception
     {
-        HashMap<String, RPCClassMethod> instanceMethods = registeredClass.getInstanceMethods();
+        HashMap<String, WisperMethod> instanceMethods = registeredClass.getInstanceMethods();
 
         assertEquals(1, instanceMethods.size());
         assertEquals("testAddInstance", instanceMethods.get("add").getMethodName());
@@ -60,7 +60,7 @@ public class WisperClassModelRegistryTest
     @Test
     public void testShouldRegisterClassWithCorrectStaticMethods() throws Exception
     {
-        HashMap<String, RPCClassMethod> staticMethods = registeredClass.getStaticMethods();
+        HashMap<String, WisperMethod> staticMethods = registeredClass.getStaticMethods();
 
         assertEquals(1, staticMethods.size());
         assertEquals("testAddStatic", staticMethods.get("add").getMethodName());

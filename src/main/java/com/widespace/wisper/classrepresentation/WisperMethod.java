@@ -10,21 +10,21 @@ import java.util.List;
  * <p/>
  * Created by Ehssan Hoorvash on 21/05/14.
  */
-public class RPCClassMethod
+public class WisperMethod
 {
     private String mapName;
     private List<RPCMethodParameterType> paramTypes;
     private CallBlock callBlock;
     private String methodName;
 
-    public RPCClassMethod(String mapName, String methodName, RPCMethodParameterType... parameterTypes)
+    public WisperMethod(String mapName, String methodName, RPCMethodParameterType... parameterTypes)
     {
         this.mapName = mapName;
         this.methodName = methodName;
         this.paramTypes = Arrays.asList(parameterTypes);
     }
 
-    public RPCClassMethod(String mapName, CallBlock callBlock)
+    public WisperMethod(String mapName, CallBlock callBlock)
     {
         this.mapName = mapName;
         this.callBlock = callBlock;

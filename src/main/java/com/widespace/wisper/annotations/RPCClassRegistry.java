@@ -2,7 +2,7 @@ package com.widespace.wisper.annotations;
 
 import com.widespace.wisper.base.RPCUtilities;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
-import com.widespace.wisper.classrepresentation.RPCClassMethod;
+import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.classrepresentation.RPCClassProperty;
 import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
 
@@ -52,13 +52,13 @@ public class RPCClassRegistry
                         if (methodAnnotation instanceof RPCInstanceMethod)
                         {
                             RPCMethodParameterType[] associatedRpcParameters = getAssociatedRpcParameters(method);
-                            RPCClassMethod instanceMethod = new RPCClassMethod(((RPCInstanceMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
+                            WisperMethod instanceMethod = new WisperMethod(((RPCInstanceMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
                             wisperClassModel.addInstanceMethod(instanceMethod);
                         }
                         else if (methodAnnotation instanceof RPCStaticMethod)
                         {
                             RPCMethodParameterType[] associatedRpcParameters = getAssociatedRpcParameters(method);
-                            RPCClassMethod staticMethod = new RPCClassMethod(((RPCStaticMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
+                            WisperMethod staticMethod = new WisperMethod(((RPCStaticMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
                             wisperClassModel.addStaticMethod(staticMethod);
                         }
                     }

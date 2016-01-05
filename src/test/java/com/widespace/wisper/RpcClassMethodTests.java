@@ -2,7 +2,7 @@ package com.widespace.wisper;
 
 import com.widespace.wisper.classrepresentation.CallBlock;
 import com.widespace.wisper.classrepresentation.WisperClassInstance;
-import com.widespace.wisper.classrepresentation.RPCClassMethod;
+import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.classrepresentation.RPCMethodParameterType;
 import com.widespace.wisper.controller.RemoteObjectController;
 import com.widespace.wisper.messagetype.Request;
@@ -22,27 +22,27 @@ public class RpcClassMethodTests
 {
 
     private final String SAMPLE_MAP_NAME = "SAMPLE_MAP_NAME";
-    private RPCClassMethod rpcClassMethod;
+    private WisperMethod wisperMethod;
 
     @Before
     public void setUp() throws Exception
     {
-        rpcClassMethod = new RPCClassMethod(SAMPLE_MAP_NAME, "methodName");
+        wisperMethod = new WisperMethod(SAMPLE_MAP_NAME, "methodName");
     }
 
     @Test
     public void testMapNameIsCorrect() throws Exception
     {
-        assertThat(SAMPLE_MAP_NAME, is(rpcClassMethod.getMapName()));
+        assertThat(SAMPLE_MAP_NAME, is(wisperMethod.getMapName()));
     }
 
 
     @Test
     public void testParameterTypesAreCorrect() throws Exception
     {
-        rpcClassMethod = new RPCClassMethod(SAMPLE_MAP_NAME, "methodName", RPCMethodParameterType.HASHMAP,
+        wisperMethod = new WisperMethod(SAMPLE_MAP_NAME, "methodName", RPCMethodParameterType.HASHMAP,
                 RPCMethodParameterType.STRING, RPCMethodParameterType.NUMBER, RPCMethodParameterType.ARRAY);
-        Class[] parameterTypes = rpcClassMethod.getParameterTypes();
+        Class[] parameterTypes = wisperMethod.getParameterTypes();
         List<Class> classList = Arrays.asList(parameterTypes);
 
         assertEquals(classList.size(), 4);
@@ -58,13 +58,13 @@ public class RpcClassMethodTests
         CallBlock sampleCallBlock = new CallBlock()
         {
             @Override
-            public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, RPCClassMethod method, Request request)
+            public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, WisperMethod method, Request request)
             {
 
             }
         };
 
-        rpcClassMethod.setCallBlock(sampleCallBlock);
-        assertEquals(sampleCallBlock, rpcClassMethod.getCallBlock());
+        wisperMethod.setCallBlock(sampleCallBlock);
+        assertEquals(sampleCallBlock, wisperMethod.getCallBlock());
     }
 }

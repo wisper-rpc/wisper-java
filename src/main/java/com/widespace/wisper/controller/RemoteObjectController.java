@@ -520,7 +520,7 @@ public class RemoteObjectController extends Gateway
             throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "No such instance has been registered with this controller under route :" + remoteObjectCall.getClassName());
         }
 
-        RPCClassMethod wisperMethod = null;
+        WisperMethod wisperMethod = null;
         if (callType == RPCRemoteObjectCallType.INSTANCE && wisperClassInstance.getInstance().getClass().getName().equals(wisperClassModel.getClassRef().getName()))
         {
             wisperMethod = wisperClassModel.getInstanceMethods().get(remoteObjectCall.getMethodName());
@@ -534,7 +534,7 @@ public class RemoteObjectController extends Gateway
 
     }
 
-    private void callRpcClassMethodOnInstance(RPCClassMethod wisperMethod, WisperClassInstance wisperInstance, WisperClassModel wisperClassModel, RemoteObjectCall remoteObjectCall)
+    private void callRpcClassMethodOnInstance(WisperMethod wisperMethod, WisperClassInstance wisperInstance, WisperClassModel wisperClassModel, RemoteObjectCall remoteObjectCall)
             throws WisperException
     {
         if (wisperMethod == null)

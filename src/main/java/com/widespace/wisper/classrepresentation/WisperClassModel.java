@@ -11,16 +11,16 @@ import java.util.HashMap;
 public class WisperClassModel
 {
     private String mapName;
-    private HashMap<String, RPCClassMethod> instanceMethods;
-    private HashMap<String, RPCClassMethod> staticMethods;
+    private HashMap<String, WisperMethod> instanceMethods;
+    private HashMap<String, WisperMethod> staticMethods;
     private HashMap<String, RPCClassProperty> properties;
 
     private Class<?> classRef;
 
     private WisperClassModel()
     {
-        instanceMethods = new HashMap<String, RPCClassMethod>();
-        staticMethods = new HashMap<String, RPCClassMethod>();
+        instanceMethods = new HashMap<String, WisperMethod>();
+        staticMethods = new HashMap<String, WisperMethod>();
         properties = new HashMap<String, RPCClassProperty>();
     }
 
@@ -43,7 +43,7 @@ public class WisperClassModel
      *
      * @param method is the representation of the RPC instance method.
      */
-    public void addInstanceMethod(RPCClassMethod method)
+    public void addInstanceMethod(WisperMethod method)
     {
         instanceMethods.put(method.getMapName(), method);
     }
@@ -53,7 +53,7 @@ public class WisperClassModel
      *
      * @param method is the representation of the RPC instance method.
      */
-    public void addStaticMethod(RPCClassMethod method)
+    public void addStaticMethod(WisperMethod method)
     {
         staticMethods.put(method.getMapName(), method);
     }
@@ -61,9 +61,9 @@ public class WisperClassModel
     /**
      * Lists the instance methods.
      *
-     * @return A HashMap of instance methods with mapping name as the key and the RPCClassMethod instance as the value.
+     * @return A HashMap of instance methods with mapping name as the key and the WisperMethod instance as the value.
      */
-    public HashMap<String, RPCClassMethod> getInstanceMethods()
+    public HashMap<String, WisperMethod> getInstanceMethods()
     {
         return instanceMethods;
     }
@@ -71,9 +71,9 @@ public class WisperClassModel
     /**
      * Lists the static methods.
      *
-     * @return A HashMap of static methods with mapping name as the key and the RPCClassMethod instance as the value.
+     * @return A HashMap of static methods with mapping name as the key and the WisperMethod instance as the value.
      */
-    public HashMap<String, RPCClassMethod> getStaticMethods()
+    public HashMap<String, WisperMethod> getStaticMethods()
     {
         return staticMethods;
     }

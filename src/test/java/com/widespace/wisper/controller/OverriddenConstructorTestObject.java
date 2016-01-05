@@ -70,10 +70,10 @@ public class OverriddenConstructorTestObject implements Wisper
 
         classModel.addProperty(new RPCClassProperty("property", RPCClassPropertyMode.READ_WRITE, "setProperty", RPCMethodParameterType.STRING));
 
-        classModel.addInstanceMethod(new RPCClassMethod(Constants.CONSTRUCTOR_TOKEN, new CallBlock()
+        classModel.addInstanceMethod(new WisperMethod(Constants.CONSTRUCTOR_TOKEN, new CallBlock()
         {
             @Override
-            public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, RPCClassMethod method, Request request)
+            public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, WisperMethod method, Request request)
             {
                 WisperControllerTestObject instance = new WisperControllerTestObject();
                 WisperClassInstance wisperClassInstance = remoteObjectController.addRpcObjectInstance(instance, classModel);
@@ -110,10 +110,10 @@ public class OverriddenConstructorTestObject implements Wisper
 
         classModel.addProperty(new RPCClassProperty("property", RPCClassPropertyMode.READ_WRITE, "setProperty", RPCMethodParameterType.STRING));
 
-        classModel.addStaticMethod(new RPCClassMethod(Constants.CONSTRUCTOR_TOKEN, new CallBlock()
+        classModel.addStaticMethod(new WisperMethod(Constants.CONSTRUCTOR_TOKEN, new CallBlock()
         {
             @Override
-            public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, RPCClassMethod method, Request request)
+            public void perform(RemoteObjectController remoteObjectController, WisperClassInstance classInstance, WisperMethod method, Request request)
             {
                 WisperControllerTestObject instance = new WisperControllerTestObject();
                 WisperClassInstance wisperClassInstance = remoteObjectController.addRpcObjectInstance(instance, classModel);

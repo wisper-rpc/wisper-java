@@ -57,7 +57,7 @@ public class RpcClassTests
     public void testAddingStaticMethod() throws Exception
     {
         wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
-        RPCClassMethod someMethod = new RPCClassMethod("methodMap", "someName");
+        WisperMethod someMethod = new WisperMethod("methodMap", "someName");
         wisperClassModel.addStaticMethod(someMethod);
         assertThat(wisperClassModel.getStaticMethods().containsKey("methodMap"), is(true));
     }
@@ -66,7 +66,7 @@ public class RpcClassTests
     public void testAddingInstanceMethod() throws Exception
     {
         wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
-        RPCClassMethod someMethod = new RPCClassMethod("methodMap", "someName");
+        WisperMethod someMethod = new WisperMethod("methodMap", "someName");
         wisperClassModel.addInstanceMethod(someMethod);
         assertThat(wisperClassModel.getInstanceMethods().containsKey("methodMap"), is(true));
     }
