@@ -28,6 +28,26 @@ public class WisperExceptionHandler
 
     public void handle(WisperException ex)
     {
+        RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.NATIVE, ex.getErrorCode())
+                .withMessage(ex.getMessage())
+                .withName(ex.getError().name())
+                .withUnderlyingError(getUnderlyingError(ex))
+                .build();
+
+        if (remoteObjectCall.getRequest() != null)
+        {
+            respondTheRequestWithError(errorMessage);
+            return;
+        }
+
+        gateway.sendMessage(errorMessage);
+    }
+
+    private RPCError getUnderlyingError(WisperException ex)
+    {
+        if (ex.getUnderlyingException() == null)
+            return null;
+
         StackTraceElement[] stackTrace = ex.getUnderlyingException().getStackTrace();
 
         RPCError underlying = new RPCError();
@@ -36,24 +56,16 @@ public class WisperExceptionHandler
         underlying.setMessage(Arrays.toString(stackTrace));
         underlying.setUnderlyingError(null);
 
-        RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.NATIVE, ex.getErrorCode())
-                .withMessage(ex.getMessage())
-                .withName(ex.getError().name())
-                .withUnderlyingError(underlying)
-                .build();
+        return underlying;
+    }
 
-        if (remoteObjectCall.getRequest() != null)
+    private void respondTheRequestWithError(RPCErrorMessage errorMessage)
+    {
+        errorMessage.setId(remoteObjectCall.getRequest().getIdentifier());
+        if (remoteObjectCall.getRequest().getResponseBlock() != null)
         {
-            errorMessage.setId(remoteObjectCall.getRequest().getIdentifier());
-            if (remoteObjectCall.getRequest().getResponseBlock() != null)
-                remoteObjectCall.getRequest().getResponseBlock().perform(null, errorMessage);
-            return;
+            remoteObjectCall.getRequest().getResponseBlock().perform(null, errorMessage);
         }
-
-        gateway.sendMessage(errorMessage);
-
-        //TODO: REMOVE FROM PRODUCTION
-        System.out.println(errorMessage);
     }
 
 }
