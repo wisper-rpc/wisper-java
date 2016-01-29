@@ -5,7 +5,7 @@ import com.widespace.wisper.classrepresentation.WisperParameterType;
 
 
 @RPCClass(name = "wisp.test.annotationTest")
-public class RPCAnnotationTest
+public class RPCAnnotationTestObject
 {
     @RPCProperty(name = "value", mode = WisperPropertyAccess.READ_WRITE, paramType = WisperParameterType.NUMBER)
     private int testProperty;

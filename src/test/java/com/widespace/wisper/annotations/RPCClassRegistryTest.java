@@ -1,7 +1,5 @@
-package com.widespace.wisper;
+package com.widespace.wisper.annotations;
 
-import com.widespace.wisper.annotations.RPCAnnotationTest;
-import com.widespace.wisper.annotations.RPCClassRegistry;
 import com.widespace.wisper.classrepresentation.*;
 import org.junit.After;
 import org.junit.Before;
@@ -13,7 +11,7 @@ import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
 
 
-public class WisperClassModelRegistryTest
+public class RPCClassRegistryTest
 {
 
     private WisperClassModel registeredClass;
@@ -21,7 +19,7 @@ public class WisperClassModelRegistryTest
     @Before
     public void setUp() throws Exception
     {
-        registeredClass = RPCClassRegistry.register(RPCAnnotationTest.class);
+        registeredClass = RPCClassRegistry.register(RPCAnnotationTestObject.class);
     }
 
     @Test

@@ -36,6 +36,7 @@ public enum Error
     ROUTE_NOT_FOUND(202, "Route not found or class not registered"),
     WISPER_INSTANCE_INVALID(203, "Invalid instance."),
     NATIVE_CLASS_NOT_FOUND(204, "Native class not found"),
+    CLASS_NOT_WISPER_COMPATIBLE(205, "Class is not Wisper compliant."),
 
     INSTANTIATION_ERROR(501, "instantiation error when constructing"),
     CONSTRUCTOR_NOT_FOUND(502, "Constructor not found"),

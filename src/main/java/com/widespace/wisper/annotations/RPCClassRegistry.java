@@ -5,6 +5,8 @@ import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.classrepresentation.WisperProperty;
 import com.widespace.wisper.classrepresentation.WisperParameterType;
+import com.widespace.wisper.messagetype.error.Error;
+import com.widespace.wisper.messagetype.error.WisperException;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -12,56 +14,71 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
- *  This class automates Rpc class registration when a Java annotation is used.
- *  All required to do is to have :
- *
- *
+ * This class automates Rpc class registration when a Java annotation is used.
+ * All required to do is to have :
+ * <p/>
+ * <p/>
  * Created by Ehssan Hoorvash on 16/01/15.
  */
 public class RPCClassRegistry
 {
-    public static WisperClassModel register(Class clazz)
+    public static WisperClassModel register(Class clazz) throws WisperException
     {
-        WisperClassModel wisperClassModel = null;
+        WisperClassModel wisperClassModel;
 
-        for (Annotation annotation : clazz.getDeclaredAnnotations())
+        wisperClassModel = fetchWisperClassModel(clazz);
+        wisperClassModel = parseWisperProperties(wisperClassModel, clazz);
+        wisperClassModel = parseWisperMethods(wisperClassModel, clazz);
+
+        return wisperClassModel;
+    }
+
+    private static WisperClassModel fetchWisperClassModel(Class clazz) throws WisperException
+    {
+        Annotation annotation = clazz.getAnnotation(RPCClass.class);
+        if (annotation == null)
+            throw new WisperException(Error.CLASS_NOT_WISPER_COMPATIBLE, null, "The class " + clazz.getName() + "is not Wisper compliant. Does it have the annotation?");
+
+        WisperClassModel wisperClassModel;//Class
+        String mapName = ((RPCClass) annotation).name();
+        wisperClassModel = new WisperClassModel(clazz, mapName);
+        return wisperClassModel;
+    }
+
+    private static WisperClassModel parseWisperProperties(WisperClassModel wisperClassModel, Class clazz)
+    {
+        //Properties
+        for (Field field : clazz.getDeclaredFields())
         {
-            if (annotation instanceof com.widespace.wisper.annotations.RPCClass)
+            RPCProperty fieldAnnotation = field.getAnnotation(RPCProperty.class);
+
+            String defaultSetterName = "set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+            if (fieldAnnotation != null)
             {
-                //Class
-                String mapName = ((com.widespace.wisper.annotations.RPCClass) annotation).name();
-                wisperClassModel = new WisperClassModel(clazz, mapName);
+                wisperClassModel.addProperty(new WisperProperty(fieldAnnotation.name(), fieldAnnotation.mode(), defaultSetterName, fieldAnnotation.paramType()));
+            }
+        }
 
-                //Properties
-                for (Field field : clazz.getDeclaredFields())
+        return wisperClassModel;
+    }
+
+    private static WisperClassModel parseWisperMethods(WisperClassModel wisperClassModel, Class clazz)
+    {
+        //Methods
+        for (Method method : clazz.getDeclaredMethods())
+        {
+            for (Annotation methodAnnotation : method.getDeclaredAnnotations())
+            {
+                if (methodAnnotation instanceof RPCInstanceMethod)
                 {
-                    RPCProperty fieldAnnotation = field.getAnnotation(RPCProperty.class);
-
-                    String defaultSetterName = "set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
-                    if (fieldAnnotation != null)
-                    {
-                        wisperClassModel.addProperty(new WisperProperty(fieldAnnotation.name(), fieldAnnotation.mode(), defaultSetterName, fieldAnnotation.paramType()));
-                    }
-                }
-
-                //Methods
-                for (Method method : clazz.getDeclaredMethods())
+                    WisperParameterType[] associatedRpcParameters = getAssociatedMethodParameters(method);
+                    WisperMethod instanceMethod = new WisperMethod(((RPCInstanceMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
+                    wisperClassModel.addInstanceMethod(instanceMethod);
+                } else if (methodAnnotation instanceof RPCStaticMethod)
                 {
-                    for (Annotation methodAnnotation : method.getDeclaredAnnotations())
-                    {
-                        if (methodAnnotation instanceof RPCInstanceMethod)
-                        {
-                            WisperParameterType[] associatedRpcParameters = getAssociatedRpcParameters(method);
-                            WisperMethod instanceMethod = new WisperMethod(((RPCInstanceMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
-                            wisperClassModel.addInstanceMethod(instanceMethod);
-                        }
-                        else if (methodAnnotation instanceof RPCStaticMethod)
-                        {
-                            WisperParameterType[] associatedRpcParameters = getAssociatedRpcParameters(method);
-                            WisperMethod staticMethod = new WisperMethod(((RPCStaticMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
-                            wisperClassModel.addStaticMethod(staticMethod);
-                        }
-                    }
+                    WisperParameterType[] associatedRpcParameters = getAssociatedMethodParameters(method);
+                    WisperMethod staticMethod = new WisperMethod(((RPCStaticMethod) methodAnnotation).name(), method.getName(), associatedRpcParameters);
+                    wisperClassModel.addStaticMethod(staticMethod);
                 }
             }
         }
@@ -69,19 +86,16 @@ public class RPCClassRegistry
         return wisperClassModel;
     }
 
-    private static WisperParameterType[] getAssociatedRpcParameters(Method method)
+    private static WisperParameterType[] getAssociatedMethodParameters(Method method) throws WisperException
     {
         Class[] methodParameterTypes = method.getParameterTypes();
         try
         {
             return RPCUtilities.convertParameterTypesToRPCParameterType(Arrays.asList(methodParameterTypes));
 
-        }
-        catch (IllegalArgumentException e)
+        } catch (IllegalArgumentException e)
         {
-            // An illegal method parameter type was passed in.
-            e.printStackTrace();
-            return null;
+            throw new WisperException(Error.METHOD_INVALID_ARGUMENTS, null, "Method "+ method.getName() +" parameters were not compatible with Wisper.");
         }
 
     }
