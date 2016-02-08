@@ -4,6 +4,7 @@ package com.widespace.wisper.controller;
 import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.*;
 import com.widespace.wisper.messagetype.error.Error;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -148,7 +149,7 @@ public class Gateway
                 {
                     if (response != null)
                         sendMessage(response);
-                    else
+                    else if (error != null)
                         sendMessage(error);
 
                     request.setResponseBlock(new ResponseBlock()

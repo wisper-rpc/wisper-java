@@ -1,5 +1,6 @@
 package com.widespace.wisper.controller;
 
+import com.widespace.wisper.base.CompletionBlock;
 import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 

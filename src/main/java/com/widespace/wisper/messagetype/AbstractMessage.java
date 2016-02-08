@@ -1,6 +1,7 @@
 package com.widespace.wisper.messagetype;
 
 import com.widespace.wisper.messagetype.error.RPCError;
+import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.utils.ClassUtils;
 import org.json.JSONArray;
 import org.json.JSONException;

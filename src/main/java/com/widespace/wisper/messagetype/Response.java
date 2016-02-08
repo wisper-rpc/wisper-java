@@ -2,6 +2,7 @@ package com.widespace.wisper.messagetype;
 
 
 import com.widespace.wisper.base.Constants;
+import com.widespace.wisper.messagetype.error.Error;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,6 +18,7 @@ public class Response extends AbstractMessage
 {
 
     private String identifier;
+    private Error error;
     private Object result;
 
 
@@ -29,6 +31,13 @@ public class Response extends AbstractMessage
     {
         this.identifier = identifier;
         this.result = result;
+    }
+
+    public Response(String identifier, Error error)
+    {
+
+        this.identifier = identifier;
+        this.error = error;
     }
 
     public Response(Request theRequest)
@@ -52,6 +61,11 @@ public class Response extends AbstractMessage
         {
             this.result = deserialize(json.get(Constants.RESULT));
         }
+
+        if (json.has(Constants.ERROR))
+        {
+            this.error = (Error) deserialize(json.get(Constants.ERROR));
+        }
     }
 
     @Override
@@ -68,6 +82,11 @@ public class Response extends AbstractMessage
     public Object getResult()
     {
         return result;
+    }
+
+    public Error getError()
+    {
+        return error;
     }
 
     /**
@@ -97,4 +116,6 @@ public class Response extends AbstractMessage
 
         return jsonObject;
     }
+
+
 }
