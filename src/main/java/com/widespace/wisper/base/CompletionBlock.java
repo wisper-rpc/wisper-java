@@ -1,6 +1,7 @@
 package com.widespace.wisper.base;
 
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
+
 import org.jetbrains.annotations.Nullable;
 
 /**

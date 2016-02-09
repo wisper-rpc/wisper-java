@@ -2,13 +2,14 @@ package com.widespace.wisper.base;
 
 import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.ResponseBlock;
-import com.widespace.wisper.messagetype.AbstractMessage;
-import com.widespace.wisper.messagetype.Notification;
-import com.widespace.wisper.messagetype.Request;
-import com.widespace.wisper.messagetype.Response;
+import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -56,7 +57,25 @@ public class WisperRemoteObject
     {
         while (instanceMessageQueue.hasMessage())
         {
-            gateway.sendMessage(instanceMessageQueue.pop());
+            AbstractMessage message = instanceMessageQueue.pop();
+
+            if (message instanceof Request)
+            {
+                Object[] objects = ((Request) message).getParams() != null ? ((Request) message).getParams() : new Object[]{};
+                List<Object> newParams = new LinkedList<Object>(Arrays.asList(objects));
+                newParams.add(0, instanceIdentifier);
+                ((Request) message).setParams(newParams.toArray(new Object[newParams.size()]));
+            }
+            if (message instanceof Event)
+            {
+                Object[] objects = ((Event) message).getParams() != null ? ((Event) message).getParams() : new Object[]{};
+                List<Object> newParams = new LinkedList<Object>(Arrays.asList(objects));
+                newParams.add(0, instanceIdentifier);
+                ((Event) message).setParams(newParams.toArray(new Object[newParams.size()]));
+
+            }
+            gateway.sendMessage(message);
+
         }
     }
 
@@ -67,6 +86,7 @@ public class WisperRemoteObject
      * @param params     The params you want to pass to the remote method.
      * @param completion Completion block that will be triggered when done with the call.
      */
+
     public void callInstanceMethod(@NotNull String methodName, Object[] params, final CompletionBlock completion)
     {
         final Request request = new Request();
@@ -98,7 +118,7 @@ public class WisperRemoteObject
 
     public void callInstanceMethod(@NotNull String methodName, Object params)
     {
-        callInstanceMethod(methodName, new Object[]{params}, null);
+        callInstanceMethod(methodName, params!= null ? new Object[]{params} : null, null);
     }
 
     /**
