@@ -1,6 +1,7 @@
 package com.widespace.wisper.route;
 
 
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.messagetype.AbstractMessage;
@@ -16,9 +17,6 @@ public class GatewayRouter extends Router implements GatewayCallback
         this.gateway = gateway;
         this.gateway.setCallback(this);
     }
-
-
-
 
     @Override
     public void gatewayReceivedMessage(AbstractMessage message)
@@ -36,5 +34,11 @@ public class GatewayRouter extends Router implements GatewayCallback
         // no-op
     }
 
+
+    public void register(String path, Class<? extends Wisper> clazz)
+    {
+        ClassRouter classRouter = new ClassRouter(clazz);
+        exposeRoute(path, classRouter);
+    }
 
 }
