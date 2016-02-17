@@ -44,6 +44,12 @@ public enum Error
     CONSTRUCTOR_NOT_INVOKED(504, "Constructor invocation error"),
 
     //=============================================================
+    //region Wisper Routes
+    //=============================================================
+    ROUTE_ALREADY_EXISTS(601, "Route already exists for the path"),
+
+
+    //=============================================================
     //region Wisper Methods
     //=============================================================
     METHOD_NOT_REGISTERED(302, "Method not registered"),
