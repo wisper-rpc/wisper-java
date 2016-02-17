@@ -1,4 +1,4 @@
-package com.widespace.wisper.route;
+package com.widespace.wisper.proxy;
 
 import com.widespace.wisper.base.WisperObject;
 import com.widespace.wisper.base.WisperTestObject;
@@ -9,6 +9,7 @@ import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.controller.RemoteObjectController;
 import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.route.Channel;
 
 
 /**
