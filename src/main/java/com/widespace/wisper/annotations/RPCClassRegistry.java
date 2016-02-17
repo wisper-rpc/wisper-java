@@ -10,6 +10,7 @@ import com.widespace.wisper.messagetype.error.WisperException;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -22,7 +23,40 @@ import java.util.Arrays;
  */
 public class RPCClassRegistry
 {
+
     public static WisperClassModel register(Class clazz) throws WisperException
+    {
+        Annotation annotation = clazz.getAnnotation(RPCClass.class);
+        if (annotation != null)
+            return registerWithAnnotations(clazz);
+        else
+            return registerWithoutAnnotations(clazz);
+    }
+
+    public static WisperClassModel registerWithoutAnnotations(Class clazz) throws WisperException
+    {
+        WisperClassModel wisperClassModel;
+        try
+        {
+            Method registerRpcClassMethod = clazz.getDeclaredMethod("registerRpcClass");
+            registerRpcClassMethod.setAccessible(true);
+            wisperClassModel = (WisperClassModel) registerRpcClassMethod.invoke(null);
+        } catch (NoSuchMethodException e)
+        {
+            throw new WisperException(Error.CLASS_NOT_WISPER_COMPATIBLE, e, "The class " + clazz.getName() + "is not Wisper compliant. Does it have the registerRpcClass() method?");
+        } catch (InvocationTargetException e)
+        {
+            throw new WisperException(Error.CLASS_NOT_WISPER_COMPATIBLE, e, "The class " + clazz.getName() + "is not Wisper compliant. Does it have the registerRpcClass() method?");
+        } catch (IllegalAccessException e)
+        {
+            throw new WisperException(Error.CLASS_NOT_WISPER_COMPATIBLE, e, "The class " + clazz.getName() + "is not Wisper compliant. Does it have the registerRpcClass() method?");
+        }
+
+        return wisperClassModel;
+    }
+
+
+    public static WisperClassModel registerWithAnnotations(Class clazz) throws WisperException
     {
         WisperClassModel wisperClassModel;
 
@@ -95,7 +129,7 @@ public class RPCClassRegistry
 
         } catch (IllegalArgumentException e)
         {
-            throw new WisperException(Error.METHOD_INVALID_ARGUMENTS, null, "Method "+ method.getName() +" parameters were not compatible with Wisper.");
+            throw new WisperException(Error.METHOD_INVALID_ARGUMENTS, null, "Method " + method.getName() + " parameters were not compatible with Wisper.");
         }
 
     }
