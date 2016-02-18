@@ -9,6 +9,7 @@ import org.junit.Test;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 
@@ -38,5 +39,19 @@ public class GatewayRouterTest
         gateway.handleMessage(request);
 
         verify(routerMock).routeMessage(eq(request), anyString());
+    }
+
+    @Test
+    public void canRegisterClassesOnGateway() throws Exception
+    {
+        Request request = new Request();
+        request.setIdentifier("ABCD1");
+        String methodName = "a.b.c";
+        request.setMethod(methodName);
+
+        gatewayRouter.register("a.b.c", RoutesTestObject.class);
+        gateway.handleMessage(request);
+
+        //exception will be thrown if path is not registered.
     }
 }
