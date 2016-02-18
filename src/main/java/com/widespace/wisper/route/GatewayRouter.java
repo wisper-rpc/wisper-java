@@ -25,7 +25,7 @@ public class GatewayRouter extends Router implements GatewayCallback
             routeMessage(message, ((Notification) message).getMethodName());
 
         else if (message instanceof Request)
-            routeMessage(message, ((Request) message).getMethod());
+            routeMessage(message, ((Request) message).getMethodName());
     }
 
     @Override
