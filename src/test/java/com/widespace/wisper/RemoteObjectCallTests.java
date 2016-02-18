@@ -1,7 +1,7 @@
 package com.widespace.wisper;
 
 import com.widespace.wisper.controller.RemoteObjectCall;
-import com.widespace.wisper.controller.RPCRemoteObjectCallType;
+import com.widespace.wisper.route.WisperCallType;
 import com.widespace.wisper.messagetype.Request;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,7 +72,7 @@ public class RemoteObjectCallTests
     {
         sampleRequest = new Request(new JSONObject(SAMPLE_INSTANCE_METHOD_CALL), null);
         remoteObjectCall = new RemoteObjectCall(sampleRequest);
-        assertEquals(RPCRemoteObjectCallType.INSTANCE, remoteObjectCall.getCallType());
+        assertEquals(WisperCallType.INSTANCE, remoteObjectCall.getCallType());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class RemoteObjectCallTests
     {
         sampleRequest = new Request(new JSONObject("{\"method\":\"wisp.ai.TestObject.sampleMethodName\", \"params\":[],\"id\":\"abcd1\"}"), null);
         remoteObjectCall = new RemoteObjectCall(sampleRequest);
-        assertEquals(RPCRemoteObjectCallType.STATIC, remoteObjectCall.getCallType());
+        assertEquals(WisperCallType.STATIC, remoteObjectCall.getCallType());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class RemoteObjectCallTests
     {
         sampleRequest = new Request(new JSONObject("{ \"method\" : \"ClassName~\", \"params\" : [], \"id\": \"abcd4\" }"), null);
         remoteObjectCall = new RemoteObjectCall(sampleRequest);
-        assertEquals(RPCRemoteObjectCallType.CREATE, remoteObjectCall.getCallType());
+        assertEquals(WisperCallType.CREATE, remoteObjectCall.getCallType());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class RemoteObjectCallTests
     {
         sampleRequest = new Request(new JSONObject("{ \"method\" : \"ClassName:~\", \"params\" : [\"some_random_instance_id\"], \"id\": \"abcd4\" }"), null);
         remoteObjectCall = new RemoteObjectCall(sampleRequest);
-        assertEquals(RPCRemoteObjectCallType.DESTROY, remoteObjectCall.getCallType());
+        assertEquals(WisperCallType.DESTROY, remoteObjectCall.getCallType());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class RemoteObjectCallTests
     {
         sampleRequest = new Request(new JSONObject("{ \"method\" : \"ClassName:!\", \"params\" : [\"some_random_event_name\"], \"id\": \"abcd4\" }"), null);
         remoteObjectCall = new RemoteObjectCall(sampleRequest);
-        assertEquals(RPCRemoteObjectCallType.INSTANCE_EVENT, remoteObjectCall.getCallType());
+        assertEquals(WisperCallType.INSTANCE_EVENT, remoteObjectCall.getCallType());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class RemoteObjectCallTests
     {
         sampleRequest = new Request(new JSONObject("{ \"method\" : \"ClassName!\", \"params\" : [\"some_random_event_name\"], \"id\": \"abcd4\" }"), null);
         remoteObjectCall = new RemoteObjectCall(sampleRequest);
-        assertEquals(RPCRemoteObjectCallType.STATIC_EVENT, remoteObjectCall.getCallType());
+        assertEquals(WisperCallType.STATIC_EVENT, remoteObjectCall.getCallType());
     }
 
 }

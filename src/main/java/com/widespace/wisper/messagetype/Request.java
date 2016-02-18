@@ -95,7 +95,7 @@ public class Request extends AbstractMessage
         this.identifier = identifier;
     }
 
-    public String getMethod()
+    public String getMethodName()
     {
         return method;
     }

@@ -2,9 +2,10 @@ package com.widespace.wisper.controller;
 
 
 import com.widespace.wisper.messagetype.*;
-import com.widespace.wisper.messagetype.error.*;
 import com.widespace.wisper.messagetype.error.Error;
-
+import com.widespace.wisper.messagetype.error.ErrorDomain;
+import com.widespace.wisper.messagetype.error.RPCErrorMessage;
+import com.widespace.wisper.messagetype.error.RPCErrorMessageBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 

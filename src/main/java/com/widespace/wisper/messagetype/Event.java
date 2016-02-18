@@ -1,8 +1,7 @@
 package com.widespace.wisper.messagetype;
 
 import com.widespace.wisper.controller.RemoteObjectCall;
-import com.widespace.wisper.controller.RPCRemoteObjectCallType;
-import org.json.JSONException;
+import com.widespace.wisper.route.WisperCallType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +34,7 @@ public class Event extends Notification
 
     public Event(RemoteObjectCall remoteObjectCall)
     {
-        RPCRemoteObjectCallType callType = remoteObjectCall.getCallType();
+        WisperCallType callType = remoteObjectCall.getCallType();
         List<Object> parameters = Arrays.asList(remoteObjectCall.getParams());
 
         String theName = null;

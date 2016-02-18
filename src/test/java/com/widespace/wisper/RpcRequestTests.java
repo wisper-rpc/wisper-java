@@ -44,7 +44,7 @@ public class RpcRequestTests
     @Test
     public void testMethodName() throws Exception
     {
-        assertEquals("wisp.ai.TestObject:sampleMethodName", request.getMethod());
+        assertEquals("wisp.ai.TestObject:sampleMethodName", request.getMethodName());
     }
 
     @Test
