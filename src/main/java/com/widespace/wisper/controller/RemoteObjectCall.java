@@ -3,11 +3,14 @@ package com.widespace.wisper.controller;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.route.WisperCallType;
 import com.widespace.wisper.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.widespace.wisper.route.WisperCallType.*;
 
 /**
  * Created by Ehssan Hoorvash on 23/05/14.
@@ -88,7 +91,7 @@ public class RemoteObjectCall
         return instanceIdentifier;
     }
 
-    public RPCRemoteObjectCallType getCallType()
+    public WisperCallType getCallType()
     {
         String fullMethodName = getFullMethodName();
         if (fullMethodName != null)
@@ -101,40 +104,40 @@ public class RemoteObjectCall
                 //Cases like ObjectName:~
                 if (lastComponent.contains(DESTRUCT_METHOD_NAME))
                 {
-                    return RPCRemoteObjectCallType.DESTROY;
+                    return DESTROY;
                 }
                 //Cases like ObjectName:!
                 else if (lastComponent.contains("!"))
                 {
-                    return RPCRemoteObjectCallType.INSTANCE_EVENT;
+                    return INSTANCE_EVENT;
                 }
                 //Cases like X:x
                 else
                 {
-                    return RPCRemoteObjectCallType.INSTANCE;
+                    return INSTANCE;
                 }
             }
 
             //Cases like X~
             if (lastComponent.contains(CONSTRUCT_METHOD_NAME))
             {
-                return RPCRemoteObjectCallType.CREATE;
+                return CREATE;
             }
 
             //Cases like X!
             if (lastComponent.contains("!"))
             {
-                return RPCRemoteObjectCallType.STATIC_EVENT;
+                return STATIC_EVENT;
             }
 
             //Cases like X.x
             if (lastComponent.contains("."))
             {
-                return RPCRemoteObjectCallType.STATIC;
+                return STATIC;
             }
         }
 
-        return RPCRemoteObjectCallType.UNKNOWN;
+        return UNKNOWN;
     }
 
     public Request getRequest()
@@ -275,7 +278,7 @@ public class RemoteObjectCall
 
         if (request != null)
         {
-            return request.getMethod();
+            return request.getMethodName();
         }
 
         return null;
