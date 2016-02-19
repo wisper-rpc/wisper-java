@@ -46,13 +46,13 @@ public class RemoteObjectCall
         {
 
             case UNKNOWN:
-            case CREATE:
-            case STATIC:
+            case CREATE_INSTANCE:
+            case STATIC_METHOD:
             case STATIC_EVENT:
                 instanceIdentifier = null;
                 return;
-            case DESTROY:
-            case INSTANCE:
+            case DESTROY_INSTANCE:
+            case INSTANCE_METHOD:
             case INSTANCE_EVENT:
             {
                 if (notification != null)
@@ -104,7 +104,7 @@ public class RemoteObjectCall
                 //Cases like ObjectName:~
                 if (lastComponent.contains(DESTRUCT_METHOD_NAME))
                 {
-                    return DESTROY;
+                    return DESTROY_INSTANCE;
                 }
                 //Cases like ObjectName:!
                 else if (lastComponent.contains("!"))
@@ -114,14 +114,14 @@ public class RemoteObjectCall
                 //Cases like X:x
                 else
                 {
-                    return INSTANCE;
+                    return INSTANCE_METHOD;
                 }
             }
 
             //Cases like X~
             if (lastComponent.contains(CONSTRUCT_METHOD_NAME))
             {
-                return CREATE;
+                return CREATE_INSTANCE;
             }
 
             //Cases like X!
@@ -133,7 +133,7 @@ public class RemoteObjectCall
             //Cases like X.x
             if (lastComponent.contains("."))
             {
-                return STATIC;
+                return STATIC_METHOD;
             }
         }
 
@@ -157,15 +157,15 @@ public class RemoteObjectCall
             {
                 case UNKNOWN:
                     break;
-                case CREATE:
+                case CREATE_INSTANCE:
                     result = className.substring(0, className.length() - 1);
                     break;
-                case DESTROY:
+                case DESTROY_INSTANCE:
                 {
                     result = className.split(":")[0];
                 }
                 break;
-                case STATIC:
+                case STATIC_METHOD:
 
                     String[] splitted = StringUtils.split(className, ".");
                     String lastComp = splitted[splitted.length - 1];
@@ -176,7 +176,7 @@ public class RemoteObjectCall
                     result = className.split("!")[0];
                     break;
 
-                case INSTANCE:
+                case INSTANCE_METHOD:
                 {
                     result = className.split(":")[0];
                 }
@@ -202,18 +202,18 @@ public class RemoteObjectCall
 
                 case UNKNOWN:
                     break;
-                case CREATE:
+                case CREATE_INSTANCE:
                     result = CONSTRUCT_METHOD_NAME;
                     break;
-                case DESTROY:
+                case DESTROY_INSTANCE:
                     result = DESTRUCT_METHOD_NAME;
                     break;
-                case STATIC:
+                case STATIC_METHOD:
                     result = lastComponent;
                     break;
                 case STATIC_EVENT:
                     break;
-                case INSTANCE:
+                case INSTANCE_METHOD:
                 {
                     ArrayList<String> components = new ArrayList<String>(Arrays.asList(lastComponent.split(":")));
                     result = components.get(components.size() - 1);
@@ -236,8 +236,8 @@ public class RemoteObjectCall
 
         switch (getCallType())
         {
-            case DESTROY:
-            case INSTANCE:
+            case DESTROY_INSTANCE:
+            case INSTANCE_METHOD:
             case INSTANCE_EVENT:
                 index = 1;
                 break;
