@@ -1,0 +1,104 @@
+package com.widespace.wisper.route;
+
+import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.error.WisperException;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
+
+
+public class WisperInstanceDestructorTest
+{
+    @Before
+    public void setUp() throws Exception
+    {
+        WisperInstanceRegistry.sharedInstance().clear();
+    }
+
+    @Test(expected = WisperException.class)
+    public void thowsExceptionOnNonDestructCalls() throws Exception
+    {
+        Request request = new Request();
+        request.setMethod("a.b.c:call");
+        request.setIdentifier("ABCD1");
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(request);
+    }
+
+    @Test
+    public void acceptsDestructMessageType() throws Exception
+    {
+        Request request = new Request();
+        request.setMethod("a.b.c:~");
+        request.setIdentifier("ABCD1");
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(request);
+        assertThat(destructor, is(notNullValue()));
+    }
+
+    @Test
+    public void givenWisperInstance_CallsDestructOnThatInstance() throws Exception
+    {
+        String mapName = "whatever.whatever.thing";
+        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName + "~");
+        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
+
+        Request destructReq = destructRequest(mapName);
+
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructReq);
+        RoutesTestObject subject = (RoutesTestObject) wisperInstance.getInstance();
+        destructor.destroy(wisperInstance.getInstanceIdentifier());
+
+        assertThat(subject.destructCalled(), is(true));
+    }
+
+
+    @Test(expected = WisperException.class)
+    public void givenWrongInstance_WisperExceptionIsThrown() throws Exception
+    {
+        String mapName = "whatever.whatever.thing";
+        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName + "~");
+        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
+
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(mapName));
+        destructor.destroy("some-fake-identifier");
+    }
+
+    //--------------------------
+    private WisperInstanceModel createInstanceAndReturnWisperInstance(String mapName) throws InterruptedException
+    {
+        Request creationRequest = new Request();
+        creationRequest.setIdentifier("ABCD1");
+        creationRequest.setMethod(mapName);
+
+        final WisperInstanceModel[] _instanceModel = new WisperInstanceModel[1];
+        WisperInstanceCreator creator = new WisperInstanceCreator(RoutesTestObject.registerRpcClass(), creationRequest);
+        creator.create(new RemoteInstanceCreatorCallback()
+        {
+            @Override
+            public void result(WisperInstanceModel instanceModel, WisperException ex)
+            {
+                _instanceModel[0] = instanceModel;
+            }
+        });
+
+        if (_instanceModel[0] == null)
+            Thread.sleep(400);
+
+
+        return _instanceModel[0];
+    }
+
+    @NotNull
+    private Request destructRequest(String mapName)
+    {
+        Request destructReq = new Request();
+        destructReq.setMethod(mapName + ":~");
+        destructReq.setIdentifier("ABCD1");
+        return destructReq;
+    }
+}
