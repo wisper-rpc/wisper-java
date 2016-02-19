@@ -28,16 +28,17 @@ public class ClassRouter extends Router
     {
         switch (MessageParser.getCallType(message))
         {
-            case CREATE:
+            case CREATE_INSTANCE:
                 createInstance(message);
                 break;
-            case DESTROY:
+            case DESTROY_INSTANCE:
+                destroyInstance(message);
                 break;
-            case STATIC:
+            case STATIC_METHOD:
                 break;
             case STATIC_EVENT:
                 break;
-            case INSTANCE:
+            case INSTANCE_METHOD:
                 break;
             case INSTANCE_EVENT:
                 break;
@@ -48,13 +49,19 @@ public class ClassRouter extends Router
         }
     }
 
+    private void destroyInstance(AbstractMessage message)
+    {
+        WisperInstanceRegistry.sharedInstance().clear();
+    }
+
+
 
     //=====================================================================================
     //region Construct
     //=====================================================================================
     private void createInstance(AbstractMessage message) throws WisperException
     {
-        new RemoteInstanceCreator(wisperClassModel, message).create(new RemoteInstanceCreatorCallback()
+        new WisperInstanceCreator(wisperClassModel, message).create(new RemoteInstanceCreatorCallback()
         {
             @Override
             public void result(WisperInstanceModel instanceModel, WisperException ex)

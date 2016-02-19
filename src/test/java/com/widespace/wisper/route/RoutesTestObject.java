@@ -8,6 +8,8 @@ import com.widespace.wisper.controller.RemoteObjectController;
 class RoutesTestObject implements Wisper
 {
 
+    private boolean destructCalled = false;
+
     public static WisperClassModel registerRpcClass()
     {
         //1.Build a class model
@@ -46,6 +48,11 @@ class RoutesTestObject implements Wisper
     @Override
     public void destruct()
     {
+        destructCalled = true;
+    }
 
+    public boolean destructCalled()
+    {
+        return destructCalled;
     }
 }

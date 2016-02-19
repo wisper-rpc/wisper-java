@@ -6,10 +6,10 @@ package com.widespace.wisper.route;
 public enum WisperCallType
 {
     UNKNOWN,
-    CREATE,
-    DESTROY,
-    STATIC,
+    CREATE_INSTANCE,
+    DESTROY_INSTANCE,
+    STATIC_METHOD,
     STATIC_EVENT,
-    INSTANCE,
+    INSTANCE_METHOD,
     INSTANCE_EVENT
 }

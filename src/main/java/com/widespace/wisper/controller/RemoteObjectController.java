@@ -20,8 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static com.widespace.wisper.route.WisperCallType.CREATE;
-
 
 /**
  * Subclass of the Gateway to extend functionality for handling instances
@@ -195,19 +193,19 @@ public class RemoteObjectController extends Gateway
     {
         switch (remoteObjectCall.getCallType())
         {
-            case CREATE:
+            case CREATE_INSTANCE:
                 createRemoteObject(remoteObjectCall);
                 break;
-            case DESTROY:
+            case DESTROY_INSTANCE:
                 rpcRemoteObjectDestruct(remoteObjectCall);
                 break;
-            case STATIC:
+            case STATIC_METHOD:
                 rpcRemoteObjectCallStaticMethod(remoteObjectCall);
                 break;
             case STATIC_EVENT:
                 handleStaticEvent(remoteObjectCall);
                 break;
-            case INSTANCE:
+            case INSTANCE_METHOD:
                 rpcRemoteObjectCallInstanceMethod(remoteObjectCall);
                 break;
             case INSTANCE_EVENT:
@@ -500,12 +498,12 @@ public class RemoteObjectController extends Gateway
     //=====================================================================================
     private void rpcRemoteObjectCallInstanceMethod(RemoteObjectCall remoteObjectCall) throws WisperException
     {
-        remoteMethodCall(remoteObjectCall, WisperCallType.INSTANCE);
+        remoteMethodCall(remoteObjectCall, WisperCallType.INSTANCE_METHOD);
     }
 
     private void rpcRemoteObjectCallStaticMethod(RemoteObjectCall remoteObjectCall) throws WisperException
     {
-        remoteMethodCall(remoteObjectCall, WisperCallType.STATIC);
+        remoteMethodCall(remoteObjectCall, WisperCallType.STATIC_METHOD);
     }
 
     private void remoteMethodCall(RemoteObjectCall remoteObjectCall, WisperCallType callType) throws WisperException
@@ -518,18 +516,18 @@ public class RemoteObjectController extends Gateway
             throw new WisperException(Error.ROUTE_NOT_FOUND, null, "No such class has been registered with this controller under route :" + remoteObjectCall.getClassName());
         }
 
-        if (wisperInstanceModel == null && callType == WisperCallType.INSTANCE)
+        if (wisperInstanceModel == null && callType == WisperCallType.INSTANCE_METHOD)
         {
             throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "No such instance has been registered with this controller under route :" + remoteObjectCall.getClassName());
         }
 
         WisperMethod wisperMethod = null;
-        if (callType == WisperCallType.INSTANCE && wisperInstanceModel.getInstance().getClass().getName().equals(wisperClassModel.getClassRef().getName()))
+        if (callType == WisperCallType.INSTANCE_METHOD && wisperInstanceModel.getInstance().getClass().getName().equals(wisperClassModel.getClassRef().getName()))
         {
             wisperMethod = wisperClassModel.getInstanceMethods().get(remoteObjectCall.getMethodName());
             callRpcClassMethodOnInstance(wisperMethod, wisperInstanceModel, wisperClassModel, remoteObjectCall);
 
-        } else if (callType == WisperCallType.STATIC)
+        } else if (callType == WisperCallType.STATIC_METHOD)
         {
             wisperMethod = wisperClassModel.getStaticMethods().get(remoteObjectCall.getMethodName());
             callRpcClassMethodOnInstance(wisperMethod, null, wisperClassModel, remoteObjectCall);

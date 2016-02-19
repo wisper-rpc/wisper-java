@@ -27,7 +27,7 @@ public class MessageParser
                 //Cases like ObjectName:~
                 if (lastComponent.contains(Constants.CONSTRUCTOR_TOKEN))
                 {
-                    return WisperCallType.DESTROY;
+                    return WisperCallType.DESTROY_INSTANCE;
                 }
                 //Cases like ObjectName:!
                 else if (lastComponent.contains("!"))
@@ -37,14 +37,14 @@ public class MessageParser
                 //Cases like X:x
                 else
                 {
-                    return WisperCallType.INSTANCE;
+                    return WisperCallType.INSTANCE_METHOD;
                 }
             }
 
             //Cases like X~
             if (lastComponent.contains(Constants.CONSTRUCTOR_TOKEN))
             {
-                return WisperCallType.CREATE;
+                return WisperCallType.CREATE_INSTANCE;
             }
 
             //Cases like X!
@@ -56,7 +56,7 @@ public class MessageParser
             //Cases like X.x
             if (lastComponent.contains("."))
             {
-                return WisperCallType.STATIC;
+                return WisperCallType.STATIC_METHOD;
             }
         }
 
@@ -93,8 +93,8 @@ public class MessageParser
 
         switch (getCallType(message))
         {
-            case DESTROY:
-            case INSTANCE:
+            case DESTROY_INSTANCE:
+            case INSTANCE_METHOD:
             case INSTANCE_EVENT:
                 index = 1;
                 break;
@@ -136,15 +136,15 @@ public class MessageParser
             {
                 case UNKNOWN:
                     break;
-                case CREATE:
+                case CREATE_INSTANCE:
                     result = className.substring(0, className.length() - 1);
                     break;
-                case DESTROY:
+                case DESTROY_INSTANCE:
                 {
                     result = className.split(":")[0];
                 }
                 break;
-                case STATIC:
+                case STATIC_METHOD:
 
                     String[] splitted = StringUtils.split(className, ".");
                     String lastComp = splitted[splitted.length - 1];
@@ -155,7 +155,7 @@ public class MessageParser
                     result = className.split("!")[0];
                     break;
 
-                case INSTANCE:
+                case INSTANCE_METHOD:
                 {
                     result = className.split(":")[0];
                 }
