@@ -15,6 +15,7 @@ public class ClassRouterTest
 {
     private static final String SAMPLE_REQUEST_ID = "abcd1";
     private ClassRouter classRouter;
+    private String ROUTE_PATH;
 
     @Before
     public void setUp() throws Exception
@@ -33,11 +34,27 @@ public class ClassRouterTest
     @Test
     public void givenCreateMessage_InstanceIsSaved() throws Exception
     {
-        Request request = new Request(new JSONObject("{ \"method\" : \"wisp.router.someclass~\", \"params\" : [], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
-        classRouter = new ClassRouter(RoutesTestObject.class);
-        WisperInstanceRegistry.sharedInstance().clear();
-        classRouter.routeMessage(request, "someclass~");
+        sendCreateRequestToClassRouter();
         assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter), is(notNullValue()));
+    }
+
+    @Test
+    public void givenDestructMessage_InstanceIsRemoved() throws Exception
+    {
+        //create the class first
+        sendCreateRequestToClassRouter();
+        ROUTE_PATH = "wisp.router.someclass";
+        Request destruct = new Request(new JSONObject("{ \"method\" : \"" + ROUTE_PATH + ":~\", \"params\" : [], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
+        classRouter.routeMessage(destruct, "whatever:~");
+        assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter), is(nullValue()));
+
+    }
+
+    private void sendCreateRequestToClassRouter()
+    {
+        Request request = new Request(new JSONObject("{ \"method\" : \"" + ROUTE_PATH + "~\", \"params\" : [], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
+        classRouter = new ClassRouter(RoutesTestObject.class);
+        classRouter.routeMessage(request, "someclass~");
     }
 }
 
