@@ -7,6 +7,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -42,15 +46,21 @@ public class GatewayRouterTest
         verify(routerMock).routeMessage(eq(request), anyString());
     }
 
-    @Ignore
     @Test
     public void canRegisterClassesOnGateway() throws Exception
     {
-        //TODO: FIX
-        
+        gatewayRouter.register("a.b.c", RoutesTestObject.class);
+        assertThat(gatewayRouter.getRoutes(), is(notNullValue()));
+        assertThat(gatewayRouter.getRoutes().containsKey("a"), is(true));
+        assertThat(gatewayRouter.getRoutes().get("a"), is(instanceOf(Router.class)));
+    }
+
+    @Test
+    public void canHandleCreateMessages() throws Exception
+    {
         Request request = new Request();
         request.setIdentifier("ABCD1");
-        String methodName = "a.b.c";
+        String methodName = "a.b.c~";
         request.setMethod(methodName);
 
         gatewayRouter.register("a.b.c", RoutesTestObject.class);
@@ -58,4 +68,6 @@ public class GatewayRouterTest
 
         //exception will be thrown if path is not registered.
     }
+
+
 }

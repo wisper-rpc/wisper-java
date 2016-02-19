@@ -19,7 +19,7 @@ public class ClassRouterTest
     @Before
     public void setUp() throws Exception
     {
-
+        WisperInstanceRegistry.sharedInstance().clear();
     }
 
     @Test
@@ -31,14 +31,13 @@ public class ClassRouterTest
     }
 
     @Test
-    public void givenCreateMessage_InstanceIsCreated() throws Exception
+    public void givenCreateMessage_InstanceIsSaved() throws Exception
     {
-        Request request = new Request(new JSONObject("{ \"method\" : \"wisp.router.test~\", \"params\" : [], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
+        Request request = new Request(new JSONObject("{ \"method\" : \"wisp.router.someclass~\", \"params\" : [], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
         classRouter = new ClassRouter(RoutesTestObject.class);
         WisperInstanceRegistry.sharedInstance().clear();
-        classRouter.routeMessage(request, "wisp.router.test~");
+        classRouter.routeMessage(request, "someclass~");
         assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter), is(notNullValue()));
-
     }
 }
 

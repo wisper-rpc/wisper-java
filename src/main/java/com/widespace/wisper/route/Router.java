@@ -3,6 +3,7 @@ package com.widespace.wisper.route;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
+import com.widespace.wisper.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -21,6 +22,14 @@ public class Router
         routes = new HashMap<String, Router>();
     }
 
+    /**
+     * Tries to route a message to a given path. If the path is not routable, a ROUTE_NOT_FOUND exception
+     * is thrown.
+     *
+     * @param message the message to be routed.
+     * @param path the path the message is supposed to be routed to.
+     * @throws WisperException when no route is found for the given path.
+     */
     public void routeMessage(AbstractMessage message, String path) throws WisperException
     {
         if (path == null)
@@ -28,9 +37,18 @@ public class Router
 
         List<String> tokens = new ArrayList<String>(Arrays.asList(path.split("\\.")));
         String firstChunk = tokens.get(0);
-        String remainingPath = path.equals(firstChunk) ? "" : path.substring(firstChunk.length() + 1);
+        String remainingPath = getRemainingPath(path, firstChunk);
         checkPathExists(message, firstChunk);
         routes.get(firstChunk).routeMessage(message, remainingPath);
+    }
+
+    private String getRemainingPath(String path, String firstChunk)
+    {
+        String result = path.equals(firstChunk) ? "" : path.substring(firstChunk.length() + 1);
+        String[] split = result.split(":");
+        result = split[0];
+        result = result.replace("~","");
+        return result;
     }
 
 
@@ -53,7 +71,7 @@ public class Router
     {
         List<String> tokens = Arrays.asList(path.split("\\."));
         String firstChunk = tokens.get(0);
-        String remainingPath = path.equals(firstChunk) ? "" : path.substring(firstChunk.length() + 1);
+        String remainingPath = getRemainingPath(path, firstChunk);
 
         rejectAlreadyExistingRoute(firstChunk);
 

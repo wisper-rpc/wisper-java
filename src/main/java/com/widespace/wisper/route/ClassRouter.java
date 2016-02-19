@@ -26,7 +26,7 @@ public class ClassRouter extends Router
     @Override
     public void routeMessage(AbstractMessage message, String path) throws WisperException
     {
-        switch (MessageParser.getCallType(path))
+        switch (MessageParser.getCallType(message))
         {
             case CREATE:
                 createInstance(message);
