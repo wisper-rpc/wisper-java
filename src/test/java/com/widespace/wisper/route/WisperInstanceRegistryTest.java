@@ -1,6 +1,9 @@
 package com.widespace.wisper.route;
 
+import com.widespace.wisper.base.Wisper;
+import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,6 +25,12 @@ public class WisperInstanceRegistryTest
         instanceRegistry = WisperInstanceRegistry.sharedInstance();
     }
 
+    @After
+    public void tearDown() throws Exception
+    {
+        instanceRegistry.clear();
+    }
+
     @Test
     public void addsInstancesUnderRoute() throws Exception
     {
@@ -34,4 +43,42 @@ public class WisperInstanceRegistryTest
         assertThat(instanceRegistry.getInstancesUnderRoute(router), is(notNullValue()));
         assertThat(instanceRegistry.getInstancesUnderRoute(router).get("ABC"), is(instanceModel));
     }
+
+    @Test
+    public void givenExistingId_canFindIdUnderRoute() throws Exception
+    {
+        Router router = mock(Router.class);
+        String instanceIdentifier = "mock-id";
+        WisperInstanceModel instanceModel = new WisperInstanceModel(mock(WisperClassModel.class), mock(Wisper.class), instanceIdentifier);
+        instanceRegistry.addInstance(instanceModel, router);
+
+        WisperInstanceModel found = instanceRegistry.findInstanceUnderRoute(instanceIdentifier, router);
+        assertThat(found, is(instanceModel));
+    }
+
+
+    @Test
+    public void givenInstanceId_canFindInstance() throws Exception
+    {
+        Router router = mock(Router.class);
+        String instanceIdentifier = "mock-id";
+        WisperInstanceModel instanceModel = new WisperInstanceModel(mock(WisperClassModel.class), mock(Wisper.class), instanceIdentifier);
+        instanceRegistry.addInstance(instanceModel, router);
+
+        WisperInstanceModel found = instanceRegistry.findInstanceWithId(instanceIdentifier);
+        assertThat(found, is(instanceModel));
+    }
+
+    @Test
+    public void givenInstanceId_canFindRouter() throws Exception
+    {
+        Router router = mock(Router.class);
+        String instanceIdentifier = "mock-id";
+        WisperInstanceModel instanceModel = new WisperInstanceModel(mock(WisperClassModel.class), mock(Wisper.class), instanceIdentifier);
+        instanceRegistry.addInstance(instanceModel, router);
+
+        Router found = instanceRegistry.findRouterForInstanceId(instanceIdentifier);
+        assertThat(found, is(router));
+    }
+
 }

@@ -2,6 +2,7 @@ package com.widespace.wisper.route;
 
 
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.messagetype.error.WisperException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -42,6 +43,45 @@ public class WisperInstanceRegistry
         instancesUnderRouter.put(instanceModel.getInstanceIdentifier(), instanceModel);
     }
 
+    public WisperInstanceModel findInstanceUnderRoute(@NotNull String insanceIdentifier, @NotNull Router router)
+    {
+        HashMap<String, WisperInstanceModel> instancesUnderRoute = (instances != null && instances.get(router) != null) ? instances.get(router) : null;
+        return (instancesUnderRoute != null) ? instancesUnderRoute.get(insanceIdentifier) : null;
+    }
+
+    public WisperInstanceModel findInstanceWithId(@NotNull String insanceIdentifier)
+    {
+        HashMap<Router, HashMap<String, WisperInstanceModel>> allInstances = getInstances();
+        if (allInstances == null)
+            return null;
+
+        for (Router router : allInstances.keySet())
+        {
+            HashMap<String, WisperInstanceModel> instancesUnderRoute = WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(router);
+            if (instancesUnderRoute != null && instancesUnderRoute.containsKey(insanceIdentifier))
+            {
+                return instancesUnderRoute.get(insanceIdentifier);
+            }
+        }
+
+        return null;
+    }
+
+    public Router findRouterForInstanceId(String instanceIdentifier)
+    {
+        if (instances == null)
+            return null;
+
+        for (Router router : instances.keySet())
+        {
+            if (findInstanceUnderRoute(instanceIdentifier, router) != null)
+                return router;
+        }
+
+        return null;
+    }
+
+
     public HashMap<Router, HashMap<String, WisperInstanceModel>> getInstances()
     {
         return instances;
@@ -62,4 +102,6 @@ public class WisperInstanceRegistry
         if (instances != null)
             instances.clear();
     }
+
+
 }
