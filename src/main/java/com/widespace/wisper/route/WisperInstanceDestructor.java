@@ -24,5 +24,6 @@ public class WisperInstanceDestructor
             throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "No such instance has been registered with this router under instance ID :" + wisperInstanceIdentifier);
 
         instanceModel.getInstance().destruct();
+        WisperInstanceRegistry.sharedInstance().removeInstance(wisperInstanceIdentifier);
     }
 }

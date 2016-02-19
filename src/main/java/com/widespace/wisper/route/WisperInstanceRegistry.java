@@ -2,7 +2,6 @@ package com.widespace.wisper.route;
 
 
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
-import com.widespace.wisper.messagetype.error.WisperException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -104,4 +103,21 @@ public class WisperInstanceRegistry
     }
 
 
+    public boolean removeInstance(String instanceIdentifier)
+    {
+        HashMap<Router, HashMap<String, WisperInstanceModel>> allInstances = getInstances();
+        if (allInstances == null)
+            return false;
+
+        for (Router router : allInstances.keySet())
+        {
+            if(instances.get(router).containsKey(instanceIdentifier))
+            {
+                instances.get(router).remove(instanceIdentifier);
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

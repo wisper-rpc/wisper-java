@@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -67,6 +66,20 @@ public class WisperInstanceDestructorTest
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(mapName));
         destructor.destroy("some-fake-identifier");
     }
+
+    @Test
+    public void destructRemovesTheInstanceFromRegistry() throws Exception
+    {
+        String mapName = "whatever.whatever.thing";
+        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName + "~");
+        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(mapName));
+        destructor.destroy(wisperInstance.getInstanceIdentifier());
+
+        WisperInstanceModel instanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId(wisperInstance.getInstanceIdentifier());
+        assertThat(instanceModel, is(nullValue()));
+    }
+
 
     //--------------------------
     private WisperInstanceModel createInstanceAndReturnWisperInstance(String mapName) throws InterruptedException
