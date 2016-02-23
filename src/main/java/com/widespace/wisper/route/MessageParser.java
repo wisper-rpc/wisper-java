@@ -14,7 +14,6 @@ import java.util.List;
 public class MessageParser
 {
 
-
     public static WisperCallType getCallType(String methodName)
     {
         if (methodName != null)
@@ -85,9 +84,6 @@ public class MessageParser
             String lastComponent = classComponents.get(classComponents.size() - 1);
             switch (getCallType(message))
             {
-
-                case UNKNOWN:
-                    break;
                 case CREATE_INSTANCE:
                     result = Constants.CONSTRUCTOR_TOKEN;
                     break;
@@ -97,15 +93,15 @@ public class MessageParser
                 case STATIC_METHOD:
                     result = lastComponent;
                     break;
-                case STATIC_EVENT:
-                    break;
                 case INSTANCE_METHOD:
                 {
                     ArrayList<String> components = new ArrayList<String>(Arrays.asList(lastComponent.split(":")));
                     result = components.get(components.size() - 1);
                 }
                 break;
+                case STATIC_EVENT:
                 case INSTANCE_EVENT:
+                case UNKNOWN:
                     break;
                 default:
                     break;
@@ -179,7 +175,7 @@ public class MessageParser
         return parameters;
     }
 
-    public String getClassName(AbstractMessage message)
+    public static String getClassName(AbstractMessage message)
     {
         String result = null;
         String className = getFullMethodName(message);
