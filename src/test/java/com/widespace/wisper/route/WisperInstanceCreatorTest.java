@@ -2,9 +2,14 @@ package com.widespace.wisper.route;
 
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.controller.ResponseBlock;
 import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.Response;
+import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.messagetype.error.WisperException;
+import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -46,7 +51,46 @@ public class WisperInstanceCreatorTest
         });
     }
 
+    @Test
+    public void callsRequestResponseBlockOnCreate() throws Exception
+    {
+        Request request = testObjectCreateRequest();
+        final boolean[] responseBlockCalled = new boolean[]{false};
+        request.setResponseBlock(new ResponseBlock()
+        {
 
+            @Override
+            public void perform(Response response, RPCErrorMessage error)
+            {
+                responseBlockCalled[0] = true;
+            }
+        });
+
+        WisperInstanceCreator creator = new WisperInstanceCreator(RoutesTestObject.registerRpcClass(), request);
+        creator.create(mock(RemoteInstanceCreatorCallback.class));
+        assertThat(responseBlockCalled[0], is(true));
+    }
+
+    //TODO: TO BE PASSED WHEN METHOD CALLER IS IMPLEMENTED
+    @Ignore
+    @Test
+    public void testGivenCustomConstructors_creatorCanHandleIt() throws Exception
+    {
+        Request request = new Request(new JSONObject("{ \"method\" : \"whatever.whatever.thing~\", \"params\" : [\"testString\"], \"id\": \"ABCD\" }"), null);
+        WisperInstanceCreator creator = new WisperInstanceCreator(RoutesTestObject.registerRpcClass(), request);
+        final Object[] result = new Object[2];
+        creator.create(new RemoteInstanceCreatorCallback()
+        {
+            @Override
+            public void result(WisperInstanceModel instanceModel, WisperException ex)
+            {
+                result[0] = instanceModel;
+                result[1] = ex;
+            }
+        });
+
+        assertThat(result[0], is(notNullValue()));
+    }
 
     //--------------------------
     private Request testObjectCreateRequest()
