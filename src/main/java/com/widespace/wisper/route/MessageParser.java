@@ -65,11 +65,64 @@ public class MessageParser
 
     public static WisperCallType getCallType(AbstractMessage message)
     {
-        String methodName = getMethodName(message);
+        String methodName = getFullMethodName(message);
         return getCallType(methodName);
     }
 
-    private static String getMethodName(AbstractMessage message)
+    /**
+     * Returns the method name based on what message type it is. For instance, "a.b.c:m" will result in "m" as the method type.
+     *
+     * @param message message to be parsed
+     * @return a string representing parsed method name, or null if nothing matches or message type is unknown.
+     */
+    public static String getMethodName(AbstractMessage message)
+    {
+        String result = null;
+        String fullMethodName = getFullMethodName(message);
+        if (fullMethodName != null)
+        {
+            ArrayList<String> classComponents = new ArrayList<String>(Arrays.asList(fullMethodName.split("\\.")));
+            String lastComponent = classComponents.get(classComponents.size() - 1);
+            switch (getCallType(message))
+            {
+
+                case UNKNOWN:
+                    break;
+                case CREATE_INSTANCE:
+                    result = Constants.CONSTRUCTOR_TOKEN;
+                    break;
+                case DESTROY_INSTANCE:
+                    result = ":" + Constants.CONSTRUCTOR_TOKEN;
+                    break;
+                case STATIC_METHOD:
+                    result = lastComponent;
+                    break;
+                case STATIC_EVENT:
+                    break;
+                case INSTANCE_METHOD:
+                {
+                    ArrayList<String> components = new ArrayList<String>(Arrays.asList(lastComponent.split(":")));
+                    result = components.get(components.size() - 1);
+                }
+                break;
+                case INSTANCE_EVENT:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the full method name that is embodied with the message. In case message is something other than Notification
+     * or Request, the result is null.
+     *
+     * @param message message to be parsed.
+     * @return a String with method name, or null.
+     */
+    public static String getFullMethodName(AbstractMessage message)
     {
         if (message instanceof Notification)
             return ((Notification) message).getMethodName();
@@ -129,7 +182,7 @@ public class MessageParser
     public String getClassName(AbstractMessage message)
     {
         String result = null;
-        String className = getMethodName(message);
+        String className = getFullMethodName(message);
         if (className != null)
         {
             switch (getCallType(message))
