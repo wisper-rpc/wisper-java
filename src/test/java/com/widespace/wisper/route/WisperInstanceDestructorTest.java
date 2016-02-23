@@ -1,24 +1,18 @@
 package com.widespace.wisper.route;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMessages;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.controller.ResponseBlock;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.Response;
-import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.omg.CORBA.Object;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 
 public class WisperInstanceDestructorTest
@@ -52,7 +46,7 @@ public class WisperInstanceDestructorTest
     public void givenWisperInstance_CallsDestructOnThatInstance() throws Exception
     {
         String mapName = "whatever.whatever.thing";
-        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName + "~");
+        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
         WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
 
         Request destructReq = destructRequest(mapName);
@@ -69,7 +63,7 @@ public class WisperInstanceDestructorTest
     public void givenWrongInstance_WisperExceptionIsThrown() throws Exception
     {
         String mapName = "whatever.whatever.thing";
-        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName + "~");
+        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
         WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
 
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(mapName));
@@ -80,7 +74,7 @@ public class WisperInstanceDestructorTest
     public void destructRemovesTheInstanceFromRegistry() throws Exception
     {
         String mapName = "whatever.whatever.thing";
-        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName + "~");
+        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
         WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(mapName));
         destructor.destroy(wisperInstance.getInstanceIdentifier());
@@ -93,7 +87,7 @@ public class WisperInstanceDestructorTest
     public void destructRespondsBackOnRequest() throws Exception
     {
         String mapName = "whatever.whatever.thing";
-        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName + "~");
+        WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
         WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
         Request request = destructRequest(mapName);
         final boolean[] callblockCalled = {false};
@@ -117,7 +111,7 @@ public class WisperInstanceDestructorTest
     {
         Request creationRequest = new Request();
         creationRequest.setIdentifier("ABCD1");
-        creationRequest.setMethod(mapName);
+        creationRequest.setMethod(mapName + "~");
 
         final WisperInstanceModel[] _instanceModel = new WisperInstanceModel[1];
         WisperInstanceCreator creator = new WisperInstanceCreator(RoutesTestObject.registerRpcClass(), creationRequest);
