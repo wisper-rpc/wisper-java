@@ -35,6 +35,7 @@ public class ClassRouter extends Router
                 destroyInstance(message);
                 break;
             case STATIC_METHOD:
+                callStaticMethod(message);
                 break;
             case STATIC_EVENT:
                 break;
@@ -47,6 +48,11 @@ public class ClassRouter extends Router
                 super.routeMessage(message, path);
                 break;
         }
+    }
+
+    private void callStaticMethod(AbstractMessage message)
+    {
+        new WisperMethodCaller(wisperClassModel ,message);
     }
 
     private void destroyInstance(AbstractMessage message)
