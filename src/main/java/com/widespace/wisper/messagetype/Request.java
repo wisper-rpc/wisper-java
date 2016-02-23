@@ -136,4 +136,10 @@ public class Request extends AbstractMessage
 
         return jsonObject;
     }
+
+    public Request withMethodName(String methodName)
+    {
+        this.setMethod(methodName);
+        return this;
+    }
 }

@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
@@ -66,6 +67,14 @@ public class RpcRequestTests
         Object[] params = request.getParams();
         assertEquals(1, params.length);
         assertEquals("sample_instance_identifier", (String) params[0]);
+    }
+
+    @Test
+    public void withMethodNameSetsTheMethodNmae() throws Exception
+    {
+        String methodName = "a.b.c~";
+        Request request = new Request().withMethodName(methodName);
+        assertThat(request.getMethodName(), is(methodName));
     }
 
     @Test
