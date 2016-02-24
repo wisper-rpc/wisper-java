@@ -42,24 +42,24 @@ public class WisperInstanceRegistry
         instancesUnderRouter.put(instanceModel.getInstanceIdentifier(), instanceModel);
     }
 
-    public WisperInstanceModel findInstanceUnderRoute(@NotNull String insanceIdentifier, @NotNull Router router)
+    public WisperInstanceModel findInstanceUnderRoute(String insanceIdentifier, @NotNull Router router)
     {
         HashMap<String, WisperInstanceModel> instancesUnderRoute = (instances != null && instances.get(router) != null) ? instances.get(router) : null;
         return (instancesUnderRoute != null) ? instancesUnderRoute.get(insanceIdentifier) : null;
     }
 
-    public WisperInstanceModel findInstanceWithId(@NotNull String insanceIdentifier)
+    public WisperInstanceModel findInstanceWithId(String instanceIdentifier)
     {
         HashMap<Router, HashMap<String, WisperInstanceModel>> allInstances = getInstances();
-        if (allInstances == null)
+        if (allInstances == null || instanceIdentifier == null)
             return null;
 
         for (Router router : allInstances.keySet())
         {
             HashMap<String, WisperInstanceModel> instancesUnderRoute = WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(router);
-            if (instancesUnderRoute != null && instancesUnderRoute.containsKey(insanceIdentifier))
+            if (instancesUnderRoute != null && instancesUnderRoute.containsKey(instanceIdentifier))
             {
-                return instancesUnderRoute.get(insanceIdentifier);
+                return instancesUnderRoute.get(instanceIdentifier);
             }
         }
 
@@ -111,7 +111,7 @@ public class WisperInstanceRegistry
 
         for (Router router : allInstances.keySet())
         {
-            if(instances.get(router).containsKey(instanceIdentifier))
+            if (instances.get(router).containsKey(instanceIdentifier))
             {
                 instances.get(router).remove(instanceIdentifier);
                 return true;
