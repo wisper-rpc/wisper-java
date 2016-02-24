@@ -5,6 +5,7 @@ import com.widespace.wisper.annotations.RPCClassRegistry;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.MessageFactory;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,9 +38,10 @@ public class ClassRouter extends Router
             case STATIC_METHOD:
                 callStaticMethod(message);
                 break;
-            case STATIC_EVENT:
-                break;
             case INSTANCE_METHOD:
+                callInstancecMethod(message);
+                break;
+            case STATIC_EVENT:
                 break;
             case INSTANCE_EVENT:
                 break;
@@ -50,20 +52,8 @@ public class ClassRouter extends Router
         }
     }
 
-    private void callStaticMethod(AbstractMessage message)
-    {
-        new WisperMethodCaller(wisperClassModel ,message);
-    }
-
-    private void destroyInstance(AbstractMessage message)
-    {
-        WisperInstanceRegistry.sharedInstance().clear();
-    }
-
-
-
     //=====================================================================================
-    //region Construct
+    //region Construct and Destruct
     //=====================================================================================
     private void createInstance(AbstractMessage message) throws WisperException
     {
@@ -80,9 +70,28 @@ public class ClassRouter extends Router
         });
     }
 
+    private void destroyInstance(AbstractMessage message)
+    {
+        WisperInstanceRegistry.sharedInstance().clear();
+    }
+
     private void saveInstance(WisperInstanceModel instanceModel)
     {
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, this);
+    }
+
+    //=====================================================================================
+    //region Method Calls
+    //=====================================================================================
+
+    private void callStaticMethod(AbstractMessage message)
+    {
+        new WisperMethodCaller(wisperClassModel, message);
+    }
+
+    private void callInstancecMethod(AbstractMessage message)
+    {
+
     }
 
 
