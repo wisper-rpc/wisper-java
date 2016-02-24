@@ -13,7 +13,13 @@ import java.util.List;
 
 public class MessageParser
 {
-
+    /**
+     * Returns the call type of the message based on method name.
+     *
+     * @param methodName String containing method name of the message.
+     * @return Call type as a WisperCallType
+     * @see WisperCallType
+     */
     public static WisperCallType getCallType(String methodName)
     {
         if (methodName != null)
@@ -62,6 +68,13 @@ public class MessageParser
         return WisperCallType.UNKNOWN;
     }
 
+    /**
+     * Returns the call type of the message based on method name.
+     *
+     * @param message Wisper message.
+     * @return Call type as a WisperCallType
+     * @see WisperCallType
+     */
     public static WisperCallType getCallType(AbstractMessage message)
     {
         String methodName = getFullMethodName(message);
@@ -130,11 +143,23 @@ public class MessageParser
     }
 
 
+    /**
+     * Returns true if the message has parameters, false otherwise.
+     *
+     * @param message a Wisper message
+     * @return true if the message has parameters, false otherwise.
+     */
     public static boolean hasParams(AbstractMessage message)
     {
         return getParams(message) != null && getParams(message).length > 0;
     }
 
+    /**
+     * Returns the parameters of the message.
+     *
+     * @param message the Wisper message
+     * @return parameters gotten from the message.
+     */
     public static Object[] getParams(AbstractMessage message)
     {
         Object[] parameters = null;
@@ -175,6 +200,12 @@ public class MessageParser
         return parameters;
     }
 
+    /**
+     * Returns the class name from the message.
+     *
+     * @param message Wisper message
+     * @return A string containing the class name from the message.
+     */
     public static String getClassName(AbstractMessage message)
     {
         String result = null;
@@ -215,5 +246,52 @@ public class MessageParser
         }
 
         return result;
+    }
+
+    /**
+     * Returns insteance identifier of the message, if anyt
+     *
+     * @param message
+     * @return
+     */
+    public static String getInstanceIdentifier(AbstractMessage message)
+    {
+        switch (getCallType(message))
+        {
+            case DESTROY_INSTANCE:
+            case INSTANCE_METHOD:
+            case INSTANCE_EVENT:
+            {
+                if (message instanceof Notification)
+                {
+                    Object[] params = ((Notification) message).getParams();
+                    if (params == null || params.length == 0)
+                    {
+                        return null;
+                    } else
+                    {
+                        return (String) params[0];
+                    }
+                } else if (message instanceof Request)
+                {
+                    Object[] params = ((Request) message).getParams();
+                    if (params == null || params.length == 0)
+                    {
+                        return null;
+                    } else
+                    {
+                        //TODO: Handle "params":[null] case. could cause a crash here.
+                        return (String) params[0];
+                    }
+                }
+            }
+            case UNKNOWN:
+            case CREATE_INSTANCE:
+            case STATIC_METHOD:
+            case STATIC_EVENT:
+                return null;
+        }
+
+        return null;
     }
 }
