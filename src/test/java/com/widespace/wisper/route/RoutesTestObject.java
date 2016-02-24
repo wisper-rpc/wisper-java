@@ -69,4 +69,9 @@ class RoutesTestObject implements Wisper
     {
         return staticMethodCalled;
     }
+
+    public static void reset()
+    {
+        staticMethodCalled = false;
+    }
 }

@@ -19,12 +19,6 @@ import java.util.Arrays;
 import static com.widespace.wisper.messagetype.error.Error.UNEXPECTED_TYPE_ERROR;
 import static com.widespace.wisper.messagetype.error.Error.WISPER_INSTANCE_INVALID;
 
-enum CallMode
-{
-    STATIC,
-    INSTANCE
-}
-
 public class WisperMethodCaller
 {
     private WisperClassModel classModel;
@@ -37,8 +31,6 @@ public class WisperMethodCaller
         WisperCallType callType = MessageParser.getCallType(message);
         if (callType != WisperCallType.STATIC_METHOD && callType != WisperCallType.INSTANCE_METHOD)
             throw new WisperException(UNEXPECTED_TYPE_ERROR, null, "Wisper method caller accepts messages of instance or static method calls only. Call type of the message was: " + callType.toString());
-
-
     }
 
     public void call() throws WisperException
@@ -69,32 +61,34 @@ public class WisperMethodCaller
 
     public void callStatic(WisperMethod methodModel) throws WisperException
     {
+        if (handledMethodCallBlock())
+            return;
+
+        Object[] messageParams = MessageParser.getParams(message);
+        messageParams = replaceWisperInstanceParametersWithRealInstances(methodModel, messageParams);
+        callMethodOnInstance(null, methodModel, messageParams);
+    }
+
+    private boolean handledMethodCallBlock()
+    {
+        return false;
+    }
+
+    private void callMethodOnInstance(WisperInstanceModel wisperInstance, WisperMethod methodModel, Object[] params) throws WisperException
+    {
         if (methodModel == null)
         {
             String errorMessage = "Method " + MessageParser.getMethodName(message) + " could not be found on class " + classModel.getClass().getName();
             throw new WisperException(Error.METHOD_NOT_FOUND, null, errorMessage);
         }
 
-        //If there is a call block instead of the method body there, just handle the call block and return.
-        if (methodModel.getCallBlock() != null)
-        {
-            //methodModel.getCallBlock().perform(this, wisperInstance, wisperMethod, remoteObjectCall.getRequest());
-            return;
-        }
-
-        String instanceIdentifier = MessageParser.getInstanceIdentifier(message);
-        WisperInstanceModel wisperInstance = WisperInstanceRegistry.sharedInstance().findInstanceWithId(instanceIdentifier);
         String methodName = methodModel.getMethodName();
-
-
-        //Replace INSTANCE with actual instance type in params
         Class[] parameterTypes = methodModel.getParameterTypes();
-        Object[] params = MessageParser.getParams(message);
+
 
         Method method;
         Object returnedValue;
 
-        replaceWisperInstanceParametersWithRealInstances(instanceIdentifier, parameterTypes, params);
 
         try
         {
@@ -149,100 +143,34 @@ public class WisperMethodCaller
 
     public void callInstance(WisperMethod methodModel)
     {
-        if (methodModel == null)
-        {
-            String errorMessage = "Method " + MessageParser.getMethodName(message) + " could not be found on class " + classModel.getClass().getName();
-            throw new WisperException(Error.METHOD_NOT_FOUND, null, errorMessage);
-        }
-
-        //If there is a call block instead of the method body there, just handle the call block and return.
-        if (methodModel.getCallBlock() != null)
-        {
-            //methodModel.getCallBlock().perform(this, wisperInstance, wisperMethod, remoteObjectCall.getRequest());
-            return;
-        }
-
         String instanceIdentifier = MessageParser.getInstanceIdentifier(message);
         WisperInstanceModel wisperInstance = WisperInstanceRegistry.sharedInstance().findInstanceWithId(instanceIdentifier);
-        if (wisperInstance == null)
-        {
-            throw new WisperException(WISPER_INSTANCE_INVALID, null, "No such instance found with instance identifier " + instanceIdentifier+". Sure you are passing it as the first parameter in your message?");
-        }
-        String methodName = methodModel.getMethodName();
+        if (handledMethodCallBlock())
+            return;
 
-
-        //Replace INSTANCE with actual instance type in params
-        Class[] parameterTypes = methodModel.getParameterTypes();
-        Object[] params = MessageParser.getParams(message);
-
-        Method method;
-        Object returnedValue;
-
-        replaceWisperInstanceParametersWithRealInstances(instanceIdentifier, parameterTypes, params);
-
-        try
-        {
-            if (wisperInstance != null)
-            {
-                Wisper instance = wisperInstance.getInstance();
-
-                // Instance method
-                method = getMethod(instance.getClass(), methodName, parameterTypes);
-                method.setAccessible(true);
-                checkParameterTypes(parameterTypes, params);
-                returnedValue = method.invoke(instance, params);
-            } else
-            {
-                // Static method
-                method = getMethod(classModel.getClassRef(), methodName, parameterTypes);
-                method.setAccessible(true);
-                returnedValue = method.invoke(null, params);
-            }
-
-            if (message instanceof Request)
-            {
-                Response response = ((Request) message).createResponse();
-                if (returnedValue != null)
-                {
-                    response.setResult(returnedValue);
-                }
-
-                if (((Request) message).getResponseBlock() != null)
-                {
-                    ((Request) message).getResponseBlock().perform(response, null);
-                }
-            }
-        } catch (IllegalAccessException e)
-        {
-            String errorMessage = "Method " + methodName + " exists but is not accessible on wisper class " + classModel.getClass().getName() + ". Is the method public?";
-            throw new WisperException(Error.METHOD_NOT_ACCESSIBLE, e, errorMessage);
-        } catch (IllegalArgumentException e)
-        {
-            String errorMessage = "Method " + methodName + " could not be invoked on wisper class " + classModel.getClass().getName() + ". Are passed parameters of correct type?";
-            throw new WisperException(Error.METHOD_INVALID_ARGUMENTS, e, errorMessage);
-        } catch (InvocationTargetException e)
-        {
-            String errorMessage = "Method " + methodName + " could not be invoked on wisper class " + classModel.getClass().getName();
-            throw new WisperException(Error.METHOD_INVOCATION_ERROR, e, errorMessage);
-        } catch (NoSuchMethodException e)
-        {
-            String errorMessage = "Method " + methodName + " could not be found on class " + classModel.getClass().getName() + "with argument types " + Arrays.toString(parameterTypes) + ". Is the method defined in the class?";
-            throw new WisperException(Error.METHOD_NOT_FOUND, e, errorMessage);
-        }
+        Object[] messageParams = MessageParser.getParams(message);
+        messageParams = replaceWisperInstanceParametersWithRealInstances(methodModel, messageParams);
+        callMethodOnInstance(wisperInstance, methodModel, messageParams);
     }
 
-    private void replaceWisperInstanceParametersWithRealInstances(String instanceIdentifier, Class[] parameterTypes, Object[] params)
+    private Object[] replaceWisperInstanceParametersWithRealInstances(WisperMethod methodModel, Object[] messageParams)
     {
+        Object[] resultedParameters = Arrays.copyOf(messageParams, messageParams.length);
+        Class[] parameterTypes = methodModel.getParameterTypes();
         for (int i = 0; i < parameterTypes.length; i++)
         {
             //In case of instance, it has been replaced by RPCMethodParameter type.
             if (parameterTypes[i].equals(WisperParameterType.INSTANCE.getClass()))
             {
-                Wisper instance = WisperInstanceRegistry.sharedInstance().findInstanceWithId(instanceIdentifier).getInstance();
-                params[i] = instance;
-                parameterTypes[i] = instance.getClass();
+                Wisper instance = WisperInstanceRegistry.sharedInstance().findInstanceWithId((String) messageParams[i]).getInstance();
+                if (instance == null)
+                    throw new WisperException(WISPER_INSTANCE_INVALID, null, "No such instance found with instance identifier :'" + messageParams[i] + "' passed as a parameter to method " + methodModel.getMethodName());
+
+                resultedParameters[i] = instance;
             }
         }
+
+        return resultedParameters;
     }
 
     private Method getMethod(Class<?> clasRef, String methodName, Class[] parameterTypes) throws NoSuchMethodException
@@ -274,7 +202,6 @@ public class WisperMethodCaller
         }
 
         throw new NoSuchMethodException();
-
     }
 
     private void checkParameterTypes(Class<?>[] parameterTypes, Object[] params) throws IllegalArgumentException
