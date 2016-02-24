@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Created by Ehssan Hoorvash on 13/06/14.
  */
-public class RpcRequestTests
+public class RequestTests
 {
     private static final String SAMPLE_REQUEST = "{\"method\":\"wisp.ai.TestObject:sampleMethodName\", \"params\":[\"sample_instance_identifier\"],\"id\":\"abcd1\"}";
     private Request request;
@@ -75,6 +75,14 @@ public class RpcRequestTests
         String methodName = "a.b.c~";
         Request request = new Request().withMethodName(methodName);
         assertThat(request.getMethodName(), is(methodName));
+    }
+
+    @Test
+    public void withParamsSetsParamsCorrectly() throws Exception
+    {
+        Object[] params = {"x", "y", "z"};
+        Request request = new Request().withParams(params);
+        assertThat(request.getParams(), is(params));
     }
 
     @Test
@@ -170,7 +178,7 @@ public class RpcRequestTests
 
         expected.put("fourth", innerJsonObj);
 
-        assertTrue(expected.equals((HashMap)requestParams[0]));
+        assertTrue(expected.equals((HashMap) requestParams[0]));
 
 
     }

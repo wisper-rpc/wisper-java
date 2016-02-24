@@ -142,4 +142,11 @@ public class Request extends AbstractMessage
         this.setMethod(methodName);
         return this;
     }
+
+    public Request withParams(Object[] params)
+    {
+        this.setParams(params);
+        return this;
+    }
+
 }
