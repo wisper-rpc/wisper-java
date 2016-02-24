@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import static com.widespace.wisper.messagetype.error.Error.UNEXPECTED_TYPE_ERROR;
+import static com.widespace.wisper.messagetype.error.Error.WISPER_INSTANCE_INVALID;
 
 enum CallMode
 {
@@ -163,6 +164,10 @@ public class WisperMethodCaller
 
         String instanceIdentifier = MessageParser.getInstanceIdentifier(message);
         WisperInstanceModel wisperInstance = WisperInstanceRegistry.sharedInstance().findInstanceWithId(instanceIdentifier);
+        if (wisperInstance == null)
+        {
+            throw new WisperException(WISPER_INSTANCE_INVALID, null, "No such instance found with instance identifier " + instanceIdentifier+". Sure you are passing it as the first parameter in your message?");
+        }
         String methodName = methodModel.getMethodName();
 
 
