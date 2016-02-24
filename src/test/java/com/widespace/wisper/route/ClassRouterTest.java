@@ -23,6 +23,7 @@ public class ClassRouterTest
     public void setUp() throws Exception
     {
         WisperInstanceRegistry.sharedInstance().clear();
+        RoutesTestObject.reset();
     }
 
     @Test
@@ -74,6 +75,37 @@ public class ClassRouterTest
         assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter), is(notNullValue()));
         assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter).size(), is(1));
         assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter).get(instanceModel2.getInstanceIdentifier()), is(instanceModel2));
+    }
+
+    @Test
+    public void givenInstanceMethodCall_methodWillGetCalledOnActualInstance() throws Exception
+    {
+        classRouter = new ClassRouter(RoutesTestObject.class);
+        RoutesTestObject actualInstance = new RoutesTestObject();
+        WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), actualInstance, "ABCD-1");
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
+
+        ROUTE_PATH = "whatever:append";
+        Request request = new Request().withMethodName("a.b.c:append").withParams(new Object[]{instanceModel1.getInstanceIdentifier(), "x1", "x2"});
+
+        assertThat(actualInstance.instanceMethodCalled(), is(false));
+        classRouter.routeMessage(request, ROUTE_PATH);
+
+        assertThat(actualInstance.instanceMethodCalled(), is(true));
+    }
+
+    @Test
+    public void givenStaticMethodCall_methodWillGetCalledOnActualClass() throws Exception
+    {
+        classRouter = new ClassRouter(RoutesTestObject.class);
+
+        ROUTE_PATH = "whatever.append";
+        Request request = new Request().withMethodName("a.b.c.append").withParams(new Object[]{"x1", "x2"});
+
+        assertThat(RoutesTestObject.staticMethodCalled(), is(false));
+        classRouter.routeMessage(request, ROUTE_PATH);
+
+        assertThat(RoutesTestObject.staticMethodCalled(), is(true));
     }
 
     private void sendCreateRequestToClassRouter()

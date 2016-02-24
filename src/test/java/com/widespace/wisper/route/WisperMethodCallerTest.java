@@ -5,6 +5,7 @@ import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.error.WisperException;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -16,6 +17,12 @@ import static org.mockito.Mockito.*;
 
 public class WisperMethodCallerTest
 {
+
+    @Before
+    public void setUp() throws Exception
+    {
+        RoutesTestObject.reset();
+    }
 
     @Test(expected = WisperException.class)
     public void givenWrongMessageType_ThrowsException() throws Exception

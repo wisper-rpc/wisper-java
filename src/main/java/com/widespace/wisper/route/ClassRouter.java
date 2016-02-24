@@ -13,6 +13,12 @@ public class ClassRouter extends Router
 {
     private WisperClassModel wisperClassModel;
 
+
+    public ClassRouter(WisperClassModel classModel)
+    {
+        wisperClassModel = classModel;
+    }
+
     public ClassRouter(@NotNull Class<? extends Wisper> clazz)
     {
         wisperClassModel = RPCClassRegistry.register(clazz);
@@ -86,12 +92,12 @@ public class ClassRouter extends Router
 
     private void callStaticMethod(AbstractMessage message)
     {
-        new WisperMethodCaller(wisperClassModel, message);
+        new WisperMethodCaller(wisperClassModel, message).call();
     }
 
     private void callInstancecMethod(AbstractMessage message)
     {
-
+        new WisperMethodCaller(wisperClassModel, message).call();
     }
 
 

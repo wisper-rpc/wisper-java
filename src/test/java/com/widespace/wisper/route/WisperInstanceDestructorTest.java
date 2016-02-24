@@ -21,6 +21,7 @@ public class WisperInstanceDestructorTest
     public void setUp() throws Exception
     {
         WisperInstanceRegistry.sharedInstance().clear();
+        RoutesTestObject.reset();
     }
 
     @Test(expected = WisperException.class)
