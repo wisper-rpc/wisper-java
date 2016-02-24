@@ -72,7 +72,7 @@ public class ClassRouter extends Router
 
     private void destroyInstance(AbstractMessage message)
     {
-        WisperInstanceRegistry.sharedInstance().clear();
+        new WisperInstanceDestructor(message).destroy();
     }
 
     private void saveInstance(WisperInstanceModel instanceModel)

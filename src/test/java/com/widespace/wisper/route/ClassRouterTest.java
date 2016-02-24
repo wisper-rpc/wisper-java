@@ -1,5 +1,6 @@
 package com.widespace.wisper.route;
 
+import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.messagetype.Request;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -7,6 +8,7 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -41,13 +43,37 @@ public class ClassRouterTest
     @Test
     public void givenDestructMessage_InstanceIsRemoved() throws Exception
     {
-        //create the class first
-        sendCreateRequestToClassRouter();
-        ROUTE_PATH = "wisp.router.someclass";
-        Request destruct = new Request(new JSONObject("{ \"method\" : \"" + ROUTE_PATH + ":~\", \"params\" : [], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
-        classRouter.routeMessage(destruct, "whatever:~");
-        assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter), is(nullValue()));
+        classRouter = new ClassRouter(RoutesTestObject.class);
+        WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), new RoutesTestObject(), "ABCD-1");
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
 
+        assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter).size(), is(1));
+        ROUTE_PATH = "ABCD-1";
+        Request destruct = new Request(new JSONObject("{ \"method\" : \"" + ROUTE_PATH + ":~\", \"params\" : [" + instanceModel1.getInstanceIdentifier() + "], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
+        classRouter.routeMessage(destruct, "whatever:~");
+
+        assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter), is(notNullValue()));
+        assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter).size(), is(0));
+        assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter).get(instanceModel1.getInstanceIdentifier()), is(nullValue()));
+    }
+
+    @Test
+    public void givenDestructMessage_OnlyThatSpecificInstanceIsRemoved() throws Exception
+    {
+        classRouter = new ClassRouter(RoutesTestObject.class);
+        WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), new RoutesTestObject(), "ABCD-1");
+        WisperInstanceModel instanceModel2 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), new RoutesTestObject(), "ABCD-2");
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel2, classRouter);
+
+        assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter).size(), is(2));
+        ROUTE_PATH = "ABCD-1";
+        Request destruct = new Request(new JSONObject("{ \"method\" : \"" + ROUTE_PATH + ":~\", \"params\" : [" + instanceModel1.getInstanceIdentifier() + "], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
+        classRouter.routeMessage(destruct, "whatever:~");
+
+        assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter), is(notNullValue()));
+        assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter).size(), is(1));
+        assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter).get(instanceModel2.getInstanceIdentifier()), is(instanceModel2));
     }
 
     private void sendCreateRequestToClassRouter()

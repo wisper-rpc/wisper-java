@@ -24,7 +24,13 @@ public class WisperInstanceDestructor
         this.message = (Request) message;
     }
 
-    public void destroy(String wisperInstanceIdentifier)
+    public void destroy() throws WisperException
+    {
+        String instanceIdentifier = MessageParser.getInstanceIdentifier(message);
+        destroy(instanceIdentifier);
+    }
+
+    public void destroy(String wisperInstanceIdentifier) throws WisperException
     {
         WisperInstanceModel instanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId(wisperInstanceIdentifier);
         if (instanceModel == null)
