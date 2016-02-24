@@ -8,7 +8,9 @@ import com.widespace.wisper.controller.RemoteObjectController;
 class RoutesTestObject implements Wisper
 {
 
+    private static boolean staticMethodCalled = false;
     private boolean destructCalled = false;
+    private boolean instanceMethodCalled = false;
 
     public static WisperClassModel registerRpcClass()
     {
@@ -31,11 +33,13 @@ class RoutesTestObject implements Wisper
 
     public static String appendStringStatic(String first, String second)
     {
+        staticMethodCalled = true;
         return first + second;
     }
 
     public String appendString(String first, String second)
     {
+        instanceMethodCalled = true;
         return first + second;
     }
 
@@ -54,5 +58,15 @@ class RoutesTestObject implements Wisper
     public boolean destructCalled()
     {
         return destructCalled;
+    }
+
+    public boolean instanceMethodCalled()
+    {
+        return instanceMethodCalled;
+    }
+
+    public static boolean staticMethodCalled()
+    {
+        return staticMethodCalled;
     }
 }
