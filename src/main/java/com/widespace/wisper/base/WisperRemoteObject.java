@@ -101,7 +101,7 @@ public class WisperRemoteObject
                     completion.perform(response.getResult(), error);
             }
         });
-        differAndSendInstanceCalls(request);
+        deferAndSendInstanceCalls(request);
 
     }
 
@@ -182,7 +182,7 @@ public class WisperRemoteObject
         Notification notification = new Notification();
         notification.setMethodName(mapName + ":!");
         notification.setParams(new Object[]{name, value});
-        differAndSendInstanceCalls(notification);
+        deferAndSendInstanceCalls(notification);
 
     }
 
@@ -205,7 +205,7 @@ public class WisperRemoteObject
      *
      * @param message
      */
-    private void differAndSendInstanceCalls(AbstractMessage message)
+    private void deferAndSendInstanceCalls(AbstractMessage message)
     {
         if (instanceIdentifier != null)
         {
