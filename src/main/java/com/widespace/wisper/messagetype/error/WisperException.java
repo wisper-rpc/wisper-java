@@ -1,8 +1,6 @@
 package com.widespace.wisper.messagetype.error;
 
 
-import java.util.Arrays;
-
 public class WisperException extends RuntimeException
 {
     private final Error error;
