@@ -9,9 +9,9 @@ import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -72,12 +72,11 @@ public class WisperInstanceCreatorTest
         assertThat(responseBlockCalled[0], is(true));
     }
 
-    //TODO: TO BE PASSED WHEN METHOD CALLER IS IMPLEMENTED
-    @Ignore
     @Test
     public void testGivenCustomConstructors_creatorCanHandleIt() throws Exception
     {
-        Request request = new Request(new JSONObject("{ \"method\" : \"whatever.whatever.thing~\", \"params\" : [\"testString\"], \"id\": \"ABCD\" }"), null);
+        String CONSTRUCTOR_PARAM_VALUE = "testString";
+        Request request = new Request(new JSONObject("{ \"method\" : \"whatever.whatever.thing~\", \"params\" : [\"" + CONSTRUCTOR_PARAM_VALUE + "\"], \"id\": \"ABCD\" }"), null);
         WisperInstanceCreator creator = new WisperInstanceCreator(RoutesTestObject.registerRpcClass(), request);
         final Object[] result = new Object[2];
         creator.create(new RemoteInstanceCreatorCallback()
@@ -90,7 +89,10 @@ public class WisperInstanceCreatorTest
             }
         });
 
-        assertThat(result[0], is(notNullValue()));
+        WisperInstanceModel instance = (WisperInstanceModel) result[0];
+        assertThat(instance, is(notNullValue()));
+        assertThat(instance.getInstance(), is(instanceOf(RoutesTestObject.class)));
+        assertThat(((RoutesTestObject) instance.getInstance()).getTestId(), is(CONSTRUCTOR_PARAM_VALUE));
     }
 
     //--------------------------

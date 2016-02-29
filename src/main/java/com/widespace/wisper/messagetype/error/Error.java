@@ -13,7 +13,7 @@ public enum Error
     PARSE_ERROR(101, "Parse error"),
     FORMAT_ERROR(102, "Invalid message format"),
     UNEXPECTED_TYPE_ERROR(103, "Message type is wrong"),
-
+    NOT_ALLOWED(105, "The operation is not allowed"),
 
     //=============================================================
     //region Wisper Properties

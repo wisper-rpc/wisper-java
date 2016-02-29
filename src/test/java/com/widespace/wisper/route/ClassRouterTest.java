@@ -94,7 +94,6 @@ public class ClassRouterTest
     }
 
 
-
     @Test
     public void givenStaticMethodCall_methodWillGetCalledOnActualClass() throws Exception
     {

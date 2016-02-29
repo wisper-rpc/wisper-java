@@ -29,7 +29,7 @@ public class WisperMethodCallerTest
     {
         Request request = new Request();
         request.setMethod("a.b.c:~");
-        new WisperMethodCaller(mock(WisperClassModel.class), request);
+        new WisperMethodCaller(mock(Router.class), mock(WisperClassModel.class), request);
     }
 
 
@@ -40,7 +40,7 @@ public class WisperMethodCallerTest
         String methodName = "methodName";
         Request request = new Request().withMethodName("whatever.whatever.thing." + methodName);
 
-        WisperMethodCaller methodCaller = spy(new WisperMethodCaller(mock(WisperClassModel.class), request));
+        WisperMethodCaller methodCaller = spy(new WisperMethodCaller(mock(Router.class), mock(WisperClassModel.class), request));
         methodCaller.call();
         verify(methodCaller).callStatic(any(WisperMethod.class));
     }
@@ -52,7 +52,7 @@ public class WisperMethodCallerTest
         String methodName = "methodName";
         Request request = new Request().withMethodName("whatever.whatever.thing:" + methodName);
 
-        WisperMethodCaller methodCaller = spy(new WisperMethodCaller(mock(WisperClassModel.class), request));
+        WisperMethodCaller methodCaller = spy(new WisperMethodCaller(mock(Router.class), mock(WisperClassModel.class), request));
         methodCaller.call();
         verify(methodCaller).callInstance(any(WisperMethod.class));
     }
@@ -63,7 +63,7 @@ public class WisperMethodCallerTest
         String methodName = "append";
         Request request = new Request().withMethodName("whatever.whatever.thing." + methodName);
         request.setParams(new Object[]{"str1", "str2"});
-        WisperMethodCaller methodCaller = new WisperMethodCaller(RoutesTestObject.registerRpcClass(), request);
+        WisperMethodCaller methodCaller = new WisperMethodCaller(mock(Router.class), RoutesTestObject.registerRpcClass(), request);
         assertThat(RoutesTestObject.staticMethodCalled(), is(false));
         methodCaller.call();
 
@@ -82,7 +82,7 @@ public class WisperMethodCallerTest
 
         RoutesTestObject actualInstance = (RoutesTestObject) instanceModel.getInstance();
         assertThat(actualInstance.instanceMethodCalled(), is(false));
-        WisperMethodCaller methodCaller = new WisperMethodCaller(instanceModel.getWisperClassModel(), request);
+        WisperMethodCaller methodCaller = new WisperMethodCaller(mock(Router.class), instanceModel.getWisperClassModel(), request);
         methodCaller.call();
 
         assertThat(actualInstance.instanceMethodCalled(), is(true));

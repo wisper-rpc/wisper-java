@@ -15,6 +15,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
+import static com.widespace.wisper.messagetype.error.Error.NOT_ALLOWED;
 import static com.widespace.wisper.messagetype.error.Error.UNEXPECTED_TYPE_ERROR;
 
 /**
@@ -38,10 +39,14 @@ public class WisperInstanceCreator
     {
         try
         {
+            if(handleBlockConstructor(callback))
+            {
+                callback.result(null, new WisperException(NOT_ALLOWED, null, "Block constructors are not allowed at this point."));
+                return;
+            }
+
             Class<?> classRef = classModel.getClassRef();
-            handleCustomConstructor();
             Wisper instance = createInstanceWithReflection(classRef);
-            //instance.setRemoteObjectController(this);
             WisperInstanceModel instanceModel = createInstanceModel(instance);
             callback.result(instanceModel, null);
             respondToCreateInstanceRequest(request, instanceModel);
@@ -51,26 +56,17 @@ public class WisperInstanceCreator
         }
     }
 
+    private boolean handleBlockConstructor(RemoteInstanceCreatorCallback callback)
+    {
+        //TODO: For now, constructor blocks are not allowed - implement later
+        return false;
+    }
 
     private WisperInstanceModel createInstanceModel(Wisper instance)
     {
         return new WisperInstanceModel(classModel, instance, instance.toString());
     }
 
-    private void handleCustomConstructor()
-    {
-        // Make it possible for the Wisper class to override constructor using a callBlock.
-//        if (classModel.getInstanceMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
-//        {
-//            callRpcClassMethodOnInstance(classModel.getInstanceMethods().get("~"), null, classModel, remoteObjectCall);
-//            return;
-//        }
-//
-//        if (classModel.getStaticMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
-//        {
-//            callRpcClassMethodOnInstance(classModel.getStaticMethods().get("~"), null, classModel, remoteObjectCall);
-//        }
-    }
 
     private void respondToCreateInstanceRequest(Request req, WisperInstanceModel instanceModel)
     {

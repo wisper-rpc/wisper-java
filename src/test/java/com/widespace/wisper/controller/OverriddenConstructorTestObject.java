@@ -3,8 +3,10 @@ package com.widespace.wisper.controller;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.base.Constants;
+import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.Response;
+import com.widespace.wisper.route.Router;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -99,6 +101,12 @@ public class OverriddenConstructorTestObject implements Wisper
                 response.setResult(resultMap);
                 request.getResponseBlock().perform(response, null);
             }
+
+            @Override
+            public void perform(Router router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, AbstractMessage message)
+            {
+
+            }
         }));
 
         return classModel;
@@ -138,6 +146,12 @@ public class OverriddenConstructorTestObject implements Wisper
                 Response response = request.createResponse();
                 response.setResult(resultMap);
                 request.getResponseBlock().perform(response, null);
+            }
+
+            @Override
+            public void perform(Router router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, AbstractMessage message)
+            {
+
             }
         }));
 

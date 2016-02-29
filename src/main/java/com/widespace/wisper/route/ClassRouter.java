@@ -92,12 +92,12 @@ public class ClassRouter extends Router
 
     private void callStaticMethod(AbstractMessage message)
     {
-        new WisperMethodCaller(wisperClassModel, message).call();
+        new WisperMethodCaller(this, wisperClassModel, message).call();
     }
 
     private void callInstancecMethod(AbstractMessage message)
     {
-        new WisperMethodCaller(wisperClassModel, message).call();
+        new WisperMethodCaller(this, wisperClassModel, message).call();
     }
 
 

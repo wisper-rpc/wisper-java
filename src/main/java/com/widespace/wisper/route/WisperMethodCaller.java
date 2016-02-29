@@ -21,11 +21,13 @@ import static com.widespace.wisper.messagetype.error.Error.WISPER_INSTANCE_INVAL
 
 public class WisperMethodCaller
 {
+    private Router router;
     private WisperClassModel classModel;
     private AbstractMessage message;
 
-    public WisperMethodCaller(@NotNull WisperClassModel classModel, @NotNull AbstractMessage message) throws WisperException
+    public WisperMethodCaller(@NotNull Router router, @NotNull WisperClassModel classModel, @NotNull AbstractMessage message) throws WisperException
     {
+        this.router = router;
         this.classModel = classModel;
         this.message = message;
         WisperCallType callType = MessageParser.getCallType(message);
@@ -62,7 +64,7 @@ public class WisperMethodCaller
     public void callStatic(WisperMethod methodModel) throws WisperException
     {
         handleUndefinedMethods(methodModel);
-        if (handledMethodCallBlock())
+        if (handledMethodCallBlock(methodModel, null))
             return;
 
         Object[] messageParams = MessageParser.getParams(message);
@@ -75,7 +77,7 @@ public class WisperMethodCaller
         handleUndefinedMethods(methodModel);
         String instanceIdentifier = MessageParser.getInstanceIdentifier(message);
         WisperInstanceModel wisperInstance = WisperInstanceRegistry.sharedInstance().findInstanceWithId(instanceIdentifier);
-        if (handledMethodCallBlock())
+        if (handledMethodCallBlock(methodModel, wisperInstance))
             return;
 
         Object[] messageParams = MessageParser.getParams(message);
@@ -83,9 +85,14 @@ public class WisperMethodCaller
         callMethodOnInstance(wisperInstance, newMethodModel);
     }
 
-    private boolean handledMethodCallBlock()
+    private boolean handledMethodCallBlock(WisperMethod methodModel, WisperInstanceModel wisperInstance)
     {
-        //TODO: implement
+        if(methodModel.getCallBlock() != null)
+        {
+            methodModel.getCallBlock().perform(router, wisperInstance, methodModel, message);
+            return true;
+        }
+
         return false;
     }
 

@@ -10,7 +10,7 @@ class RoutesTestObject implements Wisper
 
     private static boolean staticMethodCalled = false;
     private static String printedValue = null;
-    private String id = "default";
+    private String testId = "default";
     private boolean destructCalled = false;
     private boolean instanceMethodCalled = false;
 
@@ -23,7 +23,7 @@ class RoutesTestObject implements Wisper
         WisperMethod appendMethod = new WisperMethod("append", "appendString", WisperParameterType.STRING, WisperParameterType.STRING);
         WisperMethod printMethod = new WisperMethod("printInstanceId", "printInstanceId", WisperParameterType.INSTANCE, WisperParameterType.STRING);
 
-
+        WisperMethod customConstructor = new WisperMethod("~", "RoutesTestObject", WisperParameterType.STRING);
         WisperMethod appendStaticMethod = new WisperMethod("append", "appendStringStatic", WisperParameterType.STRING, WisperParameterType.STRING);
         WisperMethod printStaticMethod = new WisperMethod("printInstanceId", "printInstanceIdStatic", WisperParameterType.INSTANCE, WisperParameterType.STRING);
 
@@ -31,6 +31,7 @@ class RoutesTestObject implements Wisper
         classModel.addInstanceMethod(appendMethod);
         classModel.addInstanceMethod(printMethod);
 
+        classModel.addStaticMethod(customConstructor);
         classModel.addStaticMethod(appendStaticMethod);
         classModel.addStaticMethod(printStaticMethod);
 
@@ -39,7 +40,19 @@ class RoutesTestObject implements Wisper
         return classModel;
     }
 
+    //region Constructors
+    //==========================================================================
+    public RoutesTestObject()
+    {
+    }
 
+    public RoutesTestObject(String id)
+    {
+        this.testId = id;
+    }
+
+    //region Methods
+    //===========================================================================
     public static String appendStringStatic(String first, String second)
     {
         staticMethodCalled = true;
@@ -55,12 +68,12 @@ class RoutesTestObject implements Wisper
 
     public static void printInstanceIdStatic(RoutesTestObject instance, String message)
     {
-        printedValue = instance.getId() + message;
+        printedValue = instance.getTestId() + message;
     }
 
     public void printInstanceId(RoutesTestObject instance, String message)
     {
-        printedValue = instance.getId() + message;
+        printedValue = instance.getTestId() + message;
     }
 
 
@@ -106,11 +119,11 @@ class RoutesTestObject implements Wisper
 
     public void setTestId(String newId)
     {
-        this.id = newId;
+        this.testId = newId;
     }
 
-    public String getId()
+    public String getTestId()
     {
-        return this.id;
+        return this.testId;
     }
 }
