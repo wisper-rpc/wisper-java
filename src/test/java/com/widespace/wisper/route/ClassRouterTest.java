@@ -2,6 +2,7 @@ package com.widespace.wisper.route;
 
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.error.WisperException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,12 +25,13 @@ public class ClassRouterTest
     {
         WisperInstanceRegistry.sharedInstance().clear();
         RoutesTestObject.reset();
+        classRouter = new ClassRouter(RoutesTestObject.class);
+
     }
 
     @Test
     public void givenClass_setsClassModel() throws Exception
     {
-        classRouter = new ClassRouter(RoutesTestObject.class);
         assertThat(classRouter.getWisperClassModel(), is(notNullValue()));
         //assertThat(classRouter.getWisperClassModel(), is(equalTo(RoutesTestObject.registerRpcClass()))); needs equals() and hashCode() on classModel
     }
@@ -44,7 +46,6 @@ public class ClassRouterTest
     @Test
     public void givenDestructMessage_InstanceIsRemoved() throws Exception
     {
-        classRouter = new ClassRouter(RoutesTestObject.class);
         WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), new RoutesTestObject(), "ABCD-1");
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
 
@@ -61,7 +62,6 @@ public class ClassRouterTest
     @Test
     public void givenDestructMessage_OnlyThatSpecificInstanceIsRemoved() throws Exception
     {
-        classRouter = new ClassRouter(RoutesTestObject.class);
         WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), new RoutesTestObject(), "ABCD-1");
         WisperInstanceModel instanceModel2 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), new RoutesTestObject(), "ABCD-2");
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
@@ -80,7 +80,6 @@ public class ClassRouterTest
     @Test
     public void givenInstanceMethodCall_methodWillGetCalledOnActualInstance() throws Exception
     {
-        classRouter = new ClassRouter(RoutesTestObject.class);
         RoutesTestObject actualInstance = new RoutesTestObject();
         WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), actualInstance, "ABCD-1");
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
@@ -94,11 +93,11 @@ public class ClassRouterTest
         assertThat(actualInstance.instanceMethodCalled(), is(true));
     }
 
+
+
     @Test
     public void givenStaticMethodCall_methodWillGetCalledOnActualClass() throws Exception
     {
-        classRouter = new ClassRouter(RoutesTestObject.class);
-
         ROUTE_PATH = "whatever.append";
         Request request = new Request().withMethodName("a.b.c.append").withParams(new Object[]{"x1", "x2"});
 
@@ -108,10 +107,61 @@ public class ClassRouterTest
         assertThat(RoutesTestObject.staticMethodCalled(), is(true));
     }
 
+    @Test
+    public void givenStaticMethodWithWisperInstanceParam_methodGetsCalled() throws Exception
+    {
+        ROUTE_PATH = "whatever.append";
+        RoutesTestObject anInstance = new RoutesTestObject();
+        String INSTANCE_TEST_ID = "Test-123";
+        anInstance.setTestId(INSTANCE_TEST_ID);
+
+        WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anInstance, "ABCD-1");
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
+        Request request = new Request().withMethodName("a.b.c.printInstanceId").withParams(new Object[]{instanceModel1.getInstanceIdentifier(), "suffix"});
+
+        classRouter.routeMessage(request, ROUTE_PATH);
+
+        assertThat(anInstance.printedValue(), is(INSTANCE_TEST_ID + "suffix"));
+    }
+
+    @Test
+    public void givenInstanceMethodWithWisperInstanceParam_methodGetsCalled() throws Exception
+    {
+        ROUTE_PATH = "whatever:append";
+        String INSTANCE_TEST_ID = "Test-123";
+        String PARAM_INSTACNE_TEST_ID = "ANOTHER";
+
+        RoutesTestObject anInstance = new RoutesTestObject();
+        RoutesTestObject anotherInstance = new RoutesTestObject();
+        anInstance.setTestId(INSTANCE_TEST_ID);
+        anotherInstance.setTestId(PARAM_INSTACNE_TEST_ID);
+
+        WisperInstanceModel object_instance = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anInstance, "ABCD-1");
+        WisperInstanceModel param_instance = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anotherInstance, "ABCD-2");
+        WisperInstanceRegistry.sharedInstance().addInstance(object_instance, classRouter);
+        WisperInstanceRegistry.sharedInstance().addInstance(param_instance, classRouter);
+        Request request = new Request().withMethodName("a.b.c:printInstanceId").withParams(new Object[]{object_instance.getInstanceIdentifier(), param_instance.getInstanceIdentifier(), "suffix"});
+
+        classRouter.routeMessage(request, ROUTE_PATH);
+
+        assertThat(anInstance.printedValue(), is(PARAM_INSTACNE_TEST_ID + "suffix"));
+    }
+
+    @Test(expected = WisperException.class)
+    public void givenUndefinedMethod_exceptionIsThrown() throws Exception
+    {
+        ROUTE_PATH = "whatever";
+        RoutesTestObject anInstance = new RoutesTestObject();
+        WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anInstance, "ABCD-1");
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
+        Request request = new Request().withMethodName("a.b.c.undefinedMethodName").withParams(new Object[]{});
+
+        classRouter.routeMessage(request, ROUTE_PATH);
+    }
+
     private void sendCreateRequestToClassRouter()
     {
         Request request = new Request(new JSONObject("{ \"method\" : \"" + ROUTE_PATH + "~\", \"params\" : [], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
-        classRouter = new ClassRouter(RoutesTestObject.class);
         classRouter.routeMessage(request, "someclass~");
     }
 }

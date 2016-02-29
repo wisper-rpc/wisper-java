@@ -9,6 +9,8 @@ class RoutesTestObject implements Wisper
 {
 
     private static boolean staticMethodCalled = false;
+    private static String printedValue = null;
+    private String id = "default";
     private boolean destructCalled = false;
     private boolean instanceMethodCalled = false;
 
@@ -19,11 +21,18 @@ class RoutesTestObject implements Wisper
 
         //2.Build class methods of instance or static methods you might need
         WisperMethod appendMethod = new WisperMethod("append", "appendString", WisperParameterType.STRING, WisperParameterType.STRING);
+        WisperMethod printMethod = new WisperMethod("printInstanceId", "printInstanceId", WisperParameterType.INSTANCE, WisperParameterType.STRING);
+
+
         WisperMethod appendStaticMethod = new WisperMethod("append", "appendStringStatic", WisperParameterType.STRING, WisperParameterType.STRING);
+        WisperMethod printStaticMethod = new WisperMethod("printInstanceId", "printInstanceIdStatic", WisperParameterType.INSTANCE, WisperParameterType.STRING);
 
         //3. Add the method models to your class model
         classModel.addInstanceMethod(appendMethod);
+        classModel.addInstanceMethod(printMethod);
+
         classModel.addStaticMethod(appendStaticMethod);
+        classModel.addStaticMethod(printStaticMethod);
 
 
         //4. Return the class model
@@ -37,12 +46,25 @@ class RoutesTestObject implements Wisper
         return first + second;
     }
 
+
     public String appendString(String first, String second)
     {
         instanceMethodCalled = true;
         return first + second;
     }
 
+    public static void printInstanceIdStatic(RoutesTestObject instance, String message)
+    {
+        printedValue = instance.getId() + message;
+    }
+
+    public void printInstanceId(RoutesTestObject instance, String message)
+    {
+        printedValue = instance.getId() + message;
+    }
+
+
+    //region
     @Override
     public void setRemoteObjectController(RemoteObjectController remoteObjectController)
     {
@@ -55,6 +77,8 @@ class RoutesTestObject implements Wisper
         destructCalled = true;
     }
 
+    //region Utility Methods for Tests
+    //==========================================================
     public boolean destructCalled()
     {
         return destructCalled;
@@ -73,5 +97,20 @@ class RoutesTestObject implements Wisper
     public static void reset()
     {
         staticMethodCalled = false;
+    }
+
+    public static String printedValue()
+    {
+        return printedValue;
+    }
+
+    public void setTestId(String newId)
+    {
+        this.id = newId;
+    }
+
+    public String getId()
+    {
+        return this.id;
     }
 }
