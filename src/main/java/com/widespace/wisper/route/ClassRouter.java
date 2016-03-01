@@ -48,8 +48,10 @@ public class ClassRouter extends Router
                 callInstancecMethod(message);
                 break;
             case STATIC_EVENT:
+                handleStaticEvent(message);
                 break;
             case INSTANCE_EVENT:
+                handleInstanceEvent(message);
                 break;
             case UNKNOWN:
             default:
@@ -100,5 +102,16 @@ public class ClassRouter extends Router
         new WisperMethodCaller(this, wisperClassModel, message).call();
     }
 
+    //=====================================================================================
+    //region Events
+    //=====================================================================================
+    private void handleStaticEvent(AbstractMessage message)
+    {
+        new WisperEventHandler(this, wisperClassModel, message).handle();
+    }
+    private void handleInstanceEvent(AbstractMessage message)
+    {
+
+    }
 
 }
