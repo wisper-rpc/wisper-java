@@ -63,7 +63,7 @@ public class ClassRouter extends Router
     //=====================================================================================
     private void createInstance(AbstractMessage message) throws WisperException
     {
-        new WisperInstanceCreator(wisperClassModel, message).create(new RemoteInstanceCreatorCallback()
+        new WisperInstanceConstructor(wisperClassModel, message).create(new RemoteInstanceCreatorCallback()
         {
             @Override
             public void result(WisperInstanceModel instanceModel, WisperException ex)

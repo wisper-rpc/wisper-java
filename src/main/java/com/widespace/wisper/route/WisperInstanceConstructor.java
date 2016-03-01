@@ -21,12 +21,12 @@ import static com.widespace.wisper.messagetype.error.Error.UNEXPECTED_TYPE_ERROR
 /**
  * This class specifically tries to create an instance of a remote object using the message.
  */
-public class WisperInstanceCreator
+public class WisperInstanceConstructor
 {
     private final WisperClassModel classModel;
     private final Request request;
 
-    public WisperInstanceCreator(@NotNull WisperClassModel classModel, @NotNull AbstractMessage message)
+    public WisperInstanceConstructor(@NotNull WisperClassModel classModel, @NotNull AbstractMessage message)
     {
         if (MessageParser.getCallType(message) != WisperCallType.CREATE_INSTANCE)
             throw new WisperException(UNEXPECTED_TYPE_ERROR, null, "Remote instance creator was called with a non-CREATE message type.");

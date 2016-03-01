@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
 
-public class WisperInstanceCreatorTest
+public class WisperInstanceConstructorTest
 {
     @Before
     public void setUp() throws Exception
@@ -34,14 +34,14 @@ public class WisperInstanceCreatorTest
         request.setMethod("a.b.c:call");
         request.setIdentifier("ABCD1");
 
-        new WisperInstanceCreator(mock(WisperClassModel.class), request);
+        new WisperInstanceConstructor(mock(WisperClassModel.class), request);
     }
 
     @Test
     public void createsInstanceOnCorrectRequest() throws Exception
     {
         WisperInstanceRegistry.sharedInstance().clear();
-        WisperInstanceCreator creator = new WisperInstanceCreator(RoutesTestObject.registerRpcClass(), testObjectCreateRequest());
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), testObjectCreateRequest());
         creator.create(new RemoteInstanceCreatorCallback()
         {
             @Override
@@ -67,7 +67,7 @@ public class WisperInstanceCreatorTest
             }
         });
 
-        WisperInstanceCreator creator = new WisperInstanceCreator(RoutesTestObject.registerRpcClass(), request);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
         creator.create(mock(RemoteInstanceCreatorCallback.class));
         assertThat(responseBlockCalled[0], is(true));
     }
@@ -77,7 +77,7 @@ public class WisperInstanceCreatorTest
     {
         String CONSTRUCTOR_PARAM_VALUE = "testString";
         Request request = new Request(new JSONObject("{ \"method\" : \"whatever.whatever.thing~\", \"params\" : [\"" + CONSTRUCTOR_PARAM_VALUE + "\"], \"id\": \"ABCD\" }"), null);
-        WisperInstanceCreator creator = new WisperInstanceCreator(RoutesTestObject.registerRpcClass(), request);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
         final Object[] result = new Object[2];
         creator.create(new RemoteInstanceCreatorCallback()
         {

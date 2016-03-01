@@ -68,7 +68,7 @@ public class RpcClassMethodTests
             @Override
             public void perform(Router router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, AbstractMessage message)
             {
-                
+
             }
         };
 

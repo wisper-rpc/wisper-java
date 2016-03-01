@@ -115,7 +115,7 @@ public class WisperInstanceDestructorTest
         creationRequest.setMethod(mapName + "~");
 
         final WisperInstanceModel[] _instanceModel = new WisperInstanceModel[1];
-        WisperInstanceCreator creator = new WisperInstanceCreator(RoutesTestObject.registerRpcClass(), creationRequest);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), creationRequest);
         creator.create(new RemoteInstanceCreatorCallback()
         {
             @Override
