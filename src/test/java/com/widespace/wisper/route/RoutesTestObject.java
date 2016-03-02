@@ -3,6 +3,7 @@ package com.widespace.wisper.route;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.controller.RemoteObjectController;
+import com.widespace.wisper.messagetype.Event;
 
 
 class RoutesTestObject implements Wisper
@@ -10,9 +11,12 @@ class RoutesTestObject implements Wisper
 
     private static boolean staticMethodCalled = false;
     private static String printedValue = null;
+    private static boolean staticEventReceived = false;
     private String testId = "default";
     private boolean destructCalled = false;
     private boolean instanceMethodCalled = false;
+
+    public static String testProp;
 
     public static WisperClassModel registerRpcClass()
     {
@@ -27,6 +31,8 @@ class RoutesTestObject implements Wisper
         WisperMethod appendStaticMethod = new WisperMethod("append", "appendStringStatic", WisperParameterType.STRING, WisperParameterType.STRING);
         WisperMethod printStaticMethod = new WisperMethod("printInstanceId", "printInstanceIdStatic", WisperParameterType.INSTANCE, WisperParameterType.STRING);
 
+        WisperProperty staticProperty = new WisperProperty("testProp", WisperPropertyAccess.READ_WRITE, "setTestProp", WisperParameterType.STRING);
+
         //3. Add the method models to your class model
         classModel.addInstanceMethod(appendMethod);
         classModel.addInstanceMethod(printMethod);
@@ -35,9 +41,24 @@ class RoutesTestObject implements Wisper
         classModel.addStaticMethod(appendStaticMethod);
         classModel.addStaticMethod(printStaticMethod);
 
+        classModel.addProperty(staticProperty);
+
 
         //4. Return the class model
         return classModel;
+    }
+
+    //region Wisper Event Handlers
+    //===========================================================================
+    public static void wisperStaticEventHandler(Event event)
+    {
+        if (event != null)
+            staticEventReceived = true;
+    }
+
+    public void wisperEventHandler(Event event)
+    {
+
     }
 
     //region Constructors
@@ -49,6 +70,21 @@ class RoutesTestObject implements Wisper
     public RoutesTestObject(String id)
     {
         this.testId = id;
+    }
+
+
+    //region Getter Setter
+    //===========================================================================
+
+
+    public static String getTestProp()
+    {
+        return testProp;
+    }
+
+    public static void setTestProp(String testProp)
+    {
+        RoutesTestObject.testProp = testProp;
     }
 
     //region Methods
@@ -110,6 +146,7 @@ class RoutesTestObject implements Wisper
     public static void reset()
     {
         staticMethodCalled = false;
+        staticEventReceived = false;
     }
 
     public static String printedValue()
@@ -125,5 +162,10 @@ class RoutesTestObject implements Wisper
     public String getTestId()
     {
         return this.testId;
+    }
+
+    public static boolean isStaticEventReceived()
+    {
+        return staticEventReceived;
     }
 }
