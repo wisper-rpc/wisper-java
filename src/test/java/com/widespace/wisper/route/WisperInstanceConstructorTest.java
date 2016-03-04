@@ -11,9 +11,9 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import java.util.HashMap;
+
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -69,6 +69,7 @@ public class WisperInstanceConstructorTest
 
         WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
         creator.create(mock(RemoteInstanceCreatorCallback.class));
+
         assertThat(responseBlockCalled[0], is(true));
     }
 
@@ -93,6 +94,45 @@ public class WisperInstanceConstructorTest
         assertThat(instance, is(notNullValue()));
         assertThat(instance.getInstance(), is(instanceOf(RoutesTestObject.class)));
         assertThat(((RoutesTestObject) instance.getInstance()).getTestId(), is(CONSTRUCTOR_PARAM_VALUE));
+    }
+
+    @Test
+    public void testGivenConstructor_returnsInitializedPropertiesInResponse() throws Exception
+    {
+        Request request = testObjectCreateRequest();
+        request.setParams(new Object[]{"something"});
+        final Object[] responseBlockResponse = new Object[1];
+        request.setResponseBlock(new ResponseBlock()
+        {
+
+            @Override
+            public void perform(Response response, RPCErrorMessage error)
+            {
+                responseBlockResponse[0] = response;
+            }
+        });
+
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
+        creator.create(mock(RemoteInstanceCreatorCallback.class));
+
+
+        // Check we get a response
+        Response response = (Response) responseBlockResponse[0];
+        assertThat(response, is(notNullValue()));
+        assertThat(response.getIdentifier(), is(equalTo(request.getIdentifier())));
+
+        //Check we get id,props in response
+        HashMap<String, Object> responseResult = (HashMap<String, Object>) response.getResult();
+        assertThat(responseResult, is(notNullValue()));
+        assertThat(responseResult.containsKey("id"), is(true));
+        assertThat(responseResult.containsKey("props"), is(true));
+
+        // Check props includes "prop" (the instance property in test object) and the value is set correctly.
+        HashMap<String, Object> props = (HashMap<String, Object>) responseResult.get("props");
+        assertThat(props.containsKey("prop"), is(true));
+        assertThat((String) props.get("prop"), is(equalTo("set-by-constructor")));
+
+
     }
 
     //--------------------------

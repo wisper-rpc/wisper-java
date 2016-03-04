@@ -47,10 +47,25 @@ class RoutesTestObject implements Wisper
         classModel.addProperty(staticProperty);
         classModel.addProperty(instanceProperty);
 
-
         //4. Return the class model
         return classModel;
     }
+
+
+
+    //region Constructors
+    //==========================================================================
+    public RoutesTestObject()
+    {
+
+    }
+
+    public RoutesTestObject(String id)
+    {
+        this.testId = id;
+        this.prop = "set-by-constructor";
+    }
+
 
     //region Wisper Event Handlers
     //===========================================================================
@@ -64,17 +79,6 @@ class RoutesTestObject implements Wisper
     {
         if (event != null)
             instanceEventReceived = true;
-    }
-
-    //region Constructors
-    //==========================================================================
-    public RoutesTestObject()
-    {
-    }
-
-    public RoutesTestObject(String id)
-    {
-        this.testId = id;
     }
 
 

@@ -106,7 +106,7 @@ public class WisperEventHandlerTest
 
         assertThat(actualInstance.getProp(), is(nullValue()));
         new WisperEventHandler(mock(Router.class), instanceModel.getWisperClassModel(), instanceEventMessage).handle();
-        
+
         assertThat(actualInstance.getProp(), is(SAMPLE_VALUE));
         assertThat(actualInstance.isInstanceEventReceived(), is(true));
 
