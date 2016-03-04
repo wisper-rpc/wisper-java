@@ -1,8 +1,9 @@
 package com.widespace.wisper.route;
 
 import com.widespace.wisper.base.Constants;
-import com.widespace.wisper.classrepresentation.WisperClassModel;
-import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.base.RPCUtilities;
+import com.widespace.wisper.base.Wisper;
+import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.Notification;
@@ -31,14 +32,14 @@ public class WisperEventHandler
 
     public void handle() throws WisperException
     {
-        handle(message);
-    }
-
-    private void handle(AbstractMessage message)
-    {
         if (!(message instanceof Event))
             throw new WisperException(UNEXPECTED_TYPE_ERROR, null, "Remote instance event handler was called with a non-Notification/Event message type.");
 
+        handle((Event) message);
+    }
+
+    private void handle(Event eventMessage)
+    {
         WisperCallType callType = MessageParser.getCallType(message);
         if (callType != WisperCallType.STATIC_EVENT && callType != WisperCallType.INSTANCE_EVENT)
             throw new WisperException(UNEXPECTED_TYPE_ERROR, null, "Remote instance event handler was called with a non-Event message call type.");
@@ -46,62 +47,41 @@ public class WisperEventHandler
         switch (callType)
         {
             case STATIC_EVENT:
-                handleStaticEvent(message);
+                handleStaticEvent(eventMessage);
                 break;
             case INSTANCE_EVENT:
-                handleInstacneEvent(message);
+                handleInstacneEvent(eventMessage);
                 break;
             default:
                 break;
         }
     }
 
-    private void handleInstacneEvent(AbstractMessage message)
-    {
-        String instanceIdentifier = MessageParser.getInstanceIdentifier(message);
-        WisperInstanceModel wisperInstanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId(instanceIdentifier);
-        if (wisperInstanceModel == null)
-        {
-            throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "Instance with ID " + instanceIdentifier + "not found in instance registry. Make sure the instance is registered and it comes with the message.");
-        }
-    }
-
-    private void handleStaticEvent(AbstractMessage message)
+    //------------------------------------------------------------------------
+    //region Static Events
+    //------------------------------------------------------------------------
+    private void handleStaticEvent(Event eventMessage)
     {
         try
         {
-            handledStaticPropertySet(message);
+            handledStaticPropertySet(eventMessage);
         } catch (WisperException ex)
         {
             //Swallow
             System.out.println("WisperEventHandler : Wisper Exception swallowed : " + ex.toString());
         } finally
         {
-            callStaticEventHandlerOnClass(message);
+            callStaticEventHandlerOnClass(eventMessage);
         }
     }
 
-    private void callStaticEventHandlerOnClass(AbstractMessage eventMessage)
-    {
-        try
-        {
-            Event event = (Event) eventMessage;
-            Class<?> classRef = wisperClassModel.getClassRef();
-            Method wisperStaticEventHandlerMethod = classRef.getMethod("wisperStaticEventHandler", Event.class);
-            wisperStaticEventHandlerMethod.invoke(null, event);
-        } catch (Exception e)
-        {
-            System.out.println("WisperEventHandler : Exception swallowed : " + e.toString());
-        }
-    }
-
-    private boolean handledStaticPropertySet(AbstractMessage message) throws WisperException
+    private boolean handledStaticPropertySet(Event eventMessage) throws WisperException
     {
         boolean result = false;
         String proprtyName = null;
         try
         {
-            Object[] params = MessageParser.getParams(this.message);
+            Object[] params = MessageParser.getParams(eventMessage);
             proprtyName = (String) params[0];
             String proprtyValue = (String) params[1];
             Field field = wisperClassModel.getClassRef().getField(proprtyName);
@@ -126,6 +106,151 @@ public class WisperEventHandler
             }
         }
         return result;
+    }
+
+    private void callStaticEventHandlerOnClass(Event eventMessage)
+    {
+        try
+        {
+            Class<?> classRef = wisperClassModel.getClassRef();
+            Method wisperStaticEventHandlerMethod = classRef.getMethod("wisperStaticEventHandler", Event.class);
+            wisperStaticEventHandlerMethod.invoke(null, eventMessage);
+        } catch (Exception e)
+        {
+            System.out.println("WisperEventHandler : Exception swallowed : " + e.toString());
+        }
+    }
+
+    //------------------------------------------------------------------------
+    //region Instance Events
+    //------------------------------------------------------------------------
+    private void handleInstacneEvent(Event eventMessage)
+    {
+        String instanceIdentifier = MessageParser.getInstanceIdentifier(eventMessage);
+        WisperInstanceModel wisperInstanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId(instanceIdentifier);
+        if (wisperInstanceModel == null)
+        {
+            throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "Instance with ID " + instanceIdentifier + "not found in instance registry. Make sure the instance is registered and it comes with the message.");
+        }
+
+        try
+        {
+            handleInstancePropertySet(wisperInstanceModel, eventMessage);
+        } catch (WisperException ex)
+        {
+            //Swallow
+            System.out.println("WisperEventHandler : Wisper Exception swallowed : " + ex.toString());
+        } finally
+        {
+            callInstanceEventHandlerOnClass(wisperInstanceModel, eventMessage);
+        }
+    }
+
+    private void handleInstancePropertySet(WisperInstanceModel instanceModel, Event eventMessage) throws WisperException
+    {
+        String eventPropertyName = eventMessage.getName();
+        if (wisperClassModel.getProperties() == null || !wisperClassModel.getProperties().containsKey(eventPropertyName))
+        {
+            String errorMessage = "No such field defined as " + eventPropertyName + " in class " + wisperClassModel.getClassRef() + ".Is the property registered with the class model?";
+            throw new WisperException(Error.PROPERTY_NOT_REGISTERED, null, errorMessage);
+        }
+
+        WisperProperty property = wisperClassModel.getProperties().get(eventPropertyName);
+        if (property.getMode() == WisperPropertyAccess.READ_ONLY)
+        {
+            throw new WisperException(Error.PROPERTY_NOT_ACCESSIBLE, null, "Property " + eventPropertyName + "is readonly and cannot be set.");
+        }
+
+        String setterMethodName = property.getSetterName();
+        Wisper instance = instanceModel.getInstance();
+
+        // Instance method
+        Class[] parameterTypes = RPCUtilities.convertRpcParameterTypeToClassType(property.getSetterMethodParameterType());
+
+        // If property is pointing to an RPC instance, replace the pointer to the actual value
+        if (property.getSetterMethodParameterType() == WisperParameterType.INSTANCE)
+        {
+            WisperInstanceModel paramInstanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId((String) eventMessage.getValue());
+            if (paramInstanceModel != null)
+            {
+                eventMessage.setValue(paramInstanceModel.getInstance());
+                parameterTypes[0] = paramInstanceModel.getInstance().getClass();
+            }
+        }
+
+        try
+        {
+            Method method = getMethod(instance.getClass(), setterMethodName, parameterTypes);
+            method.setAccessible(true);
+            method.invoke(instance, eventMessage.getValue());
+
+        } catch (NoSuchMethodException e)
+        {
+            String errorMessage = "Setter method for the property " + property.getMappingName() + "not found in class " + wisperClassModel.getClassRef() + ". Does the setter method actually exist in the class? ";
+            throw new WisperException(Error.SETTER_METHOD_NOT_FOUND, e, errorMessage);
+        } catch (IllegalAccessException e)
+        {
+            String errorMessage = "Setter method for the property " + property.getMappingName() + "was not accessible in class  " + wisperClassModel.getClassRef() + ".Is the setter method public?";
+            throw new WisperException(Error.SETTER_METHOD_NOT_ACCESSIBLE, e, errorMessage);
+        } catch (InvocationTargetException e)
+        {
+            String errorMessage = "Setter method for the property " + property.getMappingName() + "could not be invoked in class  " + wisperClassModel.getClassRef();
+            throw new WisperException(Error.SETTER_METHOD_INVOCATION_ERROR, e, errorMessage);
+        } catch (IllegalArgumentException e)
+        {
+            String errorMessage = "Setter method for the property " + property.getMappingName() + "rejected the argument sent in class  " + wisperClassModel.getClassRef() + "Are the arguments passed correctly?";
+            throw new WisperException(Error.SETTER_METHOD_WRONG_ARGUMENTS, e, errorMessage);
+        }
+    }
+
+    private void callInstanceEventHandlerOnClass(WisperInstanceModel instanceModel, Event eventMessage)
+    {
+        try
+        {
+            Wisper instance = instanceModel.getInstance();
+            Class<?> classRef = wisperClassModel.getClassRef();
+            Method wisperStaticEventHandlerMethod = classRef.getMethod("wisperEventHandler", Event.class);
+            wisperStaticEventHandlerMethod.invoke(instance, eventMessage);
+        } catch (Exception e)
+        {
+            System.out.println("WisperEventHandler : Exception swallowed : " + e.toString());
+        }
+    }
+
+
+    //------------------------------------------------------------------------
+    //region Reflection and utility
+    //------------------------------------------------------------------------
+
+    private Method getMethod(Class<?> clasRef, String methodName, Class[] parameterTypes) throws NoSuchMethodException
+    {
+        nextMethod:
+        for (Method method : clasRef.getMethods())
+        {
+            if (!methodName.equals(method.getName()))
+            {
+                continue;
+            }
+
+            final Class<?>[] methodParameterTypes = method.getParameterTypes();
+            if (methodParameterTypes.length != parameterTypes.length)
+            {
+                continue;
+            }
+
+            for (int i = 0; i < methodParameterTypes.length; i++)
+            {
+
+                if (!methodParameterTypes[i].isAssignableFrom(parameterTypes[i]))
+                {
+                    continue nextMethod;
+                }
+            }
+
+            return method;
+        }
+
+        throw new NoSuchMethodException();
     }
 
 }

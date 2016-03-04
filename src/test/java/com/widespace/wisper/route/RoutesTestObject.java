@@ -17,6 +17,8 @@ class RoutesTestObject implements Wisper
     private boolean instanceMethodCalled = false;
 
     public static String testProp;
+    private String prop;
+    private boolean instanceEventReceived;
 
     public static WisperClassModel registerRpcClass()
     {
@@ -32,6 +34,7 @@ class RoutesTestObject implements Wisper
         WisperMethod printStaticMethod = new WisperMethod("printInstanceId", "printInstanceIdStatic", WisperParameterType.INSTANCE, WisperParameterType.STRING);
 
         WisperProperty staticProperty = new WisperProperty("testProp", WisperPropertyAccess.READ_WRITE, "setTestProp", WisperParameterType.STRING);
+        WisperProperty instanceProperty = new WisperProperty("prop", WisperPropertyAccess.READ_WRITE, "setProp", WisperParameterType.STRING);
 
         //3. Add the method models to your class model
         classModel.addInstanceMethod(appendMethod);
@@ -42,6 +45,7 @@ class RoutesTestObject implements Wisper
         classModel.addStaticMethod(printStaticMethod);
 
         classModel.addProperty(staticProperty);
+        classModel.addProperty(instanceProperty);
 
 
         //4. Return the class model
@@ -58,7 +62,8 @@ class RoutesTestObject implements Wisper
 
     public void wisperEventHandler(Event event)
     {
-
+        if (event != null)
+            instanceEventReceived = true;
     }
 
     //region Constructors
@@ -85,6 +90,16 @@ class RoutesTestObject implements Wisper
     public static void setTestProp(String testProp)
     {
         RoutesTestObject.testProp = testProp;
+    }
+
+    public String getProp()
+    {
+        return prop;
+    }
+
+    public void setProp(String prop)
+    {
+        this.prop = prop;
     }
 
     //region Methods
@@ -167,5 +182,10 @@ class RoutesTestObject implements Wisper
     public static boolean isStaticEventReceived()
     {
         return staticEventReceived;
+    }
+
+    public boolean isInstanceEventReceived()
+    {
+        return instanceEventReceived;
     }
 }

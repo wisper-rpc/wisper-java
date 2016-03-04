@@ -1,7 +1,8 @@
 package com.widespace.wisper.route;
 
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
-import com.widespace.wisper.classrepresentation.WisperMethod;
+import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.RPCEventBuilder;
@@ -77,5 +78,62 @@ public class WisperEventHandlerTest
     {
         Event instanceEvent = new RPCEventBuilder().withMethodName("a.b.c").withName("nonExistingName").withValue("xxxy").withInstanceIdentifier("nonExistent-1123").buildInstanceEvent();
         new WisperEventHandler(mock(Router.class), RoutesTestObject.registerRpcClass(), instanceEvent).handle();
+    }
+
+    @Test
+    public void givenInstanceEventWithExistingPropertyName_shouldChangeProperty() throws Exception
+    {
+        String SAMPLE_VALUE = "xxxxyyyy";
+        WisperInstanceModel instanceModel = createInstanceAndReturnWisperInstance("a.b.c");
+        RoutesTestObject actualInstance = (RoutesTestObject) instanceModel.getInstance();
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, mock(Router.class));
+        Event instanceEventMessage = new RPCEventBuilder().withMethodName("a.b.c").withName("prop").withValue(SAMPLE_VALUE).withInstanceIdentifier(instanceModel.getInstanceIdentifier()).buildInstanceEvent();
+
+        assertThat(actualInstance.getProp(), is(nullValue()));
+        new WisperEventHandler(mock(Router.class), instanceModel.getWisperClassModel(), instanceEventMessage).handle();
+        assertThat(actualInstance.getProp(), is(SAMPLE_VALUE));
+    }
+
+    @Test
+    public void givenInstanceEvent_willCallInstanceEventHandler() throws Exception
+    {
+        String SAMPLE_VALUE = "xxxxyyyy";
+        WisperInstanceModel instanceModel = createInstanceAndReturnWisperInstance("a.b.c");
+        RoutesTestObject actualInstance = (RoutesTestObject) instanceModel.getInstance();
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, mock(Router.class));
+
+        Event instanceEventMessage = new RPCEventBuilder().withMethodName("a.b.c").withName("prop").withValue(SAMPLE_VALUE).withInstanceIdentifier(instanceModel.getInstanceIdentifier()).buildInstanceEvent();
+
+        assertThat(actualInstance.getProp(), is(nullValue()));
+        new WisperEventHandler(mock(Router.class), instanceModel.getWisperClassModel(), instanceEventMessage).handle();
+        
+        assertThat(actualInstance.getProp(), is(SAMPLE_VALUE));
+        assertThat(actualInstance.isInstanceEventReceived(), is(true));
+
+    }
+
+    //--------------------------
+    private WisperInstanceModel createInstanceAndReturnWisperInstance(String mapName) throws InterruptedException
+    {
+        Request creationRequest = new Request();
+        creationRequest.setIdentifier("ABCD1");
+        creationRequest.setMethod(mapName + "~");
+
+        final WisperInstanceModel[] _instanceModel = new WisperInstanceModel[1];
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), creationRequest);
+        creator.create(new RemoteInstanceCreatorCallback()
+        {
+            @Override
+            public void result(WisperInstanceModel instanceModel, WisperException ex)
+            {
+                _instanceModel[0] = instanceModel;
+            }
+        });
+
+        if (_instanceModel[0] == null)
+            Thread.sleep(400);
+
+
+        return _instanceModel[0];
     }
 }
