@@ -5,6 +5,7 @@ import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.controller.ResponseBlock;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.Response;
+import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.json.JSONObject;
@@ -59,7 +60,6 @@ public class WisperInstanceConstructorTest
         final boolean[] responseBlockCalled = new boolean[]{false};
         request.setResponseBlock(new ResponseBlock()
         {
-
             @Override
             public void perform(Response response, RPCErrorMessage error)
             {
@@ -97,6 +97,55 @@ public class WisperInstanceConstructorTest
     }
 
     @Test
+    public void givenConstructorWithWrongParamType_exceptionIsThrown() throws Exception
+    {
+        Double CONSTRUCTOR_WRONG_TYPE = 112.03;
+        Request request = new Request(new JSONObject("{ \"method\" : \"whatever.whatever.thing~\", \"params\" : [" + CONSTRUCTOR_WRONG_TYPE + "], \"id\": \"ABCD\" }"), null);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
+        final Object[] result = new Object[2];
+        creator.create(new RemoteInstanceCreatorCallback()
+        {
+            @Override
+            public void result(WisperInstanceModel instanceModel, WisperException ex)
+            {
+                result[0] = instanceModel;
+                result[1] = ex;
+            }
+        });
+
+        WisperInstanceModel instance = (WisperInstanceModel) result[0];
+        WisperException exception = (WisperException) result[1];
+        assertThat(instance, is(nullValue()));
+        assertThat(exception, is(notNullValue()));
+        assertThat(exception.getErrorCode(), is(Error.CONSTRUCTOR_NOT_FOUND.getCode()));
+    }
+
+    @Test
+    public void givenConstructorWithWrongParamNumbers_exceptionIsThrown() throws Exception
+    {
+        String CONSTRUCTOR_WRONG_NUMBER = "param1, param2";
+        Request request = new Request(new JSONObject("{ \"method\" : \"whatever.whatever.thing~\", \"params\" : [" + CONSTRUCTOR_WRONG_NUMBER + "], \"id\": \"ABCD\" }"), null);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
+        final Object[] result = new Object[2];
+        creator.create(new RemoteInstanceCreatorCallback()
+        {
+            @Override
+            public void result(WisperInstanceModel instanceModel, WisperException ex)
+            {
+                result[0] = instanceModel;
+                result[1] = ex;
+            }
+        });
+
+        WisperInstanceModel instance = (WisperInstanceModel) result[0];
+        WisperException exception = (WisperException) result[1];
+        assertThat(instance, is(nullValue()));
+        assertThat(exception, is(notNullValue()));
+        assertThat(exception.getErrorCode(), is(Error.CONSTRUCTOR_NOT_FOUND.getCode()));
+    }
+
+
+    @Test
     public void testGivenConstructor_returnsInitializedPropertiesInResponse() throws Exception
     {
         Request request = testObjectCreateRequest();
@@ -115,7 +164,6 @@ public class WisperInstanceConstructorTest
         WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
         creator.create(mock(RemoteInstanceCreatorCallback.class));
 
-
         // Check we get a response
         Response response = (Response) responseBlockResponse[0];
         assertThat(response, is(notNullValue()));
@@ -131,8 +179,6 @@ public class WisperInstanceConstructorTest
         HashMap<String, Object> props = (HashMap<String, Object>) responseResult.get("props");
         assertThat(props.containsKey("prop"), is(true));
         assertThat((String) props.get("prop"), is(equalTo("set-by-constructor")));
-
-
     }
 
     //--------------------------
