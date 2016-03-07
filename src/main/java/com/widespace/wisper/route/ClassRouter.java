@@ -1,7 +1,7 @@
 package com.widespace.wisper.route;
 
 
-import com.widespace.wisper.annotations.RPCClassRegistry;
+import com.widespace.wisper.annotations.WisperClassRegistry;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
@@ -21,7 +21,7 @@ public class ClassRouter extends Router
 
     public ClassRouter(@NotNull Class<? extends Wisper> clazz)
     {
-        wisperClassModel = RPCClassRegistry.register(clazz);
+        wisperClassModel = WisperClassRegistry.register(clazz);
     }
 
     public WisperClassModel getWisperClassModel()
@@ -78,7 +78,7 @@ public class ClassRouter extends Router
         });
     }
 
-    private void destroyInstance(AbstractMessage message)
+    private void destroyInstance(AbstractMessage message) throws WisperException
     {
         new WisperInstanceDestructor(message).destroy();
     }
@@ -92,12 +92,12 @@ public class ClassRouter extends Router
     //region Method Calls
     //=====================================================================================
 
-    private void callStaticMethod(AbstractMessage message)
+    private void callStaticMethod(AbstractMessage message) throws WisperException
     {
         new WisperMethodCaller(this, wisperClassModel, message).call();
     }
 
-    private void callInstancecMethod(AbstractMessage message)
+    private void callInstancecMethod(AbstractMessage message) throws WisperException
     {
         new WisperMethodCaller(this, wisperClassModel, message).call();
     }
@@ -105,13 +105,14 @@ public class ClassRouter extends Router
     //=====================================================================================
     //region Events
     //=====================================================================================
-    private void handleStaticEvent(AbstractMessage message)
+    private void handleStaticEvent(AbstractMessage message) throws WisperException
     {
         new WisperEventHandler(this, wisperClassModel, message).handle();
     }
-    private void handleInstanceEvent(AbstractMessage message)
-    {
 
+    private void handleInstanceEvent(AbstractMessage message) throws WisperException
+    {
+        new WisperEventHandler(this, wisperClassModel, message).handle();
     }
 
 }

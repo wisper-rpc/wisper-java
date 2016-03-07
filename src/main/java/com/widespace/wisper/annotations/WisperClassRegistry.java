@@ -21,7 +21,7 @@ import java.util.Arrays;
  * <p/>
  * Created by Ehssan Hoorvash on 16/01/15.
  */
-public class RPCClassRegistry
+public class WisperClassRegistry
 {
 
     public static WisperClassModel register(Class clazz) throws WisperException

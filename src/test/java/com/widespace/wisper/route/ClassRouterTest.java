@@ -1,6 +1,8 @@
 package com.widespace.wisper.route;
 
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.messagetype.Event;
+import com.widespace.wisper.messagetype.RPCEventBuilder;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.json.JSONObject;
@@ -26,7 +28,6 @@ public class ClassRouterTest
         WisperInstanceRegistry.sharedInstance().clear();
         RoutesTestObject.reset();
         classRouter = new ClassRouter(RoutesTestObject.class);
-
     }
 
     @Test
@@ -39,7 +40,9 @@ public class ClassRouterTest
     @Test
     public void givenCreateMessage_InstanceIsSaved() throws Exception
     {
-        sendCreateRequestToClassRouter();
+        ROUTE_PATH = "whatever";
+        Request request = new Request(new JSONObject("{ \"method\" : \"" + ROUTE_PATH + "~\", \"params\" : [], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
+        classRouter.routeMessage(request, "someclass~");
         assertThat(WisperInstanceRegistry.sharedInstance().getInstancesUnderRoute(classRouter), is(notNullValue()));
     }
 
@@ -158,10 +161,29 @@ public class ClassRouterTest
         classRouter.routeMessage(request, ROUTE_PATH);
     }
 
-    private void sendCreateRequestToClassRouter()
+    @Test
+    public void givenStaticEvent_eventHandlerIsCalledOnTestClass() throws Exception
     {
-        Request request = new Request(new JSONObject("{ \"method\" : \"" + ROUTE_PATH + "~\", \"params\" : [], \"id\": \"" + SAMPLE_REQUEST_ID + "\" }"));
-        classRouter.routeMessage(request, "someclass~");
+        ROUTE_PATH = "whatever";
+        Event staticEventMessage = new RPCEventBuilder().withName("nonExistingPropertyName").withMethodName("something.somethingElse").buildStaticEvent();
+
+        assertThat(RoutesTestObject.isStaticEventReceived(), is(false));
+        classRouter.routeMessage(staticEventMessage, ROUTE_PATH);
+        assertThat(RoutesTestObject.isStaticEventReceived(), is(true));
+    }
+
+    @Test
+    public void givenInstanceEvent_eventHandlerIsCalledOnTestClass() throws Exception
+    {
+        ROUTE_PATH = "whatever";
+        RoutesTestObject anInstance = new RoutesTestObject();
+        WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anInstance, "ABCD-1");
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
+        Event staticEventMessage = new RPCEventBuilder().withName("nonExistingPropertyName").withMethodName("something.somethingElse").withInstanceIdentifier(instanceModel1.getInstanceIdentifier()).buildInstanceEvent();
+
+        assertThat(anInstance.isInstanceEventReceived(), is(false));
+        classRouter.routeMessage(staticEventMessage, ROUTE_PATH);
+        assertThat(anInstance.isInstanceEventReceived(), is(true));
     }
 }
 
