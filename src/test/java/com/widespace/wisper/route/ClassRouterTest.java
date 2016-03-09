@@ -1,6 +1,7 @@
 package com.widespace.wisper.route;
 
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.WisperEventBuilder;
 import com.widespace.wisper.messagetype.Request;
@@ -8,10 +9,16 @@ import com.widespace.wisper.messagetype.error.WisperException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -189,14 +196,40 @@ public class ClassRouterTest
     @Test
     public void givenAlreadyExistingInstance_canAddToRegistry() throws Exception
     {
-        ROUTE_PATH = "whatever";
         RoutesTestObject anInstance = new RoutesTestObject();
         WisperInstanceModel theInstanceModel = classRouter.addInstance(anInstance);
+        assertThat(theInstanceModel, is(notNullValue()));
 
         WisperInstanceModel found = WisperInstanceRegistry.sharedInstance().findInstanceUnderRoute(theInstanceModel.getInstanceIdentifier(), classRouter);
         assertThat(found, is(notNullValue()));
         assertThat(found.getInstance(), is(instanceOf(RoutesTestObject.class)));
         assertThat((RoutesTestObject) (found.getInstance()), is(anInstance));
+    }
+
+    @Test
+    public void givenAlreadyExistingInstance_reverseRoutesTheCreationEvent() throws Exception
+    {
+        classRouter = spy(new ClassRouter(RoutesTestObject.registerRpcClass()));
+        RoutesTestObject anInstance = new RoutesTestObject();
+        WisperInstanceModel theInstanceModel = classRouter.addInstance(anInstance);
+
+        ArgumentCaptor<AbstractMessage> captor = ArgumentCaptor.forClass(AbstractMessage.class);
+        verify(classRouter).reverseRoute(captor.capture(), isNull(String.class));
+        AbstractMessage reversedMessage = captor.getValue();
+
+        assertThat(reversedMessage, is(notNullValue()));
+        assertThat(reversedMessage, is(instanceOf(Event.class)));
+
+        Event passedEvent = (Event) reversedMessage;
+        assertThat(passedEvent.getName(), is("~"));
+        assertThat(passedEvent.getMethodName(), is("!"));
+    }
+
+    @Test
+    public void existingInstance_canBeRemoved() throws Exception
+    {
+
+
     }
 }
 

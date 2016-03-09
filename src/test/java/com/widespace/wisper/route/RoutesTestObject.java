@@ -23,7 +23,7 @@ class RoutesTestObject implements Wisper
     public static WisperClassModel registerRpcClass()
     {
         //1.Build a class model
-        WisperClassModel classModel = new WisperClassModel(RoutesTestObject.class, "wisp.router.test");
+        WisperClassModel classModel = new WisperClassModel(RoutesTestObject.class);
 
         //2.Build class methods of instance or static methods you might need
         WisperMethod appendMethod = new WisperMethod("append", "appendString", WisperParameterType.STRING, WisperParameterType.STRING);
@@ -85,7 +85,7 @@ class RoutesTestObject implements Wisper
     //region Getter Setter
     //===========================================================================
 
-
+//    No support for static prop getter/setter.
 //    public static String getTestProp()
 //    {
 //        return testProp;

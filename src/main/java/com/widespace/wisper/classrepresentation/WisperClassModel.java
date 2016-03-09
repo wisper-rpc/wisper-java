@@ -40,6 +40,12 @@ public class WisperClassModel
         this.mapName = mappingName;
     }
 
+    public WisperClassModel(Class<?> clazz)
+    {
+        this();
+        this.classRef = clazz;
+    }
+
     /**
      * Adds an instance method to the class implementation.
      *

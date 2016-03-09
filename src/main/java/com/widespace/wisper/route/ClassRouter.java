@@ -133,7 +133,7 @@ public class ClassRouter extends Router
         idAndProps.put("props", ClassUtils.fetchInitializedProperties(instanceModel, wisperClassModel));
         Event event = new WisperEventBuilder().withName("~").withValue(idAndProps).buildStaticEvent();
 
-        reverseRoute(event, event.getMethodName());
+        reverseRoute(event, null);
 
         return instanceModel;
     }
