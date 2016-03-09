@@ -1,6 +1,6 @@
 package com.widespace.wisper.annotations;
 
-import com.widespace.wisper.base.RPCUtilities;
+import com.widespace.wisper.utils.RPCUtilities;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.classrepresentation.WisperProperty;

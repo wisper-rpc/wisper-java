@@ -1,6 +1,6 @@
 package com.widespace.wisper.classrepresentation;
 
-import com.widespace.wisper.base.RPCUtilities;
+import com.widespace.wisper.utils.RPCUtilities;
 
 import java.util.Arrays;
 import java.util.List;

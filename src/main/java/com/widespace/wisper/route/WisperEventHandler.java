@@ -1,12 +1,10 @@
 package com.widespace.wisper.route;
 
-import com.widespace.wisper.base.Constants;
-import com.widespace.wisper.base.RPCUtilities;
+import com.widespace.wisper.utils.RPCUtilities;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
-import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.jetbrains.annotations.NotNull;

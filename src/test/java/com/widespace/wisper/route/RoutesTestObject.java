@@ -129,7 +129,7 @@ class RoutesTestObject implements Wisper
     {
         printedValue = instance.getTestId() + message;
     }
-    
+
 
     @Override
     public void destruct()

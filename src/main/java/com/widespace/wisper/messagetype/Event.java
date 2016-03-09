@@ -1,11 +1,6 @@
 package com.widespace.wisper.messagetype;
 
-import com.widespace.wisper.controller.RemoteObjectCall;
-import com.widespace.wisper.route.WisperCallType;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -31,40 +26,6 @@ public class Event extends Notification
         this.name = name;
         this.value = value;
     }
-
-    public Event(RemoteObjectCall remoteObjectCall)
-    {
-        WisperCallType callType = remoteObjectCall.getCallType();
-        List<Object> parameters = Arrays.asList(remoteObjectCall.getParams());
-
-        String theName = null;
-        Object theValue = null;
-
-        switch (callType)
-        {
-            case STATIC_EVENT:
-            {
-                theName = (String) parameters.get(0);
-                theValue = (parameters.size() > 1) ? parameters.get(1) : null;
-            }
-            break;
-            case INSTANCE_EVENT:
-            {
-                theName = (String) parameters.get(0);
-                theValue = (parameters.size() > 1) ? parameters.get(1) : null;
-            }
-            break;
-            default:
-                break;
-        }
-
-        this.methodName = remoteObjectCall.getMethodName();
-        this.instanceIdentifier = remoteObjectCall.getInstanceIdentifier();
-
-        this.name = theName;
-        this.value = theValue;
-    }
-
 
     public String getInstanceIdentifier()
     {

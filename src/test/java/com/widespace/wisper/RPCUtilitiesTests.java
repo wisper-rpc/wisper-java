@@ -1,6 +1,6 @@
 package com.widespace.wisper;
 
-import com.widespace.wisper.base.RPCUtilities;
+import com.widespace.wisper.utils.RPCUtilities;
 import com.widespace.wisper.classrepresentation.WisperParameterType;
 import org.junit.Test;
 
