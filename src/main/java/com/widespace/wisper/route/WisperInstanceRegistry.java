@@ -70,7 +70,7 @@ public class WisperInstanceRegistry
     public WisperInstanceModel findInstanceWithId(@NotNull String instanceIdentifier)
     {
         HashMap<Router, HashMap<String, WisperInstanceModel>> allInstances = getInstances();
-        if (allInstances == null || instanceIdentifier == null)
+        if (allInstances == null)
             return null;
 
         for (Router router : allInstances.keySet())

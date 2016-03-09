@@ -1,11 +1,10 @@
 package com.widespace.wisper.route;
 
-import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.Notification;
-import com.widespace.wisper.messagetype.RPCEventBuilder;
+import com.widespace.wisper.messagetype.WisperEventBuilder;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.junit.Before;
@@ -44,7 +43,7 @@ public class WisperEventHandlerTest
     @Test
     public void givenStaticEventTypeWithExistingName_publicStaticPropertySetsOnClass() throws Exception
     {
-        Event staticEvent = new RPCEventBuilder().withMethodName("a.b.c").withName("testProp").withValue("xxxy").buildStaticEvent();
+        Event staticEvent = new WisperEventBuilder().withMethodName("a.b.c").withName("testProp").withValue("xxxy").buildStaticEvent();
         WisperClassModel classModel = RoutesTestObject.registerRpcClass();
 
         assertThat(RoutesTestObject.testProp, is(nullValue()));
@@ -55,7 +54,7 @@ public class WisperEventHandlerTest
     @Test
     public void givenStaticEventTypeWithNonExistingName_staicHandlerCalledOnClass() throws Exception
     {
-        Event staticEvent = new RPCEventBuilder().withMethodName("a.b.c").withName("nonExistingName").withValue("xxxy").buildStaticEvent();
+        Event staticEvent = new WisperEventBuilder().withMethodName("a.b.c").withName("nonExistingName").withValue("xxxy").buildStaticEvent();
         WisperClassModel classModel = RoutesTestObject.registerRpcClass();
 
         assertThat(RoutesTestObject.testProp, is(nullValue()));
@@ -67,7 +66,7 @@ public class WisperEventHandlerTest
     @Test
     public void givenStaticEventTypeWithNonExistingNameAndHandler_shouldRunSilently() throws Exception
     {
-        Event staticEvent = new RPCEventBuilder().withMethodName("a.b.c").withName("nonExistingName").withValue("xxxy").buildStaticEvent();
+        Event staticEvent = new WisperEventBuilder().withMethodName("a.b.c").withName("nonExistingName").withValue("xxxy").buildStaticEvent();
         WisperClassModel classModel = mock(WisperClassModel.class);
 
         new WisperEventHandler(mock(Router.class), classModel, staticEvent).handle();
@@ -76,7 +75,7 @@ public class WisperEventHandlerTest
     @Test(expected = WisperException.class)
     public void givenInstanceEvent_shouldThrowExceptionOnNonExistingInstance() throws Exception
     {
-        Event instanceEvent = new RPCEventBuilder().withMethodName("a.b.c").withName("nonExistingName").withValue("xxxy").withInstanceIdentifier("nonExistent-1123").buildInstanceEvent();
+        Event instanceEvent = new WisperEventBuilder().withMethodName("a.b.c").withName("nonExistingName").withValue("xxxy").withInstanceIdentifier("nonExistent-1123").buildInstanceEvent();
         new WisperEventHandler(mock(Router.class), RoutesTestObject.registerRpcClass(), instanceEvent).handle();
     }
 
@@ -87,7 +86,7 @@ public class WisperEventHandlerTest
         WisperInstanceModel instanceModel = createInstanceAndReturnWisperInstance("a.b.c");
         RoutesTestObject actualInstance = (RoutesTestObject) instanceModel.getInstance();
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, mock(Router.class));
-        Event instanceEventMessage = new RPCEventBuilder().withMethodName("a.b.c").withName("prop").withValue(SAMPLE_VALUE).withInstanceIdentifier(instanceModel.getInstanceIdentifier()).buildInstanceEvent();
+        Event instanceEventMessage = new WisperEventBuilder().withMethodName("a.b.c").withName("prop").withValue(SAMPLE_VALUE).withInstanceIdentifier(instanceModel.getInstanceIdentifier()).buildInstanceEvent();
 
         assertThat(actualInstance.getProp(), is(nullValue()));
         new WisperEventHandler(mock(Router.class), instanceModel.getWisperClassModel(), instanceEventMessage).handle();
@@ -102,7 +101,7 @@ public class WisperEventHandlerTest
         RoutesTestObject actualInstance = (RoutesTestObject) instanceModel.getInstance();
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, mock(Router.class));
 
-        Event instanceEventMessage = new RPCEventBuilder().withMethodName("a.b.c").withName("prop").withValue(SAMPLE_VALUE).withInstanceIdentifier(instanceModel.getInstanceIdentifier()).buildInstanceEvent();
+        Event instanceEventMessage = new WisperEventBuilder().withMethodName("a.b.c").withName("prop").withValue(SAMPLE_VALUE).withInstanceIdentifier(instanceModel.getInstanceIdentifier()).buildInstanceEvent();
 
         assertThat(actualInstance.getProp(), is(nullValue()));
         new WisperEventHandler(mock(Router.class), instanceModel.getWisperClassModel(), instanceEventMessage).handle();

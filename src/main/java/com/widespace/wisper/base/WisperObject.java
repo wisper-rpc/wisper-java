@@ -1,7 +1,7 @@
 package com.widespace.wisper.base;
 
 import com.widespace.wisper.classrepresentation.WisperClassModel;
-import com.widespace.wisper.controller.RemoteObjectController;
+import com.widespace.wisper.controller.Gateway;
 
 /**
  * This class could be extended by all the classes that require registration to the RPC
@@ -10,7 +10,7 @@ import com.widespace.wisper.controller.RemoteObjectController;
  */
 public abstract class WisperObject implements Wisper
 {
-    protected RemoteObjectController remoteObjectController;
+    protected Gateway gateway;
 
     /**
      * This method must be implemented by any object desiring to register itself as RPC
@@ -23,11 +23,6 @@ public abstract class WisperObject implements Wisper
         return null;
     }
 
-    @Override
-    public void setRemoteObjectController(RemoteObjectController remoteObjectController)
-    {
-        this.remoteObjectController = remoteObjectController;
-    }
 
     @Override
     public void destruct()

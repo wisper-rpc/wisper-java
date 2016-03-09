@@ -2,7 +2,6 @@ package com.widespace.wisper.route;
 
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
-import com.widespace.wisper.controller.RemoteObjectController;
 import com.widespace.wisper.messagetype.Event;
 
 
@@ -130,14 +129,7 @@ class RoutesTestObject implements Wisper
     {
         printedValue = instance.getTestId() + message;
     }
-
-
-    //region
-    @Override
-    public void setRemoteObjectController(RemoteObjectController remoteObjectController)
-    {
-
-    }
+    
 
     @Override
     public void destruct()
