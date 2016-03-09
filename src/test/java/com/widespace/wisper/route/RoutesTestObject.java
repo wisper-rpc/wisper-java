@@ -18,6 +18,7 @@ class RoutesTestObject implements Wisper
     public static String testProp;
     private String prop;
     private boolean instanceEventReceived;
+    private ClassRouter classRouter;
 
     public static WisperClassModel registerRpcClass()
     {
@@ -32,7 +33,7 @@ class RoutesTestObject implements Wisper
         WisperMethod appendStaticMethod = new WisperMethod("append", "appendStringStatic", WisperParameterType.STRING, WisperParameterType.STRING);
         WisperMethod printStaticMethod = new WisperMethod("printInstanceId", "printInstanceIdStatic", WisperParameterType.INSTANCE, WisperParameterType.STRING);
 
-        WisperProperty staticProperty = new WisperProperty("testProp", WisperPropertyAccess.READ_WRITE, "setTestProp", WisperParameterType.STRING);
+        //WisperProperty staticProperty = new WisperProperty("testProp", WisperPropertyAccess.READ_WRITE, "setTestProp", WisperParameterType.STRING);
         WisperProperty instanceProperty = new WisperProperty("prop", WisperPropertyAccess.READ_WRITE, "setProp", WisperParameterType.STRING);
 
         //3. Add the method models to your class model
@@ -43,7 +44,7 @@ class RoutesTestObject implements Wisper
         classModel.addStaticMethod(appendStaticMethod);
         classModel.addStaticMethod(printStaticMethod);
 
-        classModel.addProperty(staticProperty);
+        //classModel.addProperty(staticProperty);
         classModel.addProperty(instanceProperty);
 
         //4. Return the class model
@@ -85,15 +86,15 @@ class RoutesTestObject implements Wisper
     //===========================================================================
 
 
-    public static String getTestProp()
-    {
-        return testProp;
-    }
-
-    public static void setTestProp(String testProp)
-    {
-        RoutesTestObject.testProp = testProp;
-    }
+//    public static String getTestProp()
+//    {
+//        return testProp;
+//    }
+//
+//    public static void setTestProp(String testProp)
+//    {
+//        RoutesTestObject.testProp = testProp;
+//    }
 
     public String getProp()
     {
@@ -103,6 +104,11 @@ class RoutesTestObject implements Wisper
     public void setProp(String prop)
     {
         this.prop = prop;
+    }
+
+    public ClassRouter getClassRouter()
+    {
+        return classRouter;
     }
 
     //region Methods
@@ -130,6 +136,12 @@ class RoutesTestObject implements Wisper
         printedValue = instance.getTestId() + message;
     }
 
+
+    @Override
+    public void setClassRouter(ClassRouter classRouter)
+    {
+        this.classRouter = classRouter;
+    }
 
     @Override
     public void destruct()

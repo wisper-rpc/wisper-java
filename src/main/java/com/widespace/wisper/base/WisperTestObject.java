@@ -2,6 +2,7 @@ package com.widespace.wisper.base;
 
 
 import com.widespace.wisper.classrepresentation.*;
+import com.widespace.wisper.route.ClassRouter;
 
 /**
  * Merely for testing purposes
@@ -83,6 +84,12 @@ public class WisperTestObject extends WisperObject
     public void setSampleProperty(String sampleProperty)
     {
         this.sampleProperty = sampleProperty;
+    }
+
+    @Override
+    public void setClassRouter(ClassRouter classRouter)
+    {
+
     }
 }
 

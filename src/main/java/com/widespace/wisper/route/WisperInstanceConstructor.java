@@ -76,7 +76,7 @@ public class WisperInstanceConstructor
         Response response = req.createResponse();
         HashMap<String, Object> idWithProperties = new HashMap<String, Object>();
         idWithProperties.put("id", instanceModel.getInstanceIdentifier());
-        idWithProperties.put("props", fetchInitializedProperties(instanceModel));
+        idWithProperties.put("props", ClassUtils.fetchInitializedProperties(instanceModel, classModel));
         response.setResult(idWithProperties);
 
         if (req.getResponseBlock() != null)
@@ -123,57 +123,5 @@ public class WisperInstanceConstructor
         }
     }
 
-
-    private HashMap<String, Object> fetchInitializedProperties(WisperInstanceModel wisperInstanceModel)
-    {
-        HashMap<String, Object> initializedProperties = new HashMap<String, Object>();
-        HashMap<String, WisperProperty> properties = classModel.getProperties();
-        String currentPropertyName = null;
-        try
-        {
-            for (String propertyName : properties.keySet())
-            {
-                currentPropertyName = propertyName;
-
-                WisperProperty property = properties.get(propertyName);
-                Wisper instance = wisperInstanceModel.getInstance();
-
-
-                //Check if there is a getter implemented.
-                Method getter = instance.getClass().getMethod(property.getSetterName().replace("set", "get"));
-                Object value = getter.invoke(instance);
-
-                //Check if the value is something other than null (default)
-                if (value == null)
-                {
-                    continue;
-                }
-
-                if (property.getSetterMethodParameterType() == WisperParameterType.INSTANCE)
-                {
-                    WisperInstanceModel WisperInstanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId((String) value);
-                    value = WisperInstanceModel.getInstanceIdentifier();
-                }
-
-                initializedProperties.put(propertyName, value);
-
-
-            }
-        } catch (NoSuchMethodException e)
-        {
-            String errorMessage = "Getter method for the property " + currentPropertyName + "not found in class " + wisperInstanceModel.getWisperClassModel().getMapName() + ". Does the getter method actually exist in the class? ";
-            throw new WisperException(Error.GETTER_METHOD_NOT_FOUND, e, errorMessage);
-        } catch (IllegalAccessException e)
-        {
-            String errorMessage = "Getter method for the property " + currentPropertyName + "not accessible in class " + wisperInstanceModel.getWisperClassModel().getMapName() + ". Is the getter method public?";
-            throw new WisperException(Error.GETTER_METHOD_NOT_ACCESSIBLE, e, errorMessage);
-        } catch (InvocationTargetException e)
-        {
-            String errorMessage = "Getter method for the property " + currentPropertyName + "could not be invoked in class  " + wisperInstanceModel.getWisperClassModel().getMapName();
-            throw new WisperException(Error.GETTER_METHOD_INVOCATION_ERROR, e, errorMessage);
-        }
-
-        return initializedProperties;
-    }
 }
 

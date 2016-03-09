@@ -6,8 +6,13 @@ import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.Event;
+import com.widespace.wisper.messagetype.WisperEventBuilder;
 import com.widespace.wisper.messagetype.error.WisperException;
+import com.widespace.wisper.utils.ClassUtils;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
 
 public class ClassRouter extends Router
 {
@@ -115,4 +120,21 @@ public class ClassRouter extends Router
         new WisperEventHandler(this, wisperClassModel, message).handle();
     }
 
+    //=====================================================================================
+    //region Other
+    //=====================================================================================
+    public WisperInstanceModel addInstance(Wisper anInstance)
+    {
+        WisperInstanceModel instanceModel = new WisperInstanceModel(wisperClassModel, anInstance, anInstance.toString());
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, this);
+
+        HashMap<String, Object> idAndProps = new HashMap<String, Object>();
+        idAndProps.put("id", instanceModel.getInstanceIdentifier());
+        idAndProps.put("props", ClassUtils.fetchInitializedProperties(instanceModel, wisperClassModel));
+        Event event = new WisperEventBuilder().withName("~").withValue(idAndProps).buildStaticEvent();
+
+        reverseRoute(event, event.getMethodName());
+
+        return instanceModel;
+    }
 }

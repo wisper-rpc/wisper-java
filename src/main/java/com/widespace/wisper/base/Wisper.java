@@ -1,13 +1,14 @@
 package com.widespace.wisper.base;
 
 import com.widespace.wisper.controller.Gateway;
+import com.widespace.wisper.route.ClassRouter;
 
 /**
  * Created by Ehssan Hoorvash on 21/05/14.
  */
 public interface Wisper
 {
-    //gets the remote object controller for this RPC Class instance in case of creation
+    void setClassRouter(ClassRouter classRouter);
 
     //This method is called when this RPC class instance is destructed
     void destruct();

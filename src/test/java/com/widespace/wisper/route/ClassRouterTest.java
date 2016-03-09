@@ -186,6 +186,18 @@ public class ClassRouterTest
         assertThat(anInstance.isInstanceEventReceived(), is(true));
     }
 
+    @Test
+    public void givenAlreadyExistingInstance_canAddToRegistry() throws Exception
+    {
+        ROUTE_PATH = "whatever";
+        RoutesTestObject anInstance = new RoutesTestObject();
+        WisperInstanceModel theInstanceModel = classRouter.addInstance(anInstance);
+
+        WisperInstanceModel found = WisperInstanceRegistry.sharedInstance().findInstanceUnderRoute(theInstanceModel.getInstanceIdentifier(), classRouter);
+        assertThat(found, is(notNullValue()));
+        assertThat(found.getInstance(), is(instanceOf(RoutesTestObject.class)));
+        assertThat((RoutesTestObject) (found.getInstance()), is(anInstance));
+    }
 }
 
 

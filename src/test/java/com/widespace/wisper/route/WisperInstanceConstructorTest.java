@@ -144,7 +144,6 @@ public class WisperInstanceConstructorTest
         assertThat(exception.getErrorCode(), is(Error.CONSTRUCTOR_NOT_FOUND.getCode()));
     }
 
-
     @Test
     public void testGivenConstructor_returnsInitializedPropertiesInResponse() throws Exception
     {
