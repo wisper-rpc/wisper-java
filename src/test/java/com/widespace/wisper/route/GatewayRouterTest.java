@@ -2,9 +2,11 @@ package com.widespace.wisper.route;
 
 import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.GatewayCallback;
-import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.*;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -65,9 +67,53 @@ public class GatewayRouterTest
         //exception will be thrown if path is not registered.
     }
 
+    @Test
+    public void reverseRouteSendsMessagesToGateway() throws Exception
+    {
+        Gateway gatewayMock = mock(Gateway.class);
+        gatewayRouter = new GatewayRouter(gatewayMock);
 
+        gatewayRouter.register("a.b.c", RoutesTestObject.class);
+        AbstractMessage someMessage = mock(AbstractMessage.class);
+        gatewayRouter.reverseRoute(someMessage, null);
 
+        verify(gatewayMock).sendMessage(someMessage);
+    }
 
+    @Test
+    public void givenEvent_reverseRoutePassesTheSameEventOn() throws Exception
+    {
+        Gateway gatewayMock = mock(Gateway.class);
+        gatewayRouter = new GatewayRouter(gatewayMock);
+
+        Event event = new WisperEventBuilder().withName("aName").withValue("aValue").withInstanceIdentifier("id").buildInstanceEvent();
+        gatewayRouter.reverseRoute(event, null);
+
+        ArgumentCaptor<AbstractMessage> captor = ArgumentCaptor.forClass(AbstractMessage.class);
+        verify(gatewayMock).sendMessage(captor.capture());
+        AbstractMessage preparedMessage = captor.getValue();
+
+        assertThat(preparedMessage, is(notNullValue()));
+        assertThat(preparedMessage, instanceOf(Notification.class));
+        assertThat(preparedMessage, instanceOf(Event.class));
+    }
+
+    @Test
+    public void givenEvent_reverseRouteChangesTheMethodNameAppropriately() throws Exception
+    {
+        Gateway gatewayMock = mock(Gateway.class);
+        gatewayRouter = new GatewayRouter(gatewayMock);
+
+        Event event = new WisperEventBuilder().withName("aName").withValue("aValue").withInstanceIdentifier("id").buildInstanceEvent();
+        gatewayRouter.reverseRoute(event, "a.b.c");
+
+        ArgumentCaptor<AbstractMessage> captor = ArgumentCaptor.forClass(AbstractMessage.class);
+        verify(gatewayMock).sendMessage(captor.capture());
+        Event preparedMessage = (Event) captor.getValue();
+
+        String expectedMethodName= "a.b.c:!";
+        assertThat(preparedMessage.getMethodName(), is(expectedMethodName));
+    }
 
 
 }

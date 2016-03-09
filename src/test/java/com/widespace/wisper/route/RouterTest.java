@@ -2,6 +2,7 @@ package com.widespace.wisper.route;
 
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.WisperEventBuilder;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.json.JSONObject;
@@ -10,16 +11,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 public class RouterTest
 {
     private Router router;
-    private final static Request WRONG_REQUEST = new Request(new JSONObject("{\"id\":\"1234\", \"method\":\"a.x.y.z:a\", \"params\":[\"index_1\", \"index_2\"] }"));
 
     @Before
     public void setUp() throws Exception
@@ -62,17 +64,78 @@ public class RouterTest
         assertThat(router2.hasRoute("heaven"), is(true));
     }
 
+    @Test
+    public void exposeRoute_setsNamespacesProperly() throws Exception
+    {
+        Router anotherRouter = new Router();
+        router.exposeRoute("stairway.to.heaven", anotherRouter);
+
+        Router router1 = this.router.getRoutes().get("stairway");
+        assertThat(router1.getNamespace(), is("stairway"));
+
+        Router router2 = router1.getRoutes().get("to");
+        assertThat(router2.getNamespace(), is("to"));
+
+        Router router3 = router2.getRoutes().get("heaven");
+        assertThat(router3.getNamespace(), is("heaven"));
+    }
+
     @Test(expected = WisperException.class)
     public void routerWillThrowExceptionOnRouteNotFound() throws Exception
     {
+        Request WRONG_REQUEST = new Request(new JSONObject("{\"id\":\"1234\", \"method\":\"a.x.y.z:a\", \"params\":[\"index_1\", \"index_2\"] }"));
         router.routeMessage(WRONG_REQUEST, "a.b.c");
     }
 
     @Test(expected = WisperException.class)
     public void routerWillThrowExceptionOnNullPath() throws Exception
     {
+        Request WRONG_REQUEST = new Request(new JSONObject("{\"id\":\"1234\", \"method\":\"a.x.y.z:a\", \"params\":[\"index_1\", \"index_2\"] }"));
         router.routeMessage(WRONG_REQUEST, null);
     }
+
+    @Test
+    public void canAcceptParentRoute() throws Exception
+    {
+        Router parentRouter = new Router();
+        router.setParentRoute(parentRouter);
+
+        assertThat(router.getParentRoute(), is(notNullValue()));
+        assertThat(router.getParentRoute(), is(parentRouter));
+    }
+
+
+    @Test
+    public void canAcceptNameSpace() throws Exception
+    {
+        String namespace = "myNamespace";
+        router = new Router(namespace);
+        assertThat(router.getNamespace(), is(notNullValue()));
+        assertThat(router.getNamespace(), is(namespace));
+    }
+
+    @Test
+    public void givenNoNamespace_nameSpaceIsNull() throws Exception
+    {
+        assertThat(router.getNamespace(), is(nullValue()));
+    }
+
+    @Test
+    public void givenParentRoute_canReverseRouteToParent() throws Exception
+    {
+        // parent <-- router <-- (outer) <= (inner) : innerRouter
+        router = spy(new Router());
+        Router innerRouter = spy(new Router());
+        router.exposeRoute("outerPath.innerPath", innerRouter);
+        router.setParentRoute(new Router("parent"));
+
+        AbstractMessage message = new WisperEventBuilder().withName("name").withValue("something").buildStaticEvent();
+        String path = null;
+
+        innerRouter.reverseRoute(message, path);
+        verify(router).reverseRoute(eq(message), eq("outerPath.innerPath"));
+    }
+
 
     @Test
     public void routerWillAcceptAndRouteMessages() throws Exception
@@ -85,6 +148,6 @@ public class RouterTest
 
         router.routeMessage(notificaton, notificaton.getMethodName());
 
-        verify(router_y).routeMessage((AbstractMessage) anyObject(),anyString());
+        verify(router_y).routeMessage((AbstractMessage) anyObject(), anyString());
     }
 }

@@ -3,8 +3,8 @@ package com.widespace.wisper.route;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
-import com.widespace.wisper.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,9 +17,17 @@ public class Router
     private HashMap<String, Router> routes;
     private Router parentRoute;
 
+    private String namespace;
+
     public Router()
     {
         routes = new HashMap<String, Router>();
+    }
+
+    public Router(String namespace)
+    {
+        this();
+        this.namespace = namespace;
     }
 
     /**
@@ -27,7 +35,7 @@ public class Router
      * is thrown.
      *
      * @param message the message to be routed.
-     * @param path the path the message is supposed to be routed to.
+     * @param path    the path the message is supposed to be routed to.
      * @throws WisperException when no route is found for the given path.
      */
     public void routeMessage(AbstractMessage message, String path) throws WisperException
@@ -47,7 +55,7 @@ public class Router
         String result = path.equals(firstChunk) ? "" : path.substring(firstChunk.length() + 1);
         String[] split = result.split(":");
         result = split[0];
-        result = result.replace("~","");
+        result = result.replace("~", "");
         return result;
     }
 
@@ -78,7 +86,7 @@ public class Router
         if (finalChunkAddedToRoutes(router, firstChunk, remainingPath))
             return;
 
-        routeNextChunks(router, firstChunk, remainingPath);
+        addRouterForNextChunks(router, firstChunk, remainingPath);
     }
 
     private boolean finalChunkAddedToRoutes(@NotNull Router router, String firstChunk, String remainingPath)
@@ -87,16 +95,18 @@ public class Router
         {
             routes.put(firstChunk, router);
             router.setParentRoute(this);
+            router.namespace = firstChunk;
             return true;
         }
         return false;
     }
 
-    private void routeNextChunks(@NotNull Router router, String firstChunk, String remainingPath)
+    private void addRouterForNextChunks(@NotNull Router router, String firstChunk, String remainingPath)
     {
         Router newRouter = new Router();
         newRouter.setParentRoute(this);
         routes.put(firstChunk, newRouter);
+        newRouter.namespace = firstChunk;
 
         newRouter.exposeRoute(remainingPath, router);
     }
@@ -128,4 +138,17 @@ public class Router
     {
         this.parentRoute = parentRoute;
     }
+
+    public String getNamespace()
+    {
+        return namespace;
+    }
+
+    public void reverseRoute(@NotNull AbstractMessage message, @Nullable String path)
+    {
+        String newPath = (path == null) ? namespace : namespace + "." + path;
+        if (parentRoute != null)
+            parentRoute.reverseRoute(message, newPath);
+    }
+
 }
