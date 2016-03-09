@@ -10,18 +10,17 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Matchers;
+import org.mockito.verification.VerificationMode;
 
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 public class ClassRouterTest
 {
@@ -226,8 +225,34 @@ public class ClassRouterTest
     }
 
     @Test
-    public void existingInstance_canBeRemoved() throws Exception
+    public void whenExistingInstanceRemoveCalled_instanceIsRemoved() throws Exception
     {
+        classRouter = spy(new ClassRouter(RoutesTestObject.registerRpcClass()));
+        RoutesTestObject anInstance = new RoutesTestObject();
+        WisperInstanceModel theInstanceModel = classRouter.addInstance(anInstance);
+        WisperInstanceModel found = WisperInstanceRegistry.sharedInstance().findInstanceUnderRoute(theInstanceModel.getInstanceIdentifier(), classRouter);
+        assertThat(found, is(notNullValue()));
+
+        classRouter.removeInstance(theInstanceModel);
+        found = WisperInstanceRegistry.sharedInstance().findInstanceUnderRoute(theInstanceModel.getInstanceIdentifier(), classRouter);
+        assertThat(found, is(nullValue()));
+    }
+
+    @Test
+    public void whenExistingInstanceRemoveCalled_destructIsSent() throws Exception
+    {
+        classRouter = spy(new ClassRouter(RoutesTestObject.registerRpcClass()));
+        RoutesTestObject anInstance = new RoutesTestObject();
+        WisperInstanceModel theInstanceModel = classRouter.addInstance(anInstance);
+        WisperInstanceModel found = WisperInstanceRegistry.sharedInstance().findInstanceUnderRoute(theInstanceModel.getInstanceIdentifier(), classRouter);
+
+        classRouter.removeInstance(theInstanceModel);
+
+        assertThat(anInstance.destructCalled(), is(true));
+
+        ArgumentCaptor<AbstractMessage> captor = ArgumentCaptor.forClass(AbstractMessage.class);
+        verify(classRouter, times(2)).reverseRoute(captor.capture(), anyString());
+        AbstractMessage reversedMessage = captor.getValue();
 
 
     }

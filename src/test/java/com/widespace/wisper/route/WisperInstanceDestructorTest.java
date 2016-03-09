@@ -30,7 +30,7 @@ public class WisperInstanceDestructorTest
         Request request = new Request();
         request.setMethod("a.b.c:call");
         request.setIdentifier("ABCD1");
-        WisperInstanceDestructor destructor = new WisperInstanceDestructor(request);
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(request, mock(Router.class));
     }
 
     @Test
@@ -39,7 +39,7 @@ public class WisperInstanceDestructorTest
         Request request = new Request();
         request.setMethod("a.b.c:~");
         request.setIdentifier("ABCD1");
-        WisperInstanceDestructor destructor = new WisperInstanceDestructor(request);
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(request, mock(Router.class));
         assertThat(destructor, is(notNullValue()));
     }
 
@@ -48,11 +48,12 @@ public class WisperInstanceDestructorTest
     {
         String mapName = "whatever.whatever.thing";
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
-        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
+        Router router = mock(Router.class);
+        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router);
 
         Request destructReq = destructRequest(mapName);
 
-        WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructReq);
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructReq, router);
         RoutesTestObject subject = (RoutesTestObject) wisperInstance.getInstance();
         destructor.destroy(wisperInstance.getInstanceIdentifier());
 
@@ -65,9 +66,10 @@ public class WisperInstanceDestructorTest
     {
         String mapName = "whatever.whatever.thing";
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
-        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
+        Router router = mock(Router.class);
+        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router);
 
-        WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(mapName));
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(mapName), router);
         destructor.destroy("some-fake-identifier");
     }
 
@@ -76,8 +78,9 @@ public class WisperInstanceDestructorTest
     {
         String mapName = "whatever.whatever.thing";
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
-        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
-        WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(mapName));
+        Router router = mock(Router.class);
+        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router);
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(mapName), router);
         destructor.destroy(wisperInstance.getInstanceIdentifier());
 
         WisperInstanceModel instanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId(wisperInstance.getInstanceIdentifier());
@@ -89,7 +92,8 @@ public class WisperInstanceDestructorTest
     {
         String mapName = "whatever.whatever.thing";
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
-        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, mock(Router.class));
+        Router router = mock(Router.class);
+        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router);
         Request request = destructRequest(mapName);
         final boolean[] callblockCalled = {false};
         request.setResponseBlock(new ResponseBlock()
@@ -101,7 +105,7 @@ public class WisperInstanceDestructorTest
             }
         });
 
-        WisperInstanceDestructor destructor = new WisperInstanceDestructor(request);
+        WisperInstanceDestructor destructor = new WisperInstanceDestructor(request, router);
         destructor.destroy(wisperInstance.getInstanceIdentifier());
 
         assertThat(callblockCalled[0], is(true));

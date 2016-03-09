@@ -146,11 +146,10 @@ public class WisperInstanceRegistry
      */
     public boolean removeInstance(@NotNull String instanceIdentifier)
     {
-        HashMap<Router, HashMap<String, WisperInstanceModel>> allInstances = getInstances();
-        if (allInstances == null)
+        if (instances == null)
             return false;
 
-        for (Router router : allInstances.keySet())
+        for (Router router : instances.keySet())
         {
             if (instances.get(router).containsKey(instanceIdentifier))
             {
@@ -160,5 +159,15 @@ public class WisperInstanceRegistry
         }
 
         return false;
+    }
+
+    public boolean removeInstance(@NotNull String instanceIdentifier, @NotNull Router router)
+    {
+        if (instances == null || !instances.containsKey(router))
+            return false;
+
+        instances.get(router).remove(instanceIdentifier);
+        return true;
+
     }
 }

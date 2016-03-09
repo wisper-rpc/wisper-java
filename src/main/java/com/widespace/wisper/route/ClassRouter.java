@@ -85,7 +85,7 @@ public class ClassRouter extends Router
 
     private void destroyInstance(AbstractMessage message) throws WisperException
     {
-        new WisperInstanceDestructor(message).destroy();
+        new WisperInstanceDestructor(message, this).destroy();
     }
 
     private void saveInstance(WisperInstanceModel instanceModel)
@@ -136,5 +136,10 @@ public class ClassRouter extends Router
         reverseRoute(event, null);
 
         return instanceModel;
+    }
+
+    public void removeInstance(WisperInstanceModel instanceModel)
+    {
+        new WisperInstanceDestructor(this).destroy(instanceModel.getInstanceIdentifier());
     }
 }
