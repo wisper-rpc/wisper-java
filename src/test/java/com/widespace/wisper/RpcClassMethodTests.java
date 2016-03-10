@@ -6,6 +6,7 @@ import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.classrepresentation.WisperParameterType;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.route.ClassRouter;
 import com.widespace.wisper.route.Router;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,9 +59,8 @@ public class RpcClassMethodTests
     {
         CallBlock sampleCallBlock = new CallBlock()
         {
-
             @Override
-            public void perform(Router router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, AbstractMessage message)
+            public void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, AbstractMessage message)
             {
 
             }

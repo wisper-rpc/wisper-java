@@ -1,12 +1,10 @@
 package com.widespace.wisper.classrepresentation;
 
 import com.widespace.wisper.messagetype.AbstractMessage;
-import com.widespace.wisper.route.Router;
+import com.widespace.wisper.route.ClassRouter;
 
-/**
- * Created by Ehssan Hoorvash on 26/05/14.
- */
+
 public interface CallBlock
 {
-    void perform(Router router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, AbstractMessage message);
+    void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, AbstractMessage message) throws Exception;
 }

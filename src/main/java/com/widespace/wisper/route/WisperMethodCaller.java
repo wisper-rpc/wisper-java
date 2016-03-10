@@ -21,11 +21,11 @@ import static com.widespace.wisper.messagetype.error.Error.WISPER_INSTANCE_INVAL
 
 public class WisperMethodCaller
 {
-    private Router router;
+    private ClassRouter router;
     private WisperClassModel classModel;
     private AbstractMessage message;
 
-    public WisperMethodCaller(@NotNull Router router, @NotNull WisperClassModel classModel, @NotNull AbstractMessage message) throws WisperException
+    public WisperMethodCaller(@NotNull ClassRouter router, @NotNull WisperClassModel classModel, @NotNull AbstractMessage message) throws WisperException
     {
         this.router = router;
         this.classModel = classModel;
@@ -87,13 +87,20 @@ public class WisperMethodCaller
 
     private boolean handledMethodCallBlock(WisperMethod methodModel, WisperInstanceModel wisperInstance)
     {
-        if(methodModel.getCallBlock() != null)
+        try
         {
-            methodModel.getCallBlock().perform(router, wisperInstance, methodModel, message);
-            return true;
-        }
+            if (methodModel.getCallBlock() != null)
+            {
+                methodModel.getCallBlock().perform(router, wisperInstance, methodModel, message);
+                return true;
+            }
 
-        return false;
+            return false;
+
+        } catch (Exception e)
+        {
+            throw new WisperException(Error.METHOD_INVOCATION_ERROR, e, "An exception happened while trying to invoke callBlock on method " + methodModel.getMethodName());
+        }
     }
 
     private void handleUndefinedMethods(WisperMethod methodModel) throws WisperException

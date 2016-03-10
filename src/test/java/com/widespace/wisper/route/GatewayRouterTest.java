@@ -38,7 +38,7 @@ public class GatewayRouterTest
         request.setMethod(methodName);
         Router routerMock = mock(Router.class);
         gatewayRouter.exposeRoute(methodName, routerMock);
-
+        gateway.setCallback(gatewayRouter);
         gateway.handleMessage(request);
 
         verify(routerMock).routeMessage(eq(request), anyString());
