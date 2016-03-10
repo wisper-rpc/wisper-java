@@ -15,9 +15,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class RouterTest
 {
@@ -136,7 +134,6 @@ public class RouterTest
         verify(router).reverseRoute(eq(message), eq("outerPath.innerPath"));
     }
 
-
     @Test
     public void routerWillAcceptAndRouteMessages() throws Exception
     {
@@ -150,4 +147,37 @@ public class RouterTest
 
         verify(router_y).routeMessage((AbstractMessage) anyObject(), anyString());
     }
+
+    @Test
+    public void canFindRootRouter() throws Exception
+    {
+        Router parentRoute = new Router();
+        router.setParentRoute(parentRoute);
+
+        Router theRoot = router.getRootRoute();
+        assertThat(theRoot, is(parentRoute));
+    }
+
+    @Test
+    public void canFindRootRouterOnMultipleRoutes() throws Exception
+    {
+        Router innerRouter = new Router();
+        this.router.exposeRoute("a.b.c", innerRouter);
+
+        Router rootRoute = innerRouter.getRootRoute();
+        assertThat(rootRoute, is(router));
+    }
+
+    @Test
+    public void canFindRootRouterOnMultipleRoutesWithExplicitParent() throws Exception
+    {
+        Router innerRouter = new Router();
+        router.exposeRoute("a.b.c", innerRouter);
+        Router parentRouter = new Router();
+        router.setParentRoute(parentRouter);
+
+        Router rootRoute = innerRouter.getRootRoute();
+        assertThat(rootRoute, is(parentRouter));
+    }
+
 }

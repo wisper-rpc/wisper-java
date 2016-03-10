@@ -1,7 +1,7 @@
 package com.widespace.wisper.base;
 
 import com.widespace.wisper.classrepresentation.WisperClassModel;
-import com.widespace.wisper.controller.Gateway;
+import com.widespace.wisper.route.ClassRouter;
 
 /**
  * This class could be extended by all the classes that require registration to the RPC
@@ -10,7 +10,7 @@ import com.widespace.wisper.controller.Gateway;
  */
 public abstract class WisperObject implements Wisper
 {
-    protected Gateway gateway;
+    protected ClassRouter classRouter;
 
     /**
      * This method must be implemented by any object desiring to register itself as RPC
@@ -30,5 +30,9 @@ public abstract class WisperObject implements Wisper
 
     }
 
-
+    @Override
+    public void setClassRouter(ClassRouter classRouter)
+    {
+        this.classRouter = classRouter;
+    }
 }

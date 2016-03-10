@@ -159,4 +159,12 @@ public class Router
 
         return routes.get(path);
     }
+
+    public Router getRootRoute()
+    {
+        if(this.parentRoute != null)
+            return parentRoute.getRootRoute();
+
+        return this;
+    }
 }

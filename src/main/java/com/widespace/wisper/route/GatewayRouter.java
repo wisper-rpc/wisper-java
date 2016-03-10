@@ -43,9 +43,6 @@ public class GatewayRouter extends Router implements GatewayCallback
     //region Router overrides
     //=====================================================================================
 
-
-
-
     @Override
     public void reverseRoute(@NotNull AbstractMessage message, @Nullable String path)
     {
