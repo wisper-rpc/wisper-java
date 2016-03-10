@@ -1,11 +1,17 @@
 package com.widespace.wisper.controller;
 
 
-import com.widespace.wisper.messagetype.*;
+import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.MessageFactory;
+import com.widespace.wisper.messagetype.RPCMessageType;
+import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.ErrorDomain;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.messagetype.error.RPCErrorMessageBuilder;
+
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,7 +21,7 @@ import java.util.HashMap;
  * Gateway is the receiving end point for RPC messages coming from a
  * WebView end point. The controller will handleMessage the incoming objects and parses
  * them into a model objects that are easier to interact with.
- * <p/>
+ * <p>
  * Created by Ehssan Hoorvash on 21/05/14.
  */
 
@@ -29,7 +35,7 @@ public class Gateway
 
     private static int requestCount = 0;
 
-    public Gateway(GatewayCallback callback)
+    public Gateway(@NotNull GatewayCallback callback)
     {
         this.callback = callback;
         requests = new HashMap<String, Request>();
@@ -88,7 +94,7 @@ public class Gateway
      * handleMessage this request or not, will also handleMessage the request. This is the
      * only method you need to call from the webView delegate to handleMessage RPC
      * Communication.
-     * <p/>
+     * <p>
      * If the message is not meaningful to this gateway, a Wisper Error will be sent back.
      *
      * @param message a string representation of the message, the message is
@@ -231,7 +237,10 @@ public class Gateway
      */
     public void sendMessage(String message)
     {
-        callback.gatewayGeneratedMessage(message);
+        if (callback != null)
+        {
+            callback.gatewayGeneratedMessage(message);
+        }
     }
 
     /**

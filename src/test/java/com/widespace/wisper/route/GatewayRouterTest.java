@@ -3,7 +3,7 @@ package com.widespace.wisper.route;
 import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.messagetype.*;
-import org.hamcrest.Matcher;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -47,7 +47,7 @@ public class GatewayRouterTest
     @Test
     public void canRegisterClassesOnGateway() throws Exception
     {
-        gatewayRouter.register("a.b.c", RoutesTestObject.class);
+        gatewayRouter.register(RoutesTestObject.class, "a.b.c");
         assertThat(gatewayRouter.getRoutes(), is(notNullValue()));
         assertThat(gatewayRouter.getRoutes().containsKey("a"), is(true));
         assertThat(gatewayRouter.getRoutes().get("a"), is(instanceOf(Router.class)));
@@ -61,7 +61,7 @@ public class GatewayRouterTest
         String methodName = "a.b.c~";
         request.setMethod(methodName);
 
-        gatewayRouter.register("a.b.c", RoutesTestObject.class);
+        gatewayRouter.register(RoutesTestObject.class, "a.b.c");
         gateway.handleMessage(request);
 
         //exception will be thrown if path is not registered.
@@ -73,7 +73,7 @@ public class GatewayRouterTest
         Gateway gatewayMock = mock(Gateway.class);
         gatewayRouter = new GatewayRouter(gatewayMock);
 
-        gatewayRouter.register("a.b.c", RoutesTestObject.class);
+        gatewayRouter.register(RoutesTestObject.class, "a.b.c");
         AbstractMessage someMessage = mock(AbstractMessage.class);
         gatewayRouter.reverseRoute(someMessage, null);
 

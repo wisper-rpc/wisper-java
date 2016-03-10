@@ -3,6 +3,7 @@ package com.widespace.wisper.route;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -151,4 +152,11 @@ public class Router
             parentRoute.reverseRoute(message, newPath);
     }
 
+    public Router getRouter(@NotNull String path)
+    {
+        if (routes == null || !routes.containsKey(path))
+            return null;
+
+        return routes.get(path);
+    }
 }
