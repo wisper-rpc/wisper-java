@@ -10,6 +10,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -52,9 +54,22 @@ public class RouterTest
     {
         router.exposeRoute("a", new Router());
         router.exposeRoute("a.b", new Router());
+        router.exposeRoute("a.b.c", new Router());
 
+        HashMap<String, Router> routes = router.getRoutes();
+        assertThat(routes, is(notNullValue()));
+        assertThat(routes.size(), is(1));
+        assertThat(routes.containsKey("a"), is(true));
 
+        Router router_a = routes.get("a");
+        assertThat(router_a.getRoutes(), is(notNullValue()));
+        assertThat(router_a.getRoutes().size(), is(1));
+        assertThat(router_a.getRoutes().containsKey("b"), is(true));
 
+        Router router_b = routes.get("a").getRouter("b");
+        assertThat(router_b.getRoutes(), is(notNullValue()));
+        assertThat(router_b.getRoutes().size(), is(1));
+        assertThat(router_b.getRoutes().containsKey("c"), is(true));
     }
 
     @Test
