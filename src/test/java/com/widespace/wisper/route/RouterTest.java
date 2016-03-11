@@ -111,9 +111,13 @@ public class RouterTest
 
         assertThat(router.getRoutes().get("wisp"), is(notNullValue()));
         assertThat(router.getRoutes().get("wisp").getRoutes().size(), is(1));
-        assertThat(router.getRoutes().get("wisp").getRoutes().get("ui").getRoutes().size(), is(2));
 
-    }
+        HashMap<String, Router> ui_routes = router.getRoutes().get("wisp").getRoutes().get("ui").getRoutes();
+        assertThat(ui_routes, is(notNullValue()));
+        assertThat(ui_routes.size(), is(2));
+        assertThat(ui_routes.containsKey("View1"), is(true));
+        assertThat(ui_routes.containsKey("View2"), is(true));
+}
 
     @Test(expected = WisperException.class)
     public void routerWillThrowExceptionOnRouteNotFound() throws Exception
