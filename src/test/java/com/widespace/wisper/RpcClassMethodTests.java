@@ -60,7 +60,7 @@ public class RpcClassMethodTests
         CallBlock sampleCallBlock = new CallBlock()
         {
             @Override
-            public void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, AbstractMessage message)
+            public void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, Request message) throws Exception
             {
 
             }

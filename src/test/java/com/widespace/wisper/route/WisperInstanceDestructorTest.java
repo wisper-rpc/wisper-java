@@ -49,7 +49,7 @@ public class WisperInstanceDestructorTest
         String mapName = "whatever.whatever.thing";
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
         Router router = mock(Router.class);
-        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router);
+        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router.getRootRoute());
 
         Request destructReq = destructRequest(mapName);
 
@@ -79,7 +79,7 @@ public class WisperInstanceDestructorTest
         String mapName = "whatever.whatever.thing";
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
         Router router = mock(Router.class);
-        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router);
+        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router.getRootRoute());
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(mapName), router);
         destructor.destroy(wisperInstance.getInstanceIdentifier());
 
@@ -93,7 +93,7 @@ public class WisperInstanceDestructorTest
         String mapName = "whatever.whatever.thing";
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
         Router router = mock(Router.class);
-        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router);
+        WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router.getRootRoute());
         Request request = destructRequest(mapName);
         final boolean[] callblockCalled = {false};
         request.setResponseBlock(new ResponseBlock()

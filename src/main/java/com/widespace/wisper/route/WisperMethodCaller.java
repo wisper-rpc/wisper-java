@@ -91,7 +91,7 @@ public class WisperMethodCaller
         {
             if (methodModel.getCallBlock() != null)
             {
-                methodModel.getCallBlock().perform(router, wisperInstance, methodModel, message);
+                methodModel.getCallBlock().perform(router, wisperInstance, methodModel, (Request) message);
                 return true;
             }
 

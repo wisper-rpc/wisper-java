@@ -8,8 +8,10 @@ import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.WisperEventBuilder;
-import com.widespace.wisper.messagetype.error.WisperException;
+import com.widespace.wisper.messagetype.error.*;
+import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.utils.ClassUtils;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -90,7 +92,7 @@ public class ClassRouter extends Router
 
     private void saveInstance(WisperInstanceModel instanceModel)
     {
-        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, this);
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, getRootRoute());
     }
 
     //=====================================================================================
@@ -141,5 +143,16 @@ public class ClassRouter extends Router
     public void removeInstance(WisperInstanceModel instanceModel)
     {
         new WisperInstanceDestructor(this).destroy(instanceModel.getInstanceIdentifier());
+    }
+
+    public Object getGatewayExtra(String extraKey) throws WisperException
+    {
+        Router rootRoute = getRootRoute();
+        if (rootRoute instanceof GatewayRouter)
+        {
+            return ((GatewayRouter) rootRoute).getGateway().getExtra(extraKey);
+        }
+
+        throw new WisperException(Error.UNKNOWN_ERROR, null, "Could not retrieve the value for " + extraKey + "Root of this class router is not a GatewayRouter.");
     }
 }

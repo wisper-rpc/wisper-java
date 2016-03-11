@@ -37,7 +37,7 @@ public class WisperInstanceDestructor
 
     public void destroy(String wisperInstanceIdentifier) throws WisperException
     {
-        WisperInstanceModel instanceModel = WisperInstanceRegistry.sharedInstance().findInstanceUnderRoute(wisperInstanceIdentifier, router);
+        WisperInstanceModel instanceModel = WisperInstanceRegistry.sharedInstance().findInstanceUnderRoute(wisperInstanceIdentifier, router.getRootRoute());
         if (instanceModel == null)
             throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "No such instance has been registered with this router under instance ID :" + wisperInstanceIdentifier);
 
