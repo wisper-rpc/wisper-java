@@ -81,4 +81,18 @@ public class WisperInstanceRegistryTest
         assertThat(found, is(router));
     }
 
+    @Test
+    public void givenExistingInstance_findsTheWisperInstanceIfRegistered() throws Exception
+    {
+        Router router = mock(Router.class);
+        RoutesTestObject actualInstance = new RoutesTestObject();
+        WisperInstanceModel instanceModel = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), actualInstance, "ABCD-1");
+        instanceRegistry.addInstance(instanceModel, router.getRootRoute());
+
+        WisperInstanceModel instanceModelUnderRoute = instanceRegistry.findInstanceUnderRoute(actualInstance, router.getRootRoute());
+
+        assertThat(instanceModelUnderRoute, is(notNullValue()));
+        assertThat(instanceModelUnderRoute.getInstanceIdentifier(), is("ABCD-1"));
+        assertThat(instanceModelUnderRoute, is(instanceModel));
+    }
 }

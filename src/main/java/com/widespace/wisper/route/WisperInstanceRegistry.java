@@ -1,6 +1,7 @@
 package com.widespace.wisper.route;
 
 
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,6 +60,21 @@ public class WisperInstanceRegistry
     {
         HashMap<String, WisperInstanceModel> instancesUnderRoute = (instances != null && instances.get(router) != null) ? instances.get(router) : null;
         return (instancesUnderRoute != null) ? instancesUnderRoute.get(insanceIdentifier) : null;
+    }
+
+    public WisperInstanceModel findInstanceUnderRoute(@NotNull Wisper actualInstance, @NotNull Router router)
+    {
+        HashMap<String, WisperInstanceModel> instancesUnderRoute = (instances != null && instances.get(router) != null) ? instances.get(router) : null;
+        if (instancesUnderRoute == null)
+            return null;
+
+        for (WisperInstanceModel instanceModel : instancesUnderRoute.values())
+        {
+            if (instanceModel.getInstance().equals(actualInstance))
+                return instanceModel;
+        }
+
+        return null;
     }
 
     /**
