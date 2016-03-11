@@ -24,10 +24,11 @@ public class GatewayRouter extends Router implements GatewayCallback
     //=====================================================================================
     //region public Methods
     //=====================================================================================
-    public void register(Class<? extends Wisper> clazz, String path)
+    public ClassRouter register(Class<? extends Wisper> clazz, String path)
     {
         ClassRouter classRouter = new ClassRouter(clazz);
         exposeRoute(path, classRouter);
+        return classRouter;
     }
 
     //=====================================================================================

@@ -82,7 +82,7 @@ public class Router
         String firstChunk = tokens.get(0);
         String remainingPath = getRemainingPath(path, firstChunk);
 
-        rejectAlreadyExistingRoute(firstChunk);
+        rejectAlreadyExistingRoute(firstChunk, remainingPath);
 
         if (finalChunkAddedToRoutes(router, firstChunk, remainingPath))
             return;
@@ -112,11 +112,11 @@ public class Router
         newRouter.exposeRoute(remainingPath, router);
     }
 
-    private void rejectAlreadyExistingRoute(@NotNull String path)
+    private void rejectAlreadyExistingRoute(@NotNull String path, String remainingPath)
     {
-        if (routes.containsKey(path))
+        if (remainingPath.isEmpty() && routes.containsKey(path))
         {
-            throw new WisperException(Error.ROUTE_ALREADY_EXISTS, null, "A route already exists on the router for path " + path);
+            throw new WisperException(Error.ROUTE_ALREADY_EXISTS, null, "A route already exists on the router for path \"" + path + "\"");
         }
     }
 

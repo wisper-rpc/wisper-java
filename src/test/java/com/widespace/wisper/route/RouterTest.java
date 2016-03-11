@@ -48,6 +48,16 @@ public class RouterTest
     }
 
     @Test
+    public void givenRoutesWithSimilarStartPath_shouldNotReject() throws Exception
+    {
+        router.exposeRoute("a", new Router());
+        router.exposeRoute("a.b", new Router());
+
+
+
+    }
+
+    @Test
     public void exposeRouteWorksForMultipleRoutes() throws Exception
     {
         Router anotherRouter = new Router();

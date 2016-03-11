@@ -129,7 +129,7 @@ public class ClassRouter extends Router
     public WisperInstanceModel addInstance(Wisper anInstance)
     {
         WisperInstanceModel instanceModel = new WisperInstanceModel(wisperClassModel, anInstance, anInstance.toString());
-        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, this);
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, this.getRootRoute());
 
         HashMap<String, Object> idAndProps = new HashMap<String, Object>();
         idAndProps.put("id", instanceModel.getInstanceIdentifier());
