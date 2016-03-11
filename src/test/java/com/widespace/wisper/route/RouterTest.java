@@ -205,4 +205,25 @@ public class RouterTest
         assertThat(rootRoute, is(parentRouter));
     }
 
+    @Test
+    public void givenSingleRoute_canRetrieveTheRoute() throws Exception
+    {
+        Router x_Router = new Router();
+        router.exposeRoute("x", x_Router);
+
+        Router retrieved = router.getRouter("x");
+        assertThat(retrieved, is(notNullValue()));
+        assertThat(retrieved, is(x_Router));
+    }
+
+    @Test
+    public void givenCompositeRoute_canRetrieveTheRouter() throws Exception
+    {
+        Router d_router = new Router();
+        this.router.exposeRoute("a.b.c.d", d_router);
+
+        Router retrieved = router.getRouter("a.b.c.d");
+        assertThat(retrieved, is(notNullValue()));
+        assertThat(retrieved, is(d_router));
+    }
 }

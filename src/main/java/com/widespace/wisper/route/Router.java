@@ -152,19 +152,43 @@ public class Router
             parentRoute.reverseRoute(message, newPath);
     }
 
+    /**
+     * Returns the router of the given path, or null if the path is not found.
+     * Works both on single path and composite paths. e.g. "a" or "a.b.c".
+     *
+     * @param path a dot-separated string representing the path.
+     * @return the Router, or null.
+     */
     public Router getRouter(@NotNull String path)
     {
-        if (routes == null || !routes.containsKey(path))
-            return null;
+        List<String> tokens = Arrays.asList(path.split("\\."));
+        String firstChunk = tokens.get(0);
+        String remainingPath = getRemainingPath(path, firstChunk);
+        if (remainingPath.isEmpty())
+        {
+            if (routes == null || !routes.containsKey(firstChunk))
+                return null;
 
-        return routes.get(path);
+            return routes.get(firstChunk);
+        }
+
+        return routes.get(firstChunk).getRouter(remainingPath);
     }
 
+    /**
+     * Returns the root route of this router. A root root is the uppermost parent.
+     * If there is no parent assigned, the router itself is the root.
+     *
+     * @return a Router.
+     */
+    @NotNull
     public Router getRootRoute()
     {
-        if(this.parentRoute != null)
+        if (this.parentRoute != null)
             return parentRoute.getRootRoute();
 
         return this;
     }
+
+
 }
