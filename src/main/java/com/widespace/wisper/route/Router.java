@@ -87,7 +87,7 @@ public class Router
         if (finalChunkAddedToRoutes(router, firstChunk, remainingPath))
             return;
 
-        addRouterForNextChunks(router, firstChunk, remainingPath);
+        addRouterForNextChunk(router, firstChunk, remainingPath);
     }
 
     private boolean finalChunkAddedToRoutes(@NotNull Router router, String firstChunk, String remainingPath)
@@ -102,14 +102,21 @@ public class Router
         return false;
     }
 
-    private void addRouterForNextChunks(@NotNull Router router, String firstChunk, String remainingPath)
+    private void addRouterForNextChunk(@NotNull Router router, String firstChunk, String remainingPath)
     {
-        Router newRouter = new Router();
-        newRouter.setParentRoute(this);
-        routes.put(firstChunk, newRouter);
-        newRouter.namespace = firstChunk;
+        if (!routes.containsKey(firstChunk))
+        {
+            Router newRouter = new Router();
+            newRouter.setParentRoute(this);
+            routes.put(firstChunk, newRouter);
+            newRouter.namespace = firstChunk;
 
-        newRouter.exposeRoute(remainingPath, router);
+            newRouter.exposeRoute(remainingPath, router);
+
+        } else
+        {
+            routes.get(firstChunk).exposeRoute(remainingPath, router);
+        }
     }
 
     private void rejectAlreadyExistingRoute(@NotNull String path, String remainingPath)

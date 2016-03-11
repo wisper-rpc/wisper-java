@@ -103,6 +103,18 @@ public class RouterTest
         assertThat(router3.getNamespace(), is("heaven"));
     }
 
+    @Test
+    public void givenCollidingPaths_exposeWorks() throws Exception
+    {
+        router.exposeRoute("wisp.ui.View1", new Router());
+        router.exposeRoute("wisp.ui.View2", new Router());
+
+        assertThat(router.getRoutes().get("wisp"), is(notNullValue()));
+        assertThat(router.getRoutes().get("wisp").getRoutes().size(), is(1));
+        assertThat(router.getRoutes().get("wisp").getRoutes().get("ui").getRoutes().size(), is(2));
+
+    }
+
     @Test(expected = WisperException.class)
     public void routerWillThrowExceptionOnRouteNotFound() throws Exception
     {
