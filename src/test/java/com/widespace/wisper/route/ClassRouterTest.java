@@ -1,6 +1,9 @@
 package com.widespace.wisper.route;
 
+import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.controller.Gateway;
+import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.WisperEventBuilder;
@@ -254,7 +257,30 @@ public class ClassRouterTest
         verify(classRouter, times(2)).reverseRoute(captor.capture(), anyString());
         AbstractMessage reversedMessage = captor.getValue();
 
+        //TODO: complete
+    }
 
+    @Test
+    public void givenGatewayRouterAsRoot_canRetrieveGateway() throws Exception
+    {
+        ClassRouter innerClassRouter = new ClassRouter(mock(WisperClassModel.class));
+        classRouter.exposeRoute("a.b.c", innerClassRouter);
+        Gateway gateway = new Gateway(mock(GatewayCallback.class));
+        classRouter.setParentRoute(new GatewayRouter(gateway));
+
+        Gateway retrieved = innerClassRouter.getRootGateway();
+        assertThat(retrieved, is(notNullValue()));
+        assertThat(retrieved, is(gateway));
+    }
+
+    @Test(expected = WisperException.class)
+    public void givenNonGatewayRouterAsRoot_throws() throws Exception
+    {
+        ClassRouter innerClassRouter = new ClassRouter(mock(WisperClassModel.class));
+        classRouter.exposeRoute("a.b.c", innerClassRouter);
+        classRouter.setParentRoute(new Router());
+
+        Gateway retrieved = innerClassRouter.getRootGateway();
     }
 }
 

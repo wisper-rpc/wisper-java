@@ -5,6 +5,7 @@ import com.widespace.wisper.annotations.WisperClassRegistry;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.WisperEventBuilder;
@@ -143,6 +144,17 @@ public class ClassRouter extends Router
     public void removeInstance(WisperInstanceModel instanceModel)
     {
         new WisperInstanceDestructor(this).destroy(instanceModel.getInstanceIdentifier());
+    }
+
+    public Gateway getRootGateway()
+    {
+        Router rootRoute = getRootRoute();
+        if (rootRoute instanceof GatewayRouter)
+        {
+            return ((GatewayRouter) rootRoute).getGateway();
+        }
+
+        throw new WisperException(Error.UNKNOWN_ERROR, null, "Could not retrieve a gateway from the root router because the root is not a GatewayRouter.");
     }
 
     public Object getGatewayExtra(String extraKey) throws WisperException
