@@ -28,14 +28,16 @@ public class WisperInstanceConstructor
 {
     private final WisperClassModel classModel;
     private final Request request;
+    private final ClassRouter classRouter;
 
-    public WisperInstanceConstructor(@NotNull WisperClassModel classModel, @NotNull AbstractMessage message)
+    public WisperInstanceConstructor(@NotNull ClassRouter classRouter, @NotNull WisperClassModel classModel, @NotNull AbstractMessage message)
     {
         if (MessageParser.getCallType(message) != WisperCallType.CREATE_INSTANCE)
             throw new WisperException(UNEXPECTED_TYPE_ERROR, null, "Remote instance creator was called with a non-CREATE message type.");
 
         this.request = (Request) message;
         this.classModel = classModel;
+        this.classRouter = classRouter;
     }
 
     public void create(@NotNull RemoteInstanceCreatorCallback callback)
@@ -50,6 +52,7 @@ public class WisperInstanceConstructor
 
             Class<?> classRef = classModel.getClassRef();
             Wisper instance = createInstanceWithReflection(classRef);
+            setClassRouterOnInstance(instance);
             WisperInstanceModel instanceModel = createInstanceModel(instance);
             callback.result(instanceModel, null);
             respondToCreateInstanceRequest(request, instanceModel);
@@ -57,6 +60,30 @@ public class WisperInstanceConstructor
         {
             callback.result(null, e);
         }
+    }
+
+    private void setClassRouterOnInstance(Wisper instance) throws WisperException
+    {
+        try
+        {
+            Method setClassRouterMethod = instance.getClass().getMethod("setClassRouter", ClassRouter.class);
+            setClassRouterMethod.setAccessible(true);
+            setClassRouterMethod.invoke(instance, this.classRouter);
+
+        } catch (NoSuchMethodException e)
+        {
+            String errorMessage = "This should never happen! Instance creation did not complete. Method setClassRouter could not be found on this class: " + classModel.getClassRef();
+            throw new WisperException(Error.METHOD_NOT_FOUND, e, errorMessage);
+        } catch (InvocationTargetException e)
+        {
+            String errorMessage = "This should never happen! Instance creation did not complete. Method setClassRouter was found could not be invoked on this class: " + classModel.getClassRef();
+            throw new WisperException(Error.METHOD_INVOCATION_ERROR, e, errorMessage);
+        } catch (IllegalAccessException e)
+        {
+            String errorMessage = "This should never happen! Instance creation did not complete. Method setClassRouter was found could not be accessed on this class: " + classModel.getClassRef();
+            throw new WisperException(Error.METHOD_NOT_ACCESSIBLE, e, errorMessage);
+        }
+
     }
 
     private boolean handleBlockConstructor(RemoteInstanceCreatorCallback callback)
