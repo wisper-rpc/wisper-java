@@ -1,11 +1,11 @@
 package com.widespace.wisper.route;
 
+import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
+import org.json.JSONObject;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 
@@ -42,6 +42,8 @@ public class MessageParserTest
         WisperCallType callType = MessageParser.getCallType(request);
         assertThat(callType, is(WisperCallType.INSTANCE_EVENT));
     }
+
+
 
     @Test
     public void givenStaticMethodCallMessage_methodNameParses() throws Exception

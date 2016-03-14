@@ -10,6 +10,7 @@ import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -99,7 +100,7 @@ public class WisperMethodCaller
 
         } catch (Exception e)
         {
-            throw new WisperException(Error.METHOD_INVOCATION_ERROR, e, "An exception happened while trying to invoke callBlock on method " + methodModel.getMethodName());
+            throw new WisperException(Error.METHOD_INVOCATION_ERROR, e, "An exception happened while trying to invoke callBlock on method " + methodModel.getMethodName() + ". Exception : " + Arrays.toString(e.getStackTrace()));
         }
     }
 

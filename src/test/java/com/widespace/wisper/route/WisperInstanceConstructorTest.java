@@ -1,5 +1,6 @@
 package com.widespace.wisper.route;
 
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.controller.ResponseBlock;
@@ -35,14 +36,14 @@ public class WisperInstanceConstructorTest
         request.setMethod("a.b.c:call");
         request.setIdentifier("ABCD1");
 
-        new WisperInstanceConstructor(mock(WisperClassModel.class), request);
+        new WisperInstanceConstructor(mock(ClassRouter.class), mock(WisperClassModel.class), request);
     }
 
     @Test
     public void createsInstanceOnCorrectRequest() throws Exception
     {
         WisperInstanceRegistry.sharedInstance().clear();
-        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), testObjectCreateRequest());
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class),RoutesTestObject.registerRpcClass(), testObjectCreateRequest());
         creator.create(new RemoteInstanceCreatorCallback()
         {
             @Override
@@ -67,10 +68,26 @@ public class WisperInstanceConstructorTest
             }
         });
 
-        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class),RoutesTestObject.registerRpcClass(), request);
         creator.create(mock(RemoteInstanceCreatorCallback.class));
 
         assertThat(responseBlockCalled[0], is(true));
+    }
+
+    @Test
+    public void instanceCreation_setsClassRouterOnTheInstance() throws Exception
+    {
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class),RoutesTestObject.registerRpcClass(), testObjectCreateRequest());
+        creator.create(new RemoteInstanceCreatorCallback()
+        {
+            @Override
+            public void result(WisperInstanceModel instanceModel, WisperException ex)
+            {
+                RoutesTestObject instance = (RoutesTestObject) instanceModel.getInstance();
+                assertThat(instance.getClassRouter(), is(notNullValue()));
+            }
+        });
+
     }
 
     @Test
@@ -78,7 +95,7 @@ public class WisperInstanceConstructorTest
     {
         String CONSTRUCTOR_PARAM_VALUE = "testString";
         Request request = new Request(new JSONObject("{ \"method\" : \"whatever.whatever.thing~\", \"params\" : [\"" + CONSTRUCTOR_PARAM_VALUE + "\"], \"id\": \"ABCD\" }"), null);
-        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class),RoutesTestObject.registerRpcClass(), request);
         final Object[] result = new Object[2];
         creator.create(new RemoteInstanceCreatorCallback()
         {
@@ -101,7 +118,7 @@ public class WisperInstanceConstructorTest
     {
         Double CONSTRUCTOR_WRONG_TYPE = 112.03;
         Request request = new Request(new JSONObject("{ \"method\" : \"whatever.whatever.thing~\", \"params\" : [" + CONSTRUCTOR_WRONG_TYPE + "], \"id\": \"ABCD\" }"), null);
-        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class),RoutesTestObject.registerRpcClass(), request);
         final Object[] result = new Object[2];
         creator.create(new RemoteInstanceCreatorCallback()
         {
@@ -125,7 +142,7 @@ public class WisperInstanceConstructorTest
     {
         String CONSTRUCTOR_WRONG_NUMBER = "param1, param2";
         Request request = new Request(new JSONObject("{ \"method\" : \"whatever.whatever.thing~\", \"params\" : [" + CONSTRUCTOR_WRONG_NUMBER + "], \"id\": \"ABCD\" }"), null);
-        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class),RoutesTestObject.registerRpcClass(), request);
         final Object[] result = new Object[2];
         creator.create(new RemoteInstanceCreatorCallback()
         {
@@ -160,7 +177,7 @@ public class WisperInstanceConstructorTest
             }
         });
 
-        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), request);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class),RoutesTestObject.registerRpcClass(), request);
         creator.create(mock(RemoteInstanceCreatorCallback.class));
 
         // Check we get a response
@@ -179,6 +196,8 @@ public class WisperInstanceConstructorTest
         assertThat(props.containsKey("prop"), is(true));
         assertThat((String) props.get("prop"), is(equalTo("set-by-constructor")));
     }
+
+
 
     //--------------------------
     private Request testObjectCreateRequest()

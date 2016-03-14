@@ -119,7 +119,7 @@ public class WisperEventHandlerTest
         creationRequest.setMethod(mapName + "~");
 
         final WisperInstanceModel[] _instanceModel = new WisperInstanceModel[1];
-        WisperInstanceConstructor creator = new WisperInstanceConstructor(RoutesTestObject.registerRpcClass(), creationRequest);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class), RoutesTestObject.registerRpcClass(), creationRequest);
         creator.create(new RemoteInstanceCreatorCallback()
         {
             @Override
