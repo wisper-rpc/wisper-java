@@ -4,6 +4,7 @@ import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
+
 import org.jetbrains.annotations.NotNull;
 
 import static com.widespace.wisper.messagetype.error.Error.UNEXPECTED_TYPE_ERROR;
@@ -13,21 +14,17 @@ public class WisperInstanceDestructor
 {
 
     private final Router router;
-    private Request message;
+    private AbstractMessage message;
 
     public WisperInstanceDestructor(@NotNull AbstractMessage message, @NotNull Router router) throws WisperException
     {
         if (MessageParser.getCallType(message) != WisperCallType.DESTROY_INSTANCE)
             throw new WisperException(UNEXPECTED_TYPE_ERROR, null, "Remote instance creator was called with a non-DESTROY_INSTANCE message type.");
 
-        this.message = (Request) message;
+        this.message = message;
         this.router = router;
     }
 
-    public WisperInstanceDestructor(@NotNull Router router)
-    {
-        this.router = router;
-    }
 
     public void destroy() throws WisperException
     {
@@ -35,7 +32,7 @@ public class WisperInstanceDestructor
         destroy(instanceIdentifier);
     }
 
-    public void destroy(String wisperInstanceIdentifier) throws WisperException
+    private void destroy(String wisperInstanceIdentifier) throws WisperException
     {
         WisperInstanceModel instanceModel = WisperInstanceRegistry.sharedInstance().findInstanceUnderRoute(wisperInstanceIdentifier, router.getRootRoute());
         if (instanceModel == null)
@@ -58,14 +55,14 @@ public class WisperInstanceDestructor
 
     private void respondToDestructRequest(String wisperInstanceIdentifier)
     {
-        if (message==null)
-            return;
-
-        Response response = message.createResponse();
-        response.setResult(wisperInstanceIdentifier);
-        if (message.getResponseBlock() != null)
+        if (message instanceof Request)
         {
-            message.getResponseBlock().perform(response, null);
+            Response response = ((Request) message).createResponse();
+            response.setResult(wisperInstanceIdentifier);
+            if (((Request) message).getResponseBlock() != null)
+            {
+                ((Request) message).getResponseBlock().perform(response, null);
+            }
         }
     }
 

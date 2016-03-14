@@ -8,6 +8,7 @@ import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
+import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.WisperEventBuilder;
 import com.widespace.wisper.messagetype.error.*;
 import com.widespace.wisper.messagetype.error.Error;
@@ -73,7 +74,7 @@ public class ClassRouter extends Router
     //=====================================================================================
     private void createInstance(AbstractMessage message) throws WisperException
     {
-        new WisperInstanceConstructor(wisperClassModel, message).create(new RemoteInstanceCreatorCallback()
+        new WisperInstanceConstructor(this, wisperClassModel, message).create(new RemoteInstanceCreatorCallback()
         {
             @Override
             public void result(WisperInstanceModel instanceModel, WisperException ex)
@@ -130,6 +131,7 @@ public class ClassRouter extends Router
     {
         WisperInstanceModel instanceModel = new WisperInstanceModel(wisperClassModel, anInstance, anInstance.toString());
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, this.getRootRoute());
+        anInstance.setClassRouter(this);
 
         HashMap<String, Object> idAndProps = new HashMap<String, Object>();
         idAndProps.put("id", instanceModel.getInstanceIdentifier());
@@ -143,7 +145,8 @@ public class ClassRouter extends Router
 
     public void removeInstance(WisperInstanceModel instanceModel)
     {
-        new WisperInstanceDestructor(this).destroy(instanceModel.getInstanceIdentifier());
+        Notification destructNotification = new Notification().withMethodName("created.by.router:~").withParams(new Object[]{instanceModel.getInstanceIdentifier()});
+        new WisperInstanceDestructor(destructNotification, this).destroy();
     }
 
     public Gateway getRootGateway()
