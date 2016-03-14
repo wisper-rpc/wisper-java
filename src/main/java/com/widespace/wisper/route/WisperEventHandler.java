@@ -1,12 +1,18 @@
 package com.widespace.wisper.route;
 
-import com.widespace.wisper.utils.RPCUtilities;
 import com.widespace.wisper.base.Wisper;
-import com.widespace.wisper.classrepresentation.*;
+import com.widespace.wisper.classrepresentation.WisperClassModel;
+import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.classrepresentation.WisperParameterType;
+import com.widespace.wisper.classrepresentation.WisperProperty;
+import com.widespace.wisper.classrepresentation.WisperPropertyAccess;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
+import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
+import com.widespace.wisper.utils.RPCUtilities;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -30,18 +36,17 @@ public class WisperEventHandler
 
     public void handle() throws WisperException
     {
-        if (!(message instanceof Event))
+        WisperCallType callType = MessageParser.getCallType(message);
+        if (! ((message instanceof Notification) && (callType == WisperCallType.STATIC_EVENT || callType == WisperCallType.INSTANCE_EVENT) ))
             throw new WisperException(UNEXPECTED_TYPE_ERROR, null, "Remote instance event handler was called with a non-Notification/Event message type.");
 
-        handle((Event) message);
+        Event event = new Event((Notification)message);
+        message = null;
+        handle(event, callType);
     }
 
-    private void handle(Event eventMessage)
+    private void handle(Event eventMessage, WisperCallType callType)
     {
-        WisperCallType callType = MessageParser.getCallType(message);
-        if (callType != WisperCallType.STATIC_EVENT && callType != WisperCallType.INSTANCE_EVENT)
-            throw new WisperException(UNEXPECTED_TYPE_ERROR, null, "Remote instance event handler was called with a non-Event message call type.");
-
         switch (callType)
         {
             case STATIC_EVENT:
@@ -124,7 +129,7 @@ public class WisperEventHandler
     //------------------------------------------------------------------------
     private void handleInstacneEvent(Event eventMessage)
     {
-        String instanceIdentifier = MessageParser.getInstanceIdentifier(eventMessage);
+        String instanceIdentifier = eventMessage.getInstanceIdentifier();
         WisperInstanceModel wisperInstanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId(instanceIdentifier);
         if (wisperInstanceModel == null)
         {

@@ -1,11 +1,14 @@
 package com.widespace.wisper.messagetype;
 
+import com.widespace.wisper.route.MessageParser;
+import com.widespace.wisper.route.WisperCallType;
+
 import java.util.ArrayList;
 
 
 /**
  * Model object representing an event to be sent or received.
- * <p>
+ * <p/>
  * Created by Ehssan Hoorvash on 17/06/14.
  */
 public class Event extends Notification
@@ -25,6 +28,39 @@ public class Event extends Notification
         this.instanceIdentifier = instanceIdentifier;
         this.name = name;
         this.value = value;
+    }
+
+    public Event(Notification notification)
+    {
+        this.methodName = notification.getMethodName().replace(":!", "").replace("!", "");
+        WisperCallType callType = MessageParser.getCallType(notification);
+        Object[] notificationParams = notification.getParams();
+        switch (callType)
+        {
+            case STATIC_EVENT:
+            {
+                this.instanceIdentifier = null;
+                if (notificationParams != null && notificationParams.length > 1)
+                {
+                    this.name = (String) notificationParams[0];
+                    this.value = notificationParams[1];
+                }
+            }
+            break;
+
+            case INSTANCE_EVENT:
+            {
+                this.instanceIdentifier = (String) notificationParams[0];
+                if (notificationParams.length > 2)
+                {
+                    this.name = (String) notificationParams[1];
+                    this.value = notificationParams[2];
+                }
+            }
+
+        }
+
+
     }
 
     public String getInstanceIdentifier()
