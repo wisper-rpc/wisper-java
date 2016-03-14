@@ -76,4 +76,16 @@ public class Notification extends AbstractMessage
 
         return jsonObject;
     }
+
+    public Notification withMethodName(String methodName)
+    {
+        this.methodName = methodName;
+        return this;
+    }
+
+    public Notification withParams(Object[] params)
+    {
+        this.params = params;
+        return this;
+    }
 }

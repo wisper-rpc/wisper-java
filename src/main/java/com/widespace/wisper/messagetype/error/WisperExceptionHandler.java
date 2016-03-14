@@ -1,7 +1,9 @@
 package com.widespace.wisper.messagetype.error;
 
 import com.widespace.wisper.controller.Gateway;
-import com.widespace.wisper.controller.RemoteObjectCall;
+import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.Request;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
@@ -16,13 +18,13 @@ public class WisperExceptionHandler
 {
     public static final int CODE_CANNOT_BE_DETERMINED = -2;
     private final Gateway gateway;
-    private RemoteObjectCall remoteObjectCall;
+    private AbstractMessage message;
 
 
-    public WisperExceptionHandler(Gateway gateway, RemoteObjectCall remoteObjectCall)
+    public WisperExceptionHandler(@NotNull Gateway gateway,@NotNull AbstractMessage message)
     {
         this.gateway = gateway;
-        this.remoteObjectCall = remoteObjectCall;
+        this.message = message;
     }
 
 
@@ -34,9 +36,9 @@ public class WisperExceptionHandler
                 .withUnderlyingError(getUnderlyingError(ex))
                 .build();
 
-        if (remoteObjectCall.getRequest() != null)
+        if (message instanceof Request)
         {
-            respondTheRequestWithError(errorMessage);
+            respondTheRequestWithError((Request) message, errorMessage);
             return;
         }
 
@@ -59,12 +61,12 @@ public class WisperExceptionHandler
         return underlying;
     }
 
-    private void respondTheRequestWithError(RPCErrorMessage errorMessage)
+    private void respondTheRequestWithError(Request message, RPCErrorMessage errorMessage)
     {
-        errorMessage.setId(remoteObjectCall.getRequest().getIdentifier());
-        if (remoteObjectCall.getRequest().getResponseBlock() != null)
+        errorMessage.setId(message.getIdentifier());
+        if (message.getResponseBlock() != null)
         {
-            remoteObjectCall.getRequest().getResponseBlock().perform(null, errorMessage);
+            message.getResponseBlock().perform(null, errorMessage);
         }
     }
 

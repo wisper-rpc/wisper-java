@@ -1,5 +1,7 @@
 package com.widespace.wisper.classrepresentation;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 
 /**
@@ -38,12 +40,18 @@ public class WisperClassModel
         this.mapName = mappingName;
     }
 
+    public WisperClassModel(Class<?> clazz)
+    {
+        this();
+        this.classRef = clazz;
+    }
+
     /**
      * Adds an instance method to the class implementation.
      *
      * @param method is the representation of the RPC instance method.
      */
-    public void addInstanceMethod(WisperMethod method)
+    public void addInstanceMethod(@NotNull WisperMethod method)
     {
         instanceMethods.put(method.getMapName(), method);
     }
@@ -53,7 +61,7 @@ public class WisperClassModel
      *
      * @param method is the representation of the RPC instance method.
      */
-    public void addStaticMethod(WisperMethod method)
+    public void addStaticMethod(@NotNull WisperMethod method)
     {
         staticMethods.put(method.getMapName(), method);
     }
@@ -63,7 +71,7 @@ public class WisperClassModel
      *
      * @return A HashMap of instance methods with mapping name as the key and the WisperMethod instance as the value.
      */
-    public HashMap<String, WisperMethod> getInstanceMethods()
+    public @NotNull HashMap<String, WisperMethod> getInstanceMethods()
     {
         return instanceMethods;
     }
@@ -73,7 +81,7 @@ public class WisperClassModel
      *
      * @return A HashMap of static methods with mapping name as the key and the WisperMethod instance as the value.
      */
-    public HashMap<String, WisperMethod> getStaticMethods()
+    public @NotNull HashMap<String, WisperMethod> getStaticMethods()
     {
         return staticMethods;
     }

@@ -3,7 +3,9 @@ package com.widespace.wisper.route;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
+
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,11 +18,27 @@ public class Router
     private HashMap<String, Router> routes;
     private Router parentRoute;
 
+    private String namespace;
+
     public Router()
     {
         routes = new HashMap<String, Router>();
     }
 
+    public Router(String namespace)
+    {
+        this();
+        this.namespace = namespace;
+    }
+
+    /**
+     * Tries to route a message to a given path. If the path is not routable, a ROUTE_NOT_FOUND exception
+     * is thrown.
+     *
+     * @param message the message to be routed.
+     * @param path    the path the message is supposed to be routed to.
+     * @throws WisperException when no route is found for the given path.
+     */
     public void routeMessage(AbstractMessage message, String path) throws WisperException
     {
         if (path == null)
@@ -28,9 +46,18 @@ public class Router
 
         List<String> tokens = new ArrayList<String>(Arrays.asList(path.split("\\.")));
         String firstChunk = tokens.get(0);
-        String remainingPath = path.equals(firstChunk) ? "" : path.substring(firstChunk.length() + 1);
+        String remainingPath = getRemainingPath(path, firstChunk);
         checkPathExists(message, firstChunk);
         routes.get(firstChunk).routeMessage(message, remainingPath);
+    }
+
+    private String getRemainingPath(String path, String firstChunk)
+    {
+        String result = path.equals(firstChunk) ? "" : path.substring(firstChunk.length() + 1);
+        String[] split = result.split(":");
+        result = split[0];
+        result = result.replace("~", "");
+        return result;
     }
 
 
@@ -53,14 +80,14 @@ public class Router
     {
         List<String> tokens = Arrays.asList(path.split("\\."));
         String firstChunk = tokens.get(0);
-        String remainingPath = path.equals(firstChunk) ? "" : path.substring(firstChunk.length() + 1);
+        String remainingPath = getRemainingPath(path, firstChunk);
 
-        rejectAlreadyExistingRoute(firstChunk);
+        rejectAlreadyExistingRoute(firstChunk, remainingPath);
 
         if (finalChunkAddedToRoutes(router, firstChunk, remainingPath))
             return;
 
-        routeNextChunks(router, firstChunk, remainingPath);
+        addRouterForNextChunk(router, firstChunk, remainingPath);
     }
 
     private boolean finalChunkAddedToRoutes(@NotNull Router router, String firstChunk, String remainingPath)
@@ -69,25 +96,34 @@ public class Router
         {
             routes.put(firstChunk, router);
             router.setParentRoute(this);
+            router.namespace = firstChunk;
             return true;
         }
         return false;
     }
 
-    private void routeNextChunks(@NotNull Router router, String firstChunk, String remainingPath)
+    private void addRouterForNextChunk(@NotNull Router router, String firstChunk, String remainingPath)
     {
-        Router newRouter = new Router();
-        newRouter.setParentRoute(this);
-        routes.put(firstChunk, newRouter);
+        if (!routes.containsKey(firstChunk))
+        {
+            Router newRouter = new Router();
+            newRouter.setParentRoute(this);
+            routes.put(firstChunk, newRouter);
+            newRouter.namespace = firstChunk;
 
-        newRouter.exposeRoute(remainingPath, router);
+            newRouter.exposeRoute(remainingPath, router);
+
+        } else
+        {
+            routes.get(firstChunk).exposeRoute(remainingPath, router);
+        }
     }
 
-    private void rejectAlreadyExistingRoute(@NotNull String path)
+    private void rejectAlreadyExistingRoute(@NotNull String path, String remainingPath)
     {
-        if (routes.containsKey(path))
+        if (remainingPath.isEmpty() && routes.containsKey(path))
         {
-            throw new WisperException(Error.ROUTE_ALREADY_EXISTS, null, "A route already exists on the router for path " + path);
+            throw new WisperException(Error.ROUTE_ALREADY_EXISTS, null, "A route already exists on the router for path \"" + path + "\"");
         }
     }
 
@@ -110,4 +146,56 @@ public class Router
     {
         this.parentRoute = parentRoute;
     }
+
+    public String getNamespace()
+    {
+        return namespace;
+    }
+
+    public void reverseRoute(@NotNull AbstractMessage message, @Nullable String path)
+    {
+        String newPath = (path == null) ? namespace : namespace + "." + path;
+        if (parentRoute != null)
+            parentRoute.reverseRoute(message, newPath);
+    }
+
+    /**
+     * Returns the router of the given path, or null if the path is not found.
+     * Works both on single path and composite paths. e.g. "a" or "a.b.c".
+     *
+     * @param path a dot-separated string representing the path.
+     * @return the Router, or null.
+     */
+    public Router getRouter(@NotNull String path)
+    {
+        List<String> tokens = Arrays.asList(path.split("\\."));
+        String firstChunk = tokens.get(0);
+        String remainingPath = getRemainingPath(path, firstChunk);
+        if (remainingPath.isEmpty())
+        {
+            if (routes == null || !routes.containsKey(firstChunk))
+                return null;
+
+            return routes.get(firstChunk);
+        }
+
+        return routes.get(firstChunk).getRouter(remainingPath);
+    }
+
+    /**
+     * Returns the root route of this router. A root root is the uppermost parent.
+     * If there is no parent assigned, the router itself is the root.
+     *
+     * @return a Router.
+     */
+    @NotNull
+    public Router getRootRoute()
+    {
+        if (this.parentRoute != null)
+            return parentRoute.getRootRoute();
+
+        return this;
+    }
+
+
 }

@@ -2,7 +2,8 @@ package com.widespace.wisper;
 
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
-import com.widespace.wisper.controller.RemoteObjectController;
+
+import com.widespace.wisper.route.ClassRouter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +22,7 @@ public class WisperClassInstanceTests
         sampleInstance = new Wisper()
         {
             @Override
-            public void setRemoteObjectController(RemoteObjectController remoteObjectController)
+            public void setClassRouter(ClassRouter classRouter)
             {
 
             }

@@ -4,7 +4,6 @@ import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.utils.StringUtils;
-import org.json.JSONException;
 
 /**
  * Acts as an adapter between two remote object controllers.
@@ -32,11 +31,11 @@ public class RPCProxy
      * @param request The request that is trying to reach the other controller
      * @see Request
      */
-    public void handleRequest(Request request) throws JSONException
+    public void handleRequest(Request request)
     {
         Request proxifiedRequest = new Request();
         proxifiedRequest.setIdentifier(request.getIdentifier());
-        proxifiedRequest.setMethod(extractMethodName(request.getMethod()));
+        proxifiedRequest.setMethod(extractMethodName(request.getMethodName()));
         proxifiedRequest.setParams(request.getParams());
         proxifiedRequest.setResponseBlock(request.getResponseBlock());
         receiver.handleMessage(proxifiedRequest.toJsonString());
@@ -48,7 +47,7 @@ public class RPCProxy
      * @param notification The notification that is trying to reach the other controller
      * @see Notification
      */
-    public void handleNotification(Notification notification) throws JSONException
+    public void handleNotification(Notification notification)
     {
         Notification proxifiedNotification = new Notification();
         proxifiedNotification.setMethodName(extractMethodName(notification.getMethodName()));

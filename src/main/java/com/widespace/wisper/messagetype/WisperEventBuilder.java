@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * Created by Ehssan Hoorvash on 27/06/14.
  */
-public class RPCEventBuilder
+public class WisperEventBuilder
 {
     private String methodName;
     private String instanceIdentifier;
@@ -17,35 +17,35 @@ public class RPCEventBuilder
 
     public Event buildStaticEvent()
     {
-        methodName += "!";
+        methodName = (methodName == null) ? "!" : methodName+"!";
         return new Event(methodName, instanceIdentifier, name, value);
     }
 
     public Event buildInstanceEvent()
     {
-        methodName += ":!";
+        methodName = (methodName == null) ? ":!" : methodName+":!";
         return new Event(methodName, instanceIdentifier, name, value);
     }
 
-    public RPCEventBuilder withMethodName(String methodName)
+    public WisperEventBuilder withMethodName(String methodName)
     {
         this.methodName = methodName;
         return this;
     }
 
-    public RPCEventBuilder withInstanceIdentifier(String instanceIdentifier)
+    public WisperEventBuilder withInstanceIdentifier(String instanceIdentifier)
     {
         this.instanceIdentifier = instanceIdentifier;
         return this;
     }
 
-    public RPCEventBuilder withName(String name)
+    public WisperEventBuilder withName(String name)
     {
         this.name = name;
         return this;
     }
 
-    public RPCEventBuilder withValue(Object value)
+    public WisperEventBuilder withValue(Object value)
     {
         if (value!=null && value instanceof Map)
         {

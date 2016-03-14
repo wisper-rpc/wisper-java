@@ -1,17 +1,14 @@
 package com.widespace.wisper.messagetype;
 
-import com.widespace.wisper.controller.RemoteObjectCall;
-import com.widespace.wisper.controller.RPCRemoteObjectCallType;
-import org.json.JSONException;
+import com.widespace.wisper.route.MessageParser;
+import com.widespace.wisper.route.WisperCallType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
  * Model object representing an event to be sent or received.
- * <p>
+ * <p/>
  * Created by Ehssan Hoorvash on 17/06/14.
  */
 public class Event extends Notification
@@ -33,39 +30,38 @@ public class Event extends Notification
         this.value = value;
     }
 
-    public Event(RemoteObjectCall remoteObjectCall)
+    public Event(Notification notification)
     {
-        RPCRemoteObjectCallType callType = remoteObjectCall.getCallType();
-        List<Object> parameters = Arrays.asList(remoteObjectCall.getParams());
-
-        String theName = null;
-        Object theValue = null;
-
+        this.methodName = notification.getMethodName().replace(":!", "").replace("!", "");
+        WisperCallType callType = MessageParser.getCallType(notification);
+        Object[] notificationParams = notification.getParams();
         switch (callType)
         {
             case STATIC_EVENT:
             {
-                theName = (String) parameters.get(0);
-                theValue = (parameters.size() > 1) ? parameters.get(1) : null;
+                this.instanceIdentifier = null;
+                if (notificationParams != null && notificationParams.length > 1)
+                {
+                    this.name = (String) notificationParams[0];
+                    this.value = notificationParams[1];
+                }
             }
             break;
+
             case INSTANCE_EVENT:
             {
-                theName = (String) parameters.get(0);
-                theValue = (parameters.size() > 1) ? parameters.get(1) : null;
+                this.instanceIdentifier = (String) notificationParams[0];
+                if (notificationParams.length > 2)
+                {
+                    this.name = (String) notificationParams[1];
+                    this.value = notificationParams[2];
+                }
             }
-            break;
-            default:
-                break;
+
         }
 
-        this.methodName = remoteObjectCall.getMethodName();
-        this.instanceIdentifier = remoteObjectCall.getInstanceIdentifier();
 
-        this.name = theName;
-        this.value = theValue;
     }
-
 
     public String getInstanceIdentifier()
     {

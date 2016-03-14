@@ -1,6 +1,6 @@
 package com.widespace.wisper.classrepresentation;
 
-import com.widespace.wisper.base.RPCUtilities;
+import com.widespace.wisper.utils.RPCUtilities;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,9 +13,13 @@ import java.util.List;
 public class WisperMethod
 {
     private String mapName;
-    private List<WisperParameterType> paramTypes;
     private CallBlock callBlock;
     private String methodName;
+
+    private List<WisperParameterType> paramTypes;
+
+    private Object[] callParameters;
+    private Class[] callParameterTypes;
 
     public WisperMethod(String mapName, String methodName, WisperParameterType... parameterTypes)
     {
@@ -88,5 +92,25 @@ public class WisperMethod
     public String getMapName()
     {
         return mapName;
+    }
+
+    public Object[] getCallParameters()
+    {
+        return callParameters;
+    }
+
+    public void setCallParameters(Object[] callParameters)
+    {
+        this.callParameters = callParameters;
+    }
+
+    public Class[] getCallParameterTypes()
+    {
+        return callParameterTypes;
+    }
+
+    public void setCallParameterTypes(Class[] callParameterTypes)
+    {
+        this.callParameterTypes = callParameterTypes;
     }
 }

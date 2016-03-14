@@ -11,7 +11,7 @@ import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
 
 
-public class RPCClassRegistryTest
+public class WisperClassRegistryTest
 {
 
     private WisperClassModel registeredClass;
@@ -19,7 +19,7 @@ public class RPCClassRegistryTest
     @Before
     public void setUp() throws Exception
     {
-        registeredClass = RPCClassRegistry.register(RPCAnnotationTestObject.class);
+        registeredClass = WisperClassRegistry.register(RPCAnnotationTestObject.class);
     }
 
     @Test

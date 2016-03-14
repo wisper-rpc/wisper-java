@@ -95,7 +95,7 @@ public class Request extends AbstractMessage
         this.identifier = identifier;
     }
 
-    public String getMethod()
+    public String getMethodName()
     {
         return method;
     }
@@ -136,4 +136,17 @@ public class Request extends AbstractMessage
 
         return jsonObject;
     }
+
+    public Request withMethodName(String methodName)
+    {
+        this.setMethod(methodName);
+        return this;
+    }
+
+    public Request withParams(Object[] params)
+    {
+        this.setParams(params);
+        return this;
+    }
+
 }

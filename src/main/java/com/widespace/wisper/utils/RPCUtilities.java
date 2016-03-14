@@ -1,4 +1,4 @@
-package com.widespace.wisper.base;
+package com.widespace.wisper.utils;
 
 import com.widespace.wisper.classrepresentation.WisperParameterType;
 

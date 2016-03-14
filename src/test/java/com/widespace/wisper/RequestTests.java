@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Created by Ehssan Hoorvash on 13/06/14.
  */
-public class RpcRequestTests
+public class RequestTests
 {
     private static final String SAMPLE_REQUEST = "{\"method\":\"wisp.ai.TestObject:sampleMethodName\", \"params\":[\"sample_instance_identifier\"],\"id\":\"abcd1\"}";
     private Request request;
@@ -44,7 +45,7 @@ public class RpcRequestTests
     @Test
     public void testMethodName() throws Exception
     {
-        assertEquals("wisp.ai.TestObject:sampleMethodName", request.getMethod());
+        assertEquals("wisp.ai.TestObject:sampleMethodName", request.getMethodName());
     }
 
     @Test
@@ -66,6 +67,22 @@ public class RpcRequestTests
         Object[] params = request.getParams();
         assertEquals(1, params.length);
         assertEquals("sample_instance_identifier", (String) params[0]);
+    }
+
+    @Test
+    public void withMethodNameSetsTheMethodNmae() throws Exception
+    {
+        String methodName = "a.b.c~";
+        Request request = new Request().withMethodName(methodName);
+        assertThat(request.getMethodName(), is(methodName));
+    }
+
+    @Test
+    public void withParamsSetsParamsCorrectly() throws Exception
+    {
+        Object[] params = {"x", "y", "z"};
+        Request request = new Request().withParams(params);
+        assertThat(request.getParams(), is(params));
     }
 
     @Test
@@ -161,7 +178,7 @@ public class RpcRequestTests
 
         expected.put("fourth", innerJsonObj);
 
-        assertTrue(expected.equals((HashMap)requestParams[0]));
+        assertTrue(expected.equals((HashMap) requestParams[0]));
 
 
     }

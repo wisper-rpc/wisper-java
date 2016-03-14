@@ -16,7 +16,6 @@ import static com.widespace.wisper.base.Constants.EMPTY;
  */
 public class Response extends AbstractMessage
 {
-
     private String identifier;
     private Error error;
     private Object result;

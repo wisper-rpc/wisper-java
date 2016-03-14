@@ -1,15 +1,12 @@
 package com.widespace.wisper.proxy;
 
 import com.widespace.wisper.base.WisperObject;
-import com.widespace.wisper.base.WisperTestObject;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.classrepresentation.WisperParameterType;
 import com.widespace.wisper.controller.Gateway;
-import com.widespace.wisper.controller.GatewayCallback;
-import com.widespace.wisper.controller.RemoteObjectController;
-import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.route.Channel;
+import com.widespace.wisper.route.ClassRouter;
 
 
 /**
@@ -41,42 +38,10 @@ public class RemoteGateway extends WisperObject
         gateway.setCallback(channel);
     }
 
+
     @Override
-    public void setRemoteObjectController(RemoteObjectController remoteObjectController)
+    public void setClassRouter(ClassRouter classRouter)
     {
-        super.setRemoteObjectController(remoteObjectController);
 
-        //TODO: temporary
-        gateway = new RemoteObjectController(new GatewayCallback()
-        {
-            @Override
-            public void gatewayReceivedMessage(AbstractMessage message)
-            {
-
-            }
-
-            @Override
-            public void gatewayGeneratedMessage(String message)
-            {
-
-            }
-        });
-        ((RemoteObjectController) gateway).registerClass(WisperTestObject.registerRpcClass());
-//
-//        gateway = new Gateway(new GatewayCallback()
-//        {
-//            @Override
-//            public void gatewayReceivedMessage(AbstractMessage message)
-//            {
-//
-//                System.out.println("");
-//            }
-//
-//            @Override
-//            public void gatewayGeneratedMessage(String message)
-//            {
-//                System.out.println("");
-//            }
-//        });
     }
 }

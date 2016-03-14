@@ -3,6 +3,7 @@ package com.widespace.wisper;
 import com.widespace.wisper.base.WisperObject;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
+import com.widespace.wisper.route.ClassRouter;
 
 // This class is needed for RPC tests.
 public class MyWisperTestObject extends WisperObject
@@ -108,4 +109,9 @@ public class MyWisperTestObject extends WisperObject
     }
 
 
+    @Override
+    public void setClassRouter(ClassRouter classRouter)
+    {
+
+    }
 }
