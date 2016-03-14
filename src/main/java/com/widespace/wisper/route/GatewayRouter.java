@@ -15,10 +15,22 @@ import org.jetbrains.annotations.Nullable;
 public class GatewayRouter extends Router implements GatewayCallback
 {
     private Gateway gateway;
+    private GatewayCallback gatewayCallback;
 
     public GatewayRouter(Gateway gateway)
     {
         this.gateway = gateway;
+        this.gateway.setCallback(this);
+    }
+
+    public GatewayCallback getGatewayCallback()
+    {
+        return gatewayCallback;
+    }
+
+    public void setGatewayCallback(GatewayCallback gatewayCallback)
+    {
+        this.gatewayCallback = gatewayCallback;
     }
 
     //=====================================================================================
@@ -69,6 +81,14 @@ public class GatewayRouter extends Router implements GatewayCallback
     @Override
     public void gatewayReceivedMessage(AbstractMessage message)
     {
+        if (gatewayCallback != null)
+            gatewayCallback.gatewayReceivedMessage(message);
+
+        String methodName = MessageParser.getFullMethodName(message);
+
+        if (methodName == null || methodName.equals(".handshake"))
+            return;
+
         if (message instanceof Notification)
             routeMessage(message, ((Notification) message).getMethodName());
 
@@ -79,6 +99,8 @@ public class GatewayRouter extends Router implements GatewayCallback
     @Override
     public void gatewayGeneratedMessage(String message)
     {
+        if (gatewayCallback != null)
+            gatewayCallback.gatewayGeneratedMessage(message);
         // no-op
     }
 
