@@ -88,6 +88,7 @@ public class WisperMethodCaller
 
     private boolean handledMethodCallBlock(WisperMethod methodModel, WisperInstanceModel wisperInstance)
     {
+        //TODO: do not cast to Request. coudl be Notification as well
         try
         {
             if (methodModel.getCallBlock() != null)

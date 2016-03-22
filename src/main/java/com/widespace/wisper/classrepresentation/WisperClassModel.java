@@ -1,5 +1,7 @@
 package com.widespace.wisper.classrepresentation;
 
+import com.widespace.wisper.base.Wisper;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -17,7 +19,7 @@ public class WisperClassModel
     private HashMap<String, WisperMethod> staticMethods;
     private HashMap<String, WisperProperty> properties;
 
-    private Class<?> classRef;
+    private Class<? extends Wisper> classRef;
 
     private WisperClassModel()
     {
@@ -26,21 +28,21 @@ public class WisperClassModel
         properties = new HashMap<String, WisperProperty>();
     }
 
-    public WisperClassModel(Object object, String mappingName)
+    public WisperClassModel(Wisper object, String mappingName)
     {
         this();
         this.classRef = object.getClass();
         this.mapName = mappingName;
     }
 
-    public WisperClassModel(Class<?> clazz, String mappingName)
+    public WisperClassModel(Class<? extends Wisper> clazz, String mappingName)
     {
         this();
         this.classRef = clazz;
         this.mapName = mappingName;
     }
 
-    public WisperClassModel(Class<?> clazz)
+    public WisperClassModel(Class<? extends Wisper> clazz)
     {
         this();
         this.classRef = clazz;
@@ -101,9 +103,9 @@ public class WisperClassModel
      *
      * @return a Class object representing the actual modeled Java class.
      */
-    public Class<?> getClassRef()
+    public Class<? extends Wisper> getClassRef()
     {
-        return classRef;
+        return  classRef;
     }
 
     /**
@@ -131,7 +133,7 @@ public class WisperClassModel
         this.mapName = mapName;
     }
 
-    public void setClassRef(Class<?> classRef)
+    public void setClassRef(Class<? extends Wisper> classRef)
     {
         this.classRef = classRef;
     }

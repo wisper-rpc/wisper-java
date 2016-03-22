@@ -17,7 +17,13 @@ public class GatewayRouter extends Router implements GatewayCallback
     private Gateway gateway;
     private GatewayCallback gatewayCallback;
 
-    public GatewayRouter(Gateway gateway)
+
+    public GatewayRouter()
+    {
+        this.gateway = new Gateway(this);
+    }
+
+    public GatewayRouter(@NotNull Gateway gateway)
     {
         this.gateway = gateway;
         this.gateway.setCallback(this);

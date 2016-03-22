@@ -1,6 +1,8 @@
 package com.widespace.wisper;
 
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
+import com.widespace.wisper.route.ClassRouter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,13 +15,13 @@ public class RpcClassTests
 {
     private final String SAMPLE_MAP_NAME = "SAMPLE_MAP_NAME";
     private WisperClassModel wisperClassModel;
-    private String SAMPLE_OBJECT;
+    private MyWisperObject SAMPLE_OBJECT;
 
 
     @Before
     public void setUp() throws Exception
     {
-        SAMPLE_OBJECT = "my Test Object";
+        SAMPLE_OBJECT =  new MyWisperObject();
     }
 
     @Test
@@ -48,8 +50,8 @@ public class RpcClassTests
     public void testClassRefCouldBeOverwritten() throws Exception
     {
         wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
-        wisperClassModel.setClassRef(this.getClass());
-        assertThat(this, is(instanceOf(wisperClassModel.getClassRef())));
+        wisperClassModel.setClassRef(null);
+        assertThat(wisperClassModel.getClassRef(), is(nullValue()));
     }
 
 
@@ -92,5 +94,20 @@ public class RpcClassTests
     public void tearDown() throws Exception
     {
         wisperClassModel = null;
+    }
+
+    private class MyWisperObject implements Wisper
+    {
+        @Override
+        public void setClassRouter(ClassRouter classRouter)
+        {
+
+        }
+
+        @Override
+        public void destruct()
+        {
+
+        }
     }
 }
