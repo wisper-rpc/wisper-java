@@ -40,7 +40,7 @@ public class WisperInstanceDestructor
 
         instanceModel.getInstance().destruct();
 
-        sendDestroyEvent(instanceModel);
+        //sendDestroyEvent(instanceModel);
 
         respondToDestructRequest(wisperInstanceIdentifier);
 
