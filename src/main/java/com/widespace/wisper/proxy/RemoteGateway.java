@@ -44,6 +44,12 @@ public class RemoteGateway extends WisperObject
         setChannel(channel);
     }
 
+    public RemoteGateway(GatewayRouter gatewayRouter, Channel channel)
+    {
+        this.gatewayRouter = gatewayRouter;
+        setChannel(channel);
+    }
+
     public static WisperClassModel registerRpcClass()
     {
         final WisperClassModel wisperClassModel = new WisperClassModel(RemoteGateway.class);

@@ -1,15 +1,25 @@
 package com.widespace.wisper.proxy;
 
 import com.widespace.wisper.base.Wisper;
+import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.controller.Gateway;
+import com.widespace.wisper.controller.GatewayCallback;
+import com.widespace.wisper.controller.ResponseBlock;
+import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.Response;
+import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.route.Channel;
 
+import com.widespace.wisper.route.ClassRouter;
+import com.widespace.wisper.route.GatewayRouter;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static junit.framework.TestCase.fail;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 
 public class RemoteGatewayTest
@@ -44,11 +54,48 @@ public class RemoteGatewayTest
     public void receivesMessagesFromTheChannel() throws Exception
     {
         TestChannel testChannel = new TestChannel();
-        RemoteGateway remoteGateway = new RemoteGateway(testChannel);
+        Gateway gateway = mock(Gateway.class);
+        GatewayRouter gatewayRouter = new GatewayRouter(gateway);
+        //make a remote gateway
+        RemoteGateway remoteGateway = new RemoteGateway(gatewayRouter, testChannel);
+
+        //channel receives a message
+        String aMessage = "a message";
+        testChannel.receiveMessage(aMessage);
+
+        //gateway must receuve it too
+        verify(gateway).handleMessage(aMessage);
+    }
 
 
+    @Test
+    public void testSendingNestedRequests() throws Exception
+    {
+        GatewayRouter controllerGatewayRouter = new GatewayRouter(new Gateway(mock(GatewayCallback.class)));
+        ClassRouter remoteGatewayClassRouter = new ClassRouter(RemoteGateway.class);
+        controllerGatewayRouter.exposeRoute("Gateway", remoteGatewayClassRouter);
 
+        final RemoteGateway remoteGateway = new RemoteGateway(new TestChannel());
+        WisperInstanceModel remoteGatewayWisperInstanceModel = remoteGatewayClassRouter.addInstance(remoteGateway);
 
+        final Request inner_request = new Request().withMethodName("some.path:method");
+        inner_request.setIdentifier("inner_001");
+
+        Object[] params =  new Object[]{remoteGatewayWisperInstanceModel.getInstanceIdentifier(), inner_request.toJsonString()};
+        final Request outer_request=new Request().withMethodName("Gateway:sendMessage").withParams(params);
+        outer_request.setIdentifier("outer_001");
+        outer_request.setResponseBlock(new ResponseBlock()
+        {
+            @Override
+            public void perform(Response response, RPCErrorMessage error)
+            {
+                assertThat(error, is(nullValue()));
+                assertThat(response, is(notNullValue()));
+                assertThat(response.getIdentifier(), is(outer_request.getIdentifier()));
+            }
+        });
+
+        controllerGatewayRouter.getGateway().handleMessage(outer_request);
     }
 
     private class TestChannel extends Channel

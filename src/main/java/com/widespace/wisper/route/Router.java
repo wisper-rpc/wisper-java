@@ -47,6 +47,9 @@ public class Router
         List<String> tokens = new ArrayList<String>(Arrays.asList(path.split("\\.")));
         String firstChunk = tokens.get(0);
         String remainingPath = getRemainingPath(path, firstChunk);
+        if (firstChunk.equals(path))
+            firstChunk = firstChunk.split(":")[0];
+
         checkPathExists(message, firstChunk);
         routes.get(firstChunk).routeMessage(message, remainingPath);
     }
