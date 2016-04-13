@@ -1,5 +1,9 @@
 apply plugin: 'java'
 
+group = 'com.widespace'
+archivesBaseName = 'wisper-java'
+
+
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
@@ -10,8 +14,7 @@ repositories {
 
 allprojects {
     tasks.withType(Javadoc) {
-        if (JavaVersion.current().isJava8Compatible())
-        {
+        if (JavaVersion.current().isJava8Compatible()) {
             options.addStringOption('Xdoclint:none', '-quiet')
         }
     }
