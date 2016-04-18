@@ -7,7 +7,6 @@ import com.widespace.wisper.messagetype.Event;
 
 class RoutesTestObject implements Wisper
 {
-
     private static boolean staticMethodCalled = false;
     private static String printedValue = null;
     private static boolean staticEventReceived = false;
@@ -29,7 +28,9 @@ class RoutesTestObject implements Wisper
         WisperMethod appendMethod = new WisperMethod("append", "appendString", WisperParameterType.STRING, WisperParameterType.STRING);
         WisperMethod printMethod = new WisperMethod("printInstanceId", "printInstanceId", WisperParameterType.INSTANCE, WisperParameterType.STRING);
 
-        WisperMethod customConstructor = new WisperMethod("~", "RoutesTestObject", WisperParameterType.STRING);
+        WisperMethod customConstructor1 = new WisperMethod("~", "RoutesTestObject", WisperParameterType.STRING);
+
+
         WisperMethod appendStaticMethod = new WisperMethod("append", "appendStringStatic", WisperParameterType.STRING, WisperParameterType.STRING);
         WisperMethod printStaticMethod = new WisperMethod("printInstanceId", "printInstanceIdStatic", WisperParameterType.INSTANCE, WisperParameterType.STRING);
 
@@ -40,7 +41,8 @@ class RoutesTestObject implements Wisper
         classModel.addInstanceMethod(appendMethod);
         classModel.addInstanceMethod(printMethod);
 
-        classModel.addStaticMethod(customConstructor);
+        classModel.addStaticMethod(customConstructor1);
+
         classModel.addStaticMethod(appendStaticMethod);
         classModel.addStaticMethod(printStaticMethod);
 
@@ -64,6 +66,12 @@ class RoutesTestObject implements Wisper
     {
         this.testId = id;
         this.prop = "set-by-constructor";
+    }
+
+    public RoutesTestObject(RoutesTestObject instance)
+    {
+        this(instance.testId);
+        this.prop = "set-by-instance-constructor";
     }
 
 

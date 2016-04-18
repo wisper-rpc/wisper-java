@@ -120,10 +120,8 @@ public class WisperMethodCaller
         Class[] parameterTypes = methodModel.getCallParameterTypes();
         Object[] params = methodModel.getCallParameters();
 
-
         Method method;
         Object returnedValue;
-
 
         try
         {

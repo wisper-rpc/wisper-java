@@ -1,25 +1,29 @@
 package com.widespace.wisper.route;
 
+import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.classrepresentation.WisperParameterType;
-import com.widespace.wisper.classrepresentation.WisperProperty;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
 import com.widespace.wisper.utils.ClassUtils;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static com.widespace.wisper.messagetype.error.Error.NOT_ALLOWED;
 import static com.widespace.wisper.messagetype.error.Error.UNEXPECTED_TYPE_ERROR;
+import static com.widespace.wisper.messagetype.error.Error.WISPER_INSTANCE_INVALID;
 
 /**
  * This class specifically tries to create an instance of a remote object using the message.
@@ -120,9 +124,18 @@ public class WisperInstanceConstructor
             if (MessageParser.hasParams(request))
             {
                 Class<?> aClass = Class.forName(classRef.getName());
+                WisperMethod newMethodModel = null;
+                newMethodModel = handleCustomConstructorsAndReplaceInstanceParams(newMethodModel);
+
                 Object[] params = MessageParser.getParams(request);
+                if (newMethodModel != null)
+                {
+                    params = newMethodModel.getCallParameters();
+                }
+
                 Constructor<?> constructor = aClass.getConstructor(ClassUtils.getParameterClasses(params));
                 return (Wisper) constructor.newInstance(params);
+
             } else
             {
                 return (Wisper) Class.forName(classRef.getName()).newInstance();
@@ -148,6 +161,51 @@ public class WisperInstanceConstructor
             String errorMessage = "Could not instantiate this class. " + classModel.getClassRef() + ". Is the class Abstract?";
             throw new WisperException(Error.INSTANTIATION_ERROR, e, errorMessage);
         }
+    }
+
+    private WisperMethod handleCustomConstructorsAndReplaceInstanceParams(WisperMethod methodModel)
+    {
+        WisperMethod newMethodModel = methodModel;
+        if (classModel.getStaticMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
+        {
+            WisperMethod constructorMethod = classModel.getStaticMethods().get(Constants.CONSTRUCTOR_TOKEN);
+            Object[] messageParams = MessageParser.getParams(request);
+            newMethodModel = replaceWisperInstanceParametersWithRealInstances(constructorMethod, messageParams);
+
+        } else if (classModel.getInstanceMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
+        {
+            WisperMethod constructorMethod = classModel.getInstanceMethods().get(Constants.CONSTRUCTOR_TOKEN);
+            Object[] messageParams = MessageParser.getParams(request);
+            newMethodModel = replaceWisperInstanceParametersWithRealInstances(constructorMethod, messageParams);
+        }
+        return newMethodModel;
+    }
+
+    private WisperMethod replaceWisperInstanceParametersWithRealInstances(WisperMethod methodModel, Object[] messageParams)
+    {
+        Object[] resultedParameters = Arrays.copyOf(messageParams, messageParams.length);
+        Class[] parameterTypes = methodModel.getParameterTypes();
+        for (int i = 0; i < parameterTypes.length; i++)
+        {
+            //In case of instance, it has been replaced by RPCMethodParameter type.
+            if (parameterTypes[i].equals(WisperParameterType.INSTANCE.getClass()))
+            {
+                WisperInstanceModel instanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId((String) messageParams[i]);
+                Wisper instance=null;
+                if(instanceModel!=null)
+                    instance = instanceModel.getInstance();
+
+                if (instance == null)
+                    throw new WisperException(WISPER_INSTANCE_INVALID, null, "No such instance found with instance identifier :'" + messageParams[i] + "' passed as a parameter to method " + methodModel.getMethodName());
+
+                resultedParameters[i] = instance;
+                parameterTypes[i] = instance.getClass();
+            }
+        }
+
+        methodModel.setCallParameters(resultedParameters);
+        methodModel.setCallParameterTypes(parameterTypes);
+        return methodModel;
     }
 
 }
