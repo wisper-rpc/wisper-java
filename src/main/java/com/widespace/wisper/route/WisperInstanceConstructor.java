@@ -57,6 +57,7 @@ public class WisperInstanceConstructor
 
             callback.result(instanceModel, null);
             respondToCreateInstanceRequest(request, instanceModel);
+
         } catch (WisperException e)
         {
             callback.result(null, e);
@@ -95,28 +96,30 @@ public class WisperInstanceConstructor
         if (classModel.getStaticMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
         {
             WisperMethod wisperMethod = classModel.getStaticMethods().get(Constants.CONSTRUCTOR_TOKEN);
-            callConstructorBlock(instanceModel, wisperMethod, callback);
-            return true;
+            if (wisperMethod.getCallBlock() != null)
+            {
+                wisperMethod.getCallBlock().perform(classRouter, instanceModel, wisperMethod, request);
+                callback.result(instanceModel, null);
+                //respondToCreateInstanceRequest(request, instanceModel);
+                return true;
+            }
         }
 
         if (classModel.getInstanceMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
         {
             WisperMethod wisperMethod = classModel.getInstanceMethods().get(Constants.CONSTRUCTOR_TOKEN);
-            callConstructorBlock(instanceModel, wisperMethod, callback);
-            return true;
+            if (wisperMethod.getCallBlock() != null)
+            {
+                wisperMethod.getCallBlock().perform(classRouter, instanceModel, wisperMethod, request);
+                callback.result(instanceModel, null);
+                //respondToCreateInstanceRequest(request, instanceModel);
+                return true;
+            }
         }
 
         return false;
     }
 
-    private void callConstructorBlock(WisperInstanceModel instanceModel, WisperMethod wisperMethod, RemoteInstanceCreatorCallback callback) throws Exception
-    {
-        if (wisperMethod.getCallBlock() != null)
-            wisperMethod.getCallBlock().perform(classRouter, instanceModel, wisperMethod, request);
-
-        callback.result(instanceModel, null);
-        respondToCreateInstanceRequest(request, instanceModel);
-    }
 
     private WisperInstanceModel createInstanceModel(Wisper instance)
     {

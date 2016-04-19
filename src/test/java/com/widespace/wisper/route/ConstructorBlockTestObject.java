@@ -7,6 +7,10 @@ import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.Response;
+import com.widespace.wisper.utils.ClassUtils;
+
+import java.util.HashMap;
 
 /**
  * Created by ehssanhoorvash on 19/04/16.
@@ -29,9 +33,17 @@ public class ConstructorBlockTestObject implements Wisper
                     ConstructorBlockTestObject obj = (ConstructorBlockTestObject) wisperInstanceModel.getInstance();
                     obj.setInitialization_id("block");
 
-                    // This must be done manually
-                    message.getResponseBlock().perform();
-                    WisperInstanceRegistry.sharedInstance().addInstance(wisperInstanceModel, router.getRootRoute());
+                    //Response back to the request
+                    Response response = message.createResponse();
+                    HashMap<String, Object> idWithProperties = new HashMap<String, Object>();
+                    idWithProperties.put("id", wisperInstanceModel.getInstanceIdentifier());
+                    idWithProperties.put("props", ClassUtils.fetchInitializedProperties(wisperInstanceModel, wisperInstanceModel.getWisperClassModel()));
+                    response.setResult(idWithProperties);
+
+                    if (message.getResponseBlock() != null)
+                    {
+                        message.getResponseBlock().perform(response, null);
+                    }
                 }
             }
         }));
