@@ -21,9 +21,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static com.widespace.wisper.messagetype.error.Error.NOT_ALLOWED;
-import static com.widespace.wisper.messagetype.error.Error.UNEXPECTED_TYPE_ERROR;
-import static com.widespace.wisper.messagetype.error.Error.WISPER_INSTANCE_INVALID;
+import static com.widespace.wisper.messagetype.error.Error.*;
 
 /**
  * This class specifically tries to create an instance of a remote object using the message.
@@ -48,21 +46,23 @@ public class WisperInstanceConstructor
     {
         try
         {
-            if (handleBlockConstructor(callback))
-            {
-                callback.result(null, new WisperException(NOT_ALLOWED, null, "Block constructors are not allowed at this point."));
-                return;
-            }
-
             Class<?> classRef = classModel.getClassRef();
             Wisper instance = createInstanceWithReflection(classRef);
             setClassRouterOnInstance(instance);
             WisperInstanceModel instanceModel = createInstanceModel(instance);
+            if (handleBlockConstructor(instanceModel, callback))
+            {
+                return;
+            }
+
             callback.result(instanceModel, null);
             respondToCreateInstanceRequest(request, instanceModel);
         } catch (WisperException e)
         {
             callback.result(null, e);
+        } catch (Exception ex)
+        {
+            callback.result(null, new WisperException(UNKNOWN_ERROR, ex, "An unknown exception happened while trying to call the constructor."));
         }
     }
 
@@ -90,10 +90,32 @@ public class WisperInstanceConstructor
 
     }
 
-    private boolean handleBlockConstructor(RemoteInstanceCreatorCallback callback)
+    private boolean handleBlockConstructor(WisperInstanceModel instanceModel, RemoteInstanceCreatorCallback callback) throws Exception
     {
-        //TODO: For now, constructor blocks are not allowed - implement later
+        if (classModel.getStaticMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
+        {
+            WisperMethod wisperMethod = classModel.getStaticMethods().get(Constants.CONSTRUCTOR_TOKEN);
+            callConstructorBlock(instanceModel, wisperMethod, callback);
+            return true;
+        }
+
+        if (classModel.getInstanceMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
+        {
+            WisperMethod wisperMethod = classModel.getInstanceMethods().get(Constants.CONSTRUCTOR_TOKEN);
+            callConstructorBlock(instanceModel, wisperMethod, callback);
+            return true;
+        }
+
         return false;
+    }
+
+    private void callConstructorBlock(WisperInstanceModel instanceModel, WisperMethod wisperMethod, RemoteInstanceCreatorCallback callback) throws Exception
+    {
+        if (wisperMethod.getCallBlock() != null)
+            wisperMethod.getCallBlock().perform(classRouter, instanceModel, wisperMethod, request);
+
+        callback.result(instanceModel, null);
+        respondToCreateInstanceRequest(request, instanceModel);
     }
 
     private WisperInstanceModel createInstanceModel(Wisper instance)

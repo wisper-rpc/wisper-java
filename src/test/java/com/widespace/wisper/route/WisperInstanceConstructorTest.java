@@ -241,6 +241,33 @@ public class WisperInstanceConstructorTest
     }
 
 
+    @Test
+    public void callBlockAsConstructorWorks() throws Exception
+    {
+        final Object[] result = new Object[2];
+        Request request = new Request(new JSONObject("{ \"method\" : \"whatever.whatever.thing~\", \"params\" : [], \"id\": \"ABCD\" }"), null);
+        WisperInstanceConstructor constructor = new WisperInstanceConstructor(mock(ClassRouter.class), ConstructorBlockTestObject.registerRpcClass(), request);
+        constructor.create(new RemoteInstanceCreatorCallback()
+        {
+            @Override
+            public void result(WisperInstanceModel instanceModel, WisperException ex)
+            {
+                //problem is the other constructor takes a string, and that is the one being called, so the instance is actually made using the other constr
+                result[0] = instanceModel;
+                result[1] = ex;
+            }
+        });
+
+
+        assertThat(result[1], is(nullValue()));
+        assertThat(result[0], is(notNullValue()));
+
+        Object created_instance = ((WisperInstanceModel) result[0]).getInstance();
+        assertThat(created_instance, is(instanceOf(ConstructorBlockTestObject.class)));
+
+        ConstructorBlockTestObject constructorBlockTestObject = (ConstructorBlockTestObject) created_instance;
+        assertThat(constructorBlockTestObject.getInitializationId(), is("block"));
+    }
 
     //--------------------------
     private Request testObjectCreateRequest()
