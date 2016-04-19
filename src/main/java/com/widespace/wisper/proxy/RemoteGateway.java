@@ -1,5 +1,6 @@
 package com.widespace.wisper.proxy;
 
+import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.base.WisperObject;
 import com.widespace.wisper.classrepresentation.CallBlock;

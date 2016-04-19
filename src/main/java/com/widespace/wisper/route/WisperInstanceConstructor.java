@@ -165,6 +165,10 @@ public class WisperInstanceConstructor
         {
             String errorMessage = "Could not instantiate this class. " + classModel.getClassRef() + ". Is the class Abstract?";
             throw new WisperException(Error.INSTANTIATION_ERROR, e, errorMessage);
+        } catch (IllegalArgumentException e)
+        {
+            String errorMessage = "Could not find the specified constructor for this class. " + classModel.getClassRef() + ". Are the arguments passed correct?";
+            throw new WisperException(Error.CONSTRUCTOR_NOT_FOUND, e, errorMessage);
         }
     }
 
@@ -226,13 +230,13 @@ public class WisperInstanceConstructor
             Class<?>[] types = constructor.getParameterTypes();
             if (types.length == args.length)
             {
-                boolean argumentsMatch = true;
+                boolean argumentsMatch = false;
                 for (int i = 0; i < args.length; i++)
                 {
                     //Note that the types in args must be in same order as in the constructor if the checking is done this way
-                    if (!types[i].isAssignableFrom(args[i]))
+                    if (types[i].isAssignableFrom(args[i]))
                     {
-                        argumentsMatch = false;
+                        argumentsMatch = true;
                         break;
                     }
                 }
