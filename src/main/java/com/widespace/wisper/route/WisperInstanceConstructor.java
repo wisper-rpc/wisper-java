@@ -100,7 +100,6 @@ public class WisperInstanceConstructor
             {
                 wisperMethod.getCallBlock().perform(classRouter, instanceModel, wisperMethod, request);
                 callback.result(instanceModel, null);
-                //respondToCreateInstanceRequest(request, instanceModel);
                 return true;
             }
         }
@@ -112,7 +111,6 @@ public class WisperInstanceConstructor
             {
                 wisperMethod.getCallBlock().perform(classRouter, instanceModel, wisperMethod, request);
                 callback.result(instanceModel, null);
-                //respondToCreateInstanceRequest(request, instanceModel);
                 return true;
             }
         }
