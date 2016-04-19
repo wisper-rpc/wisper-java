@@ -124,20 +124,25 @@ public class WisperInstanceConstructor
             if (MessageParser.hasParams(request))
             {
                 Class<?> aClass = Class.forName(classRef.getName());
-                WisperMethod newMethodModel = null;
-                newMethodModel = handleCustomConstructorsAndReplaceInstanceParams(newMethodModel);
+                WisperMethod customConstructor = handleCustomConstructorsAndReplaceInstanceParams(classModel);
 
-                Object[] params = MessageParser.getParams(request);
-                if (newMethodModel != null)
+                Object[] params;
+                if (customConstructor != null)
                 {
-                    params = newMethodModel.getCallParameters();
+                    //Custom constructor
+                    Constructor<?> constructor = getConstructorForArgs(aClass, customConstructor.getCallParameterTypes()); //aClass.getConstructor(customConstructor.getCallParameterTypes());
+                    return (Wisper) constructor.newInstance(customConstructor.getCallParameters());
+                } else
+                {
+                    //constructor with params
+                    params = MessageParser.getParams(request);
+                    Constructor<?> constructor = getConstructorForArgs(aClass, ClassUtils.getParameterClasses(params)); //aClass.getConstructor(ClassUtils.getParameterClasses(params));
+                    return (Wisper) constructor.newInstance(params);
                 }
-
-                Constructor<?> constructor = aClass.getConstructor(ClassUtils.getParameterClasses(params));
-                return (Wisper) constructor.newInstance(params);
 
             } else
             {
+                //default constructor without any params
                 return (Wisper) Class.forName(classRef.getName()).newInstance();
             }
         } catch (InvocationTargetException e)
@@ -163,18 +168,19 @@ public class WisperInstanceConstructor
         }
     }
 
-    private WisperMethod handleCustomConstructorsAndReplaceInstanceParams(WisperMethod methodModel)
+
+    private WisperMethod handleCustomConstructorsAndReplaceInstanceParams(WisperClassModel theClassModel)
     {
-        WisperMethod newMethodModel = methodModel;
-        if (classModel.getStaticMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
+        WisperMethod newMethodModel = null;
+        if (theClassModel.getStaticMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
         {
-            WisperMethod constructorMethod = classModel.getStaticMethods().get(Constants.CONSTRUCTOR_TOKEN);
+            WisperMethod constructorMethod = theClassModel.getStaticMethods().get(Constants.CONSTRUCTOR_TOKEN);
             Object[] messageParams = MessageParser.getParams(request);
             newMethodModel = replaceWisperInstanceParametersWithRealInstances(constructorMethod, messageParams);
 
-        } else if (classModel.getInstanceMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
+        } else if (theClassModel.getInstanceMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
         {
-            WisperMethod constructorMethod = classModel.getInstanceMethods().get(Constants.CONSTRUCTOR_TOKEN);
+            WisperMethod constructorMethod = theClassModel.getInstanceMethods().get(Constants.CONSTRUCTOR_TOKEN);
             Object[] messageParams = MessageParser.getParams(request);
             newMethodModel = replaceWisperInstanceParametersWithRealInstances(constructorMethod, messageParams);
         }
@@ -191,8 +197,8 @@ public class WisperInstanceConstructor
             if (parameterTypes[i].equals(WisperParameterType.INSTANCE.getClass()))
             {
                 WisperInstanceModel instanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId((String) messageParams[i]);
-                Wisper instance=null;
-                if(instanceModel!=null)
+                Wisper instance = null;
+                if (instanceModel != null)
                     instance = instanceModel.getInstance();
 
                 if (instance == null)
@@ -206,6 +212,41 @@ public class WisperInstanceConstructor
         methodModel.setCallParameters(resultedParameters);
         methodModel.setCallParameterTypes(parameterTypes);
         return methodModel;
+    }
+
+
+    private Constructor<?> getConstructorForArgs(Class<?> klass, Class[] args) throws NoSuchMethodException
+    {
+        //Get all the constructors from given class
+        Constructor<?>[] constructors = klass.getConstructors();
+
+        for (Constructor<?> constructor : constructors)
+        {
+            //Walk through all the constructors, matching parameter amount and parameter types with given types (args)
+            Class<?>[] types = constructor.getParameterTypes();
+            if (types.length == args.length)
+            {
+                boolean argumentsMatch = true;
+                for (int i = 0; i < args.length; i++)
+                {
+                    //Note that the types in args must be in same order as in the constructor if the checking is done this way
+                    if (!types[i].isAssignableFrom(args[i]))
+                    {
+                        argumentsMatch = false;
+                        break;
+                    }
+                }
+
+                if (argumentsMatch)
+                {
+                    //We found a matching constructor, return it
+                    return constructor;
+                }
+            }
+        }
+
+        //No matching constructor
+        throw new NoSuchMethodException("Constructor with parameters " + Arrays.toString(args) + " was not found on " + klass.toString());
     }
 
 }
