@@ -7,5 +7,5 @@ import com.widespace.wisper.route.ClassRouter;
 
 public interface CallBlock
 {
-    void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, Request message) throws Exception;
+    void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, AbstractMessage message) throws Exception;
 }

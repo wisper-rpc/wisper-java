@@ -1,6 +1,5 @@
 package com.widespace.wisper.proxy;
 
-import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.base.WisperObject;
 import com.widespace.wisper.classrepresentation.CallBlock;
@@ -115,31 +114,64 @@ public class RemoteGateway extends WisperObject
     private static class SendMessageCallBlock implements CallBlock
     {
         @Override
-        public void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, final Request request) throws Exception
+        public void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, final AbstractMessage message) throws Exception
         {
-            final String internalMessageString = (String) request.getParams()[1];
-            AbstractMessage wisperMessage = new MessageFactory().createMessage(new JSONObject(internalMessageString));
-            if (wisperMessage instanceof Request)
+            if (message instanceof Request)
             {
-                ((Request) wisperMessage).setResponseBlock(new ResponseBlock()
+                final Request request = (Request) message;
+                final String internalMessageString = (String) request.getParams()[1];
+                AbstractMessage wisperMessage = new MessageFactory().createMessage(new JSONObject(internalMessageString));
+                if (wisperMessage instanceof Request)
                 {
-                    @Override
-                    public void perform(Response response, RPCErrorMessage error)
+                    ((Request) wisperMessage).setResponseBlock(new ResponseBlock()
                     {
-                        Response newResponse = new Response();
-                        newResponse.setIdentifier(request.getIdentifier());
-                        newResponse.setResult(response.toJsonString());
-                        request.getResponseBlock().perform(newResponse, null);
+                        @Override
+                        public void perform(Response response, RPCErrorMessage error)
+                        {
+                            Response newResponse = new Response();
+                            newResponse.setIdentifier(request.getIdentifier());
+                            newResponse.setResult(response.toJsonString());
+                            request.getResponseBlock().perform(newResponse, null);
 
-                        //TODO: Handle Err case & Notifications
-                    }
-                });
-            } else
+                            //TODO: Handle Err case & Notifications?
+                        }
+                    });
+                } else
+                {
+                    ((RemoteGateway) wisperInstanceModel.getInstance()).gatewayRouter.getGateway().handleMessage(wisperMessage);
+                    Response response = request.createResponse();
+                    request.getResponseBlock().perform(response, null);
+                }
+            } else if (message instanceof Notification)
             {
-                ((RemoteGateway) wisperInstanceModel.getInstance()).gatewayRouter.getGateway().handleMessage(wisperMessage);
-                Response response = request.createResponse();
-                request.getResponseBlock().perform(response, null);
+                final Notification notification = (Notification) message;
+                final String internalMessageString = (String) notification.getParams()[1];
+                AbstractMessage wisperMessage = new MessageFactory().createMessage(new JSONObject(internalMessageString));
+                if (wisperMessage instanceof Request)
+                {
+                    ((Request) wisperMessage).setResponseBlock(new ResponseBlock()
+                    {
+                        @Override
+                        public void perform(Response response, RPCErrorMessage error)
+                        {
+                            Response newResponse = new Response();
+                            newResponse.setIdentifier(notification.getIdentifier());
+                            newResponse.setResult(response.toJsonString());
+                            //notification.getResponseBlock().perform(newResponse, null);
+
+                            //TODO: Handle Err case & Notifications?
+                        }
+                    });
+                } else
+                {
+                    ((RemoteGateway) wisperInstanceModel.getInstance()).gatewayRouter.getGateway().handleMessage(wisperMessage);
+                    //Response response = notification.createResponse();
+                    //notification.getResponseBlock().perform(response, null);
+                }
+
             }
+
+
         }
     }
 
@@ -163,7 +195,7 @@ public class RemoteGateway extends WisperObject
 
             proxyNotificationTypeMessage(message);
 
-            classRouter.getRootGateway().sendMessage(message);
+
         }
 
         private void proxyNotificationTypeMessage(AbstractMessage message)
@@ -174,6 +206,7 @@ public class RemoteGateway extends WisperObject
             String methodName = MessageParser.getFullMethodName(message);
             String replacedMethodName = methodName.replaceFirst(newRoute, myRoute);
             ((Notification) message).setMethodName(replacedMethodName);
+            classRouter.getRootGateway().sendMessage(message);
         }
 
         private boolean proxiedRequestTypeMessage(final AbstractMessage message)
@@ -214,6 +247,8 @@ public class RemoteGateway extends WisperObject
                     ((Request) message).getResponseBlock().perform(proxiedResponse, null);
                 }
             });
+
+            classRouter.getRootGateway().sendMessage(proxiedRequest);
 
             return true;
         }

@@ -93,7 +93,7 @@ public class WisperMethodCaller
         {
             if (methodModel.getCallBlock() != null)
             {
-                methodModel.getCallBlock().perform(router, wisperInstance, methodModel, (Request) message);
+                methodModel.getCallBlock().perform(router, wisperInstance, methodModel,  message);
                 return true;
             }
 
@@ -101,7 +101,7 @@ public class WisperMethodCaller
 
         } catch (Exception e)
         {
-            throw new WisperException(Error.METHOD_INVOCATION_ERROR, e, "An exception happened while trying to invoke callBlock on method " + methodModel.getMethodName() + ". Exception : " + Arrays.toString(e.getStackTrace()));
+            throw new WisperException(Error.METHOD_INVOCATION_ERROR, e, "An exception happened while trying to invoke callBlock on method " + methodModel.getMethodName() + ". Exception : " + e.getMessage() + Arrays.toString(e.getStackTrace()));
         }
     }
 
