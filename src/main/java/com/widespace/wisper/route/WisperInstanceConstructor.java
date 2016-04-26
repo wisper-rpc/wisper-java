@@ -42,18 +42,20 @@ public class WisperInstanceConstructor
         this.classRouter = classRouter;
     }
 
+
     public void create(@NotNull RemoteInstanceCreatorCallback callback)
     {
         try
         {
             Class<?> classRef = classModel.getClassRef();
-            Wisper instance = createInstanceWithReflection(classRef);
-            setClassRouterOnInstance(instance);
-            WisperInstanceModel instanceModel = createInstanceModel(instance);
-            if (handleBlockConstructor(instanceModel, callback))
+            if (handleBlockConstructor(callback))
             {
                 return;
             }
+
+            Wisper instance = createInstanceWithReflection(classRef);
+            setClassRouterOnInstance(instance);
+            WisperInstanceModel instanceModel = createInstanceModel(instance);
 
             callback.result(instanceModel, null);
             respondToCreateInstanceRequest(request, instanceModel);
@@ -65,6 +67,39 @@ public class WisperInstanceConstructor
         {
             callback.result(null, new WisperException(UNKNOWN_ERROR, ex, "An unknown exception happened while trying to call the constructor."));
         }
+    }
+
+    private boolean handleBlockConstructor(RemoteInstanceCreatorCallback callback) throws Exception
+    {
+        if (classModel.getStaticMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
+        {
+            WisperMethod wisperMethod = classModel.getStaticMethods().get(Constants.CONSTRUCTOR_TOKEN);
+            if (wisperMethod.getCallBlock() != null)
+            {
+                Wisper instance = (Wisper) Class.forName(classModel.getClassRef().getName()).newInstance();
+                setClassRouterOnInstance(instance);
+                WisperInstanceModel instanceModel = createInstanceModel(instance);
+                wisperMethod.getCallBlock().perform(classRouter, instanceModel, wisperMethod, request);
+                callback.result(instanceModel, null);
+                return true;
+            }
+        }
+
+        if (classModel.getInstanceMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
+        {
+            WisperMethod wisperMethod = classModel.getInstanceMethods().get(Constants.CONSTRUCTOR_TOKEN);
+            if (wisperMethod.getCallBlock() != null)
+            {
+                Wisper instance = (Wisper) Class.forName(classModel.getClassRef().getName()).newInstance();
+                setClassRouterOnInstance(instance);
+                WisperInstanceModel instanceModel = createInstanceModel(instance);
+                wisperMethod.getCallBlock().perform(classRouter, instanceModel, wisperMethod, request);
+                callback.result(instanceModel, null);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void setClassRouterOnInstance(Wisper instance) throws WisperException
@@ -89,33 +124,6 @@ public class WisperInstanceConstructor
             throw new WisperException(Error.METHOD_NOT_ACCESSIBLE, e, errorMessage);
         }
 
-    }
-
-    private boolean handleBlockConstructor(WisperInstanceModel instanceModel, RemoteInstanceCreatorCallback callback) throws Exception
-    {
-        if (classModel.getStaticMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
-        {
-            WisperMethod wisperMethod = classModel.getStaticMethods().get(Constants.CONSTRUCTOR_TOKEN);
-            if (wisperMethod.getCallBlock() != null)
-            {
-                wisperMethod.getCallBlock().perform(classRouter, instanceModel, wisperMethod, request);
-                callback.result(instanceModel, null);
-                return true;
-            }
-        }
-
-        if (classModel.getInstanceMethods().containsKey(Constants.CONSTRUCTOR_TOKEN))
-        {
-            WisperMethod wisperMethod = classModel.getInstanceMethods().get(Constants.CONSTRUCTOR_TOKEN);
-            if (wisperMethod.getCallBlock() != null)
-            {
-                wisperMethod.getCallBlock().perform(classRouter, instanceModel, wisperMethod, request);
-                callback.result(instanceModel, null);
-                return true;
-            }
-        }
-
-        return false;
     }
 
 
@@ -193,6 +201,11 @@ public class WisperInstanceConstructor
             String errorMessage = "Could not find the specified constructor for this class. " + classModel.getClassRef() + ". Are the arguments passed correct?";
             throw new WisperException(Error.CONSTRUCTOR_NOT_FOUND, e, errorMessage);
         }
+    }
+
+    private boolean hasBlockConstructor(WisperClassModel classModel)
+    {
+        return classModel.getStaticMethods().containsKey("~") || classModel.getInstanceMethods().containsKey("~");
     }
 
 

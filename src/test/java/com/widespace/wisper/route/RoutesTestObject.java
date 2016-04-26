@@ -68,11 +68,6 @@ class RoutesTestObject implements Wisper
         this.prop = "set-by-constructor";
     }
 
-    public RoutesTestObject(RoutesTestObject instance)
-    {
-        this(instance.testId);
-        this.prop = "set-by-instance-constructor";
-    }
 
 
     //region Wisper Event Handlers
