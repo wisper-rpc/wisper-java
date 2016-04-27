@@ -84,7 +84,7 @@ public class ClassUtils
             }
         } catch (NoSuchMethodException e)
         {
-            String errorMessage = "Getter method for the property " + currentPropertyName + "not found in class " + wisperInstanceModel.getWisperClassModel().getMapName() + ". Does the getter method actually exist in the class? ";
+            String errorMessage = "Getter method for the property " + currentPropertyName + " not found in class " + wisperInstanceModel.getWisperClassModel().getMapName() + ". Does the getter method actually exist in the class? ";
             throw new WisperException(Error.GETTER_METHOD_NOT_FOUND, e, errorMessage);
         } catch (IllegalAccessException e)
         {
