@@ -20,7 +20,7 @@ public class ChannelTest
         Channel channel = spy(new TestChannel());
         assertThat(channel.getGateway(), is(nullValue()));
 
-        channel.receiveMessage(new Request().toJsonString());
+        channel.receiveMessage(new Request("foo").toJsonString());
         //of exception is thrown, test fails.
     }
 
@@ -30,7 +30,7 @@ public class ChannelTest
         Channel channel = new TestChannel();
         Gateway gateway = mock(Gateway.class);
         channel.setGateway(gateway);
-        Request mesage = new Request();
+        Request mesage = new Request("foo");
 
         channel.receiveMessage(mesage.toJsonString());
         verify(gateway).handleMessage(mesage.toJsonString());

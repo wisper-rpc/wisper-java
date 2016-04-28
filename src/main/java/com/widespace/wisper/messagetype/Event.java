@@ -17,21 +17,25 @@ public class Event extends Notification
     private String name;
     private Object value;
 
-    public Event()
-    {
-        super();
-    }
 
-    public Event(String methodName, String instanceIdentifier, String name, Object value)
+    public Event(String methodName, Object... params)
     {
-        this.methodName = methodName;
-        this.instanceIdentifier = instanceIdentifier;
-        this.name = name;
-        this.value = value;
+        super(methodName, params);
+
+        if (params.length == 2)
+        {
+            name = (String)params[ 0 ];
+            value = params[ 1 ];
+        } else if (params.length == 3) {
+            instanceIdentifier = (String)params[ 0 ];
+            name = (String)params[ 1 ];
+            value = params[ 2 ];
+        }
     }
 
     public Event(Notification notification)
     {
+        super(notification.getMethodName(), notification.getParams());
         this.methodName = notification.getMethodName().replace(":!", "").replace("!", "");
         WisperCallType callType = MessageParser.getCallType(notification);
         Object[] notificationParams = notification.getParams();
@@ -62,6 +66,7 @@ public class Event extends Notification
 
 
     }
+
 
     public String getInstanceIdentifier()
     {

@@ -33,12 +33,9 @@ public class RPCProxy
      */
     public void handleRequest(Request request)
     {
-        Request proxifiedRequest = new Request();
-        proxifiedRequest.setIdentifier(request.getIdentifier());
-        proxifiedRequest.setMethod(extractMethodName(request.getMethodName()));
-        proxifiedRequest.setParams(request.getParams());
-        proxifiedRequest.setResponseBlock(request.getResponseBlock());
-        receiver.handleMessage(proxifiedRequest.toJsonString());
+        Request proxied = new Request(extractMethodName(request.getMethodName()), request.getResponseBlock(), request.getParams());
+        proxied.setIdentifier(request.getIdentifier());
+        receiver.handleMessage(proxied.toJsonString());
     }
 
     /**
@@ -49,12 +46,8 @@ public class RPCProxy
      */
     public void handleNotification(Notification notification)
     {
-        Notification proxifiedNotification = new Notification();
-        proxifiedNotification.setMethodName(extractMethodName(notification.getMethodName()));
-        proxifiedNotification.setParams(notification.getParams());
-        receiver.handleMessage(proxifiedNotification.toJsonString());
+        receiver.handleMessage(new Notification(extractMethodName(notification.getMethodName()), notification.getParams()).toJsonString());
     }
-
 
 
     private String extractMethodName(String methodName)

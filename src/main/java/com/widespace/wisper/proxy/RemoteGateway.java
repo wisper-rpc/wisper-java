@@ -77,11 +77,15 @@ public class RemoteGateway extends WisperObject
     public void setChannel(Channel channel)
     {
         if (this.channel != null)
+        {
             this.channel.setGateway(null);
+        }
 
         this.channel = channel;
         if (channel != null)
+        {
             channel.setGateway(gatewayRouter.getGateway());
+        }
 
         gatewayRouter.setGatewayCallback(channel);
     }
@@ -136,13 +140,15 @@ public class RemoteGateway extends WisperObject
                             //TODO: Handle Err case & Notifications?
                         }
                     });
-                } else
+                }
+                else
                 {
                     ((RemoteGateway) wisperInstanceModel.getInstance()).gatewayRouter.getGateway().handleMessage(wisperMessage);
                     Response response = request.createResponse();
                     request.getResponseBlock().perform(response, null);
                 }
-            } else if (message instanceof Notification)
+            }
+            else if (message instanceof Notification)
             {
                 final Notification notification = (Notification) message;
                 final String internalMessageString = (String) notification.getParams()[1];
@@ -162,7 +168,8 @@ public class RemoteGateway extends WisperObject
                             //TODO: Handle Err case & Notifications?
                         }
                     });
-                } else
+                }
+                else
                 {
                     ((RemoteGateway) wisperInstanceModel.getInstance()).gatewayRouter.getGateway().handleMessage(wisperMessage);
                     //Response response = notification.createResponse();
@@ -191,7 +198,9 @@ public class RemoteGateway extends WisperObject
         public void routeMessage(final AbstractMessage message, String path) throws WisperException
         {
             if (proxiedRequestTypeMessage(message))
+            {
                 return;
+            }
 
             proxyNotificationTypeMessage(message);
 
@@ -201,24 +210,27 @@ public class RemoteGateway extends WisperObject
         private void proxyNotificationTypeMessage(AbstractMessage message)
         {
             if (!(message instanceof Notification))
+            {
                 return;
+            }
 
             String methodName = MessageParser.getFullMethodName(message);
             String replacedMethodName = methodName.replaceFirst(newRoute, myRoute);
-            ((Notification) message).setMethodName(replacedMethodName);
-            classRouter.getRootGateway().sendMessage(message);
+
+            classRouter.getRootGateway().sendMessage(new Notification(replacedMethodName, ((Notification) message).getParams()));
         }
 
         private boolean proxiedRequestTypeMessage(final AbstractMessage message)
         {
             if (!(message instanceof Request))
+            {
                 return false;
+            }
 
             String methodName = MessageParser.getFullMethodName(message);
             String replacedMethodName = methodName.replaceFirst(newRoute, myRoute);
 
-            Request proxiedRequest = new Request().withMethodName(replacedMethodName).withParams(((Request) message).getParams());
-            proxiedRequest.setResponseBlock(new ResponseBlock()
+            ResponseBlock block = new ResponseBlock()
             {
                 @Override
                 public void perform(Response response, RPCErrorMessage error)
@@ -226,7 +238,8 @@ public class RemoteGateway extends WisperObject
                     if (error == null)
                     {
                         proxyResponse(response);
-                    } else
+                    }
+                    else
                     {
                         proxyError(error);
                     }
@@ -246,7 +259,9 @@ public class RemoteGateway extends WisperObject
 
                     ((Request) message).getResponseBlock().perform(proxiedResponse, null);
                 }
-            });
+            };
+
+            Request proxiedRequest = new Request(replacedMethodName, block, ((Request) message).getParams());
 
             classRouter.getRootGateway().sendMessage(proxiedRequest);
 

@@ -6,24 +6,19 @@ import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
-import com.widespace.wisper.messagetype.WisperEventBuilder;
 import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.WisperEventBuilder;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-import org.mockito.Matchers;
-import org.mockito.verification.VerificationMode;
-
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.*;
 
 public class ClassRouterTest
@@ -98,7 +93,7 @@ public class ClassRouterTest
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
 
         ROUTE_PATH = "whatever:append";
-        Request request = new Request().withMethodName("a.b.c:append").withParams(new Object[]{instanceModel1.getInstanceIdentifier(), "x1", "x2"});
+        Request request = new Request("a.b.c:append", null, new Object[]{instanceModel1.getInstanceIdentifier(), "x1", "x2"});
 
         assertThat(actualInstance.instanceMethodCalled(), is(false));
         classRouter.routeMessage(request, ROUTE_PATH);
@@ -111,7 +106,7 @@ public class ClassRouterTest
     public void givenStaticMethodCall_methodWillGetCalledOnActualClass() throws Exception
     {
         ROUTE_PATH = "whatever.append";
-        Request request = new Request().withMethodName("a.b.c.append").withParams(new Object[]{"x1", "x2"});
+        Request request = new Request("a.b.c.append", null, "x1", "x2");
 
         assertThat(RoutesTestObject.staticMethodCalled(), is(false));
         classRouter.routeMessage(request, ROUTE_PATH);
@@ -129,7 +124,7 @@ public class ClassRouterTest
 
         WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anInstance, "ABCD-1");
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
-        Request request = new Request().withMethodName("a.b.c.printInstanceId").withParams(new Object[]{instanceModel1.getInstanceIdentifier(), "suffix"});
+        Request request = new Request("a.b.c.printInstanceId", null, instanceModel1.getInstanceIdentifier(), "suffix");
 
         classRouter.routeMessage(request, ROUTE_PATH);
 
@@ -152,7 +147,7 @@ public class ClassRouterTest
         WisperInstanceModel param_instance = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anotherInstance, "ABCD-2");
         WisperInstanceRegistry.sharedInstance().addInstance(object_instance, classRouter);
         WisperInstanceRegistry.sharedInstance().addInstance(param_instance, classRouter);
-        Request request = new Request().withMethodName("a.b.c:printInstanceId").withParams(new Object[]{object_instance.getInstanceIdentifier(), param_instance.getInstanceIdentifier(), "suffix"});
+        Request request = new Request("a.b.c:printInstanceId", null, object_instance.getInstanceIdentifier(), param_instance.getInstanceIdentifier(), "suffix");
 
         classRouter.routeMessage(request, ROUTE_PATH);
 
@@ -166,7 +161,7 @@ public class ClassRouterTest
         RoutesTestObject anInstance = new RoutesTestObject();
         WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anInstance, "ABCD-1");
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
-        Request request = new Request().withMethodName("a.b.c.undefinedMethodName").withParams(new Object[]{});
+        Request request = new Request("a.b.c.undefinedMethodName");
 
         classRouter.routeMessage(request, ROUTE_PATH);
     }

@@ -32,10 +32,9 @@ public class GatewayRouterTest
     @Test
     public void testGatewayRouterForwardsIncomingMessages() throws Exception
     {
-        Request request = new Request();
-        request.setIdentifier("ABCD1");
         String methodName = "a.b.c:call";
-        request.setMethod(methodName);
+        Request request = new Request(methodName);
+        request.setIdentifier("ABCD1");
         Router routerMock = mock(Router.class);
         gatewayRouter.exposeRoute(methodName, routerMock);
         gateway.setCallback(gatewayRouter);
@@ -56,10 +55,9 @@ public class GatewayRouterTest
     @Test
     public void canHandleCreateMessages() throws Exception
     {
-        Request request = new Request();
-        request.setIdentifier("ABCD1");
         String methodName = "a.b.c~";
-        request.setMethod(methodName);
+        Request request = new Request(methodName);
+        request.setIdentifier("ABCD1");
 
         gatewayRouter.register(RoutesTestObject.class, "a.b.c");
         gateway.handleMessage(request);

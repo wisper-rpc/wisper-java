@@ -12,12 +12,7 @@ public class Notification extends AbstractMessage
     protected String methodName;
     protected Object[] params;
 
-    public Notification()
-    {
-        this(null, null);
-    }
-
-    public Notification(String methodName, Object[] params)
+    public Notification(String methodName, Object ...params)
     {
         this.methodName = methodName;
         this.params = params;
@@ -52,19 +47,9 @@ public class Notification extends AbstractMessage
         return methodName;
     }
 
-    public void setMethodName(String methodName)
-    {
-        this.methodName = methodName;
-    }
-
     public Object[] getParams()
     {
         return params;
-    }
-
-    public void setParams(Object[] params)
-    {
-        this.params = params;
     }
 
     @Override
@@ -75,17 +60,5 @@ public class Notification extends AbstractMessage
         jsonObject.put(Constants.PARAMS, getParams() == null ? "" : serialize(getParams()));
 
         return jsonObject;
-    }
-
-    public Notification withMethodName(String methodName)
-    {
-        this.methodName = methodName;
-        return this;
-    }
-
-    public Notification withParams(Object[] params)
-    {
-        this.params = params;
-        return this;
     }
 }

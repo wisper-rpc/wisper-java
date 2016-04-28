@@ -145,7 +145,7 @@ public class ClassRouter extends Router
 
     public void removeInstance(WisperInstanceModel instanceModel)
     {
-        Notification destructNotification = new Notification().withMethodName("created.by.router:~").withParams(new Object[]{instanceModel.getInstanceIdentifier()});
+        Notification destructNotification = new Notification("created.by.router:~", instanceModel.getInstanceIdentifier());
         new WisperInstanceDestructor(destructNotification, this).destroy();
     }
 

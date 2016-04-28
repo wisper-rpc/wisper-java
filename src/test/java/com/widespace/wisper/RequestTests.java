@@ -73,7 +73,7 @@ public class RequestTests
     public void withMethodNameSetsTheMethodNmae() throws Exception
     {
         String methodName = "a.b.c~";
-        Request request = new Request().withMethodName(methodName);
+        Request request = new Request(methodName, null);
         assertThat(request.getMethodName(), is(methodName));
     }
 
@@ -81,7 +81,7 @@ public class RequestTests
     public void withParamsSetsParamsCorrectly() throws Exception
     {
         Object[] params = {"x", "y", "z"};
-        Request request = new Request().withParams(params);
+        Request request = new Request("foo", null, params);
         assertThat(request.getParams(), is(params));
     }
 

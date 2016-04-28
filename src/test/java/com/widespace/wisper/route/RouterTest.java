@@ -180,7 +180,7 @@ public class RouterTest
     {
         Router router_x = new Router();
         Router router_y = mock(Router.class);
-        Notification notificaton = new Notification("x.y.method", new String[]{"first", "second"});
+        Notification notificaton = new Notification("x.y.method", "first", "second");
         router.exposeRoute("x", router_x);
         router_x.exposeRoute("y", router_y);
 

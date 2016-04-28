@@ -9,16 +9,13 @@ import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.route.Channel;
-
 import com.widespace.wisper.route.ClassRouter;
 import com.widespace.wisper.route.GatewayRouter;
 import org.junit.Test;
 
-import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 
@@ -78,11 +75,11 @@ public class RemoteGatewayTest
         final RemoteGateway remoteGateway = new RemoteGateway(new TestChannel());
         WisperInstanceModel remoteGatewayWisperInstanceModel = remoteGatewayClassRouter.addInstance(remoteGateway);
 
-        final Request inner_request = new Request().withMethodName("some.path:method");
+        final Request inner_request = new Request("some.path:method");
         inner_request.setIdentifier("inner_001");
 
-        Object[] params =  new Object[]{remoteGatewayWisperInstanceModel.getInstanceIdentifier(), inner_request.toJsonString()};
-        final Request outer_request=new Request().withMethodName("Gateway:sendMessage").withParams(params);
+        Object[] params = new Object[]{remoteGatewayWisperInstanceModel.getInstanceIdentifier(), inner_request.toJsonString()};
+        final Request outer_request = new Request("Gateway:sendMessage", null, params);
         outer_request.setIdentifier("outer_001");
         outer_request.setResponseBlock(new ResponseBlock()
         {

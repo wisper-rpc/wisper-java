@@ -29,8 +29,7 @@ public class WisperInstanceDestructorTest
     @Test(expected = WisperException.class)
     public void thowsExceptionOnNonDestructCalls() throws Exception
     {
-        Request request = new Request();
-        request.setMethod("a.b.c:call");
+        Request request = new Request("a.b.c:call");
         request.setIdentifier("ABCD1");
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(request, mock(Router.class));
     }
@@ -38,8 +37,7 @@ public class WisperInstanceDestructorTest
     @Test
     public void acceptsDestructMessageType() throws Exception
     {
-        Request request = new Request();
-        request.setMethod("a.b.c:~");
+        Request request = new Request("a.b.c:~");
         request.setIdentifier("ABCD1");
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(request, mock(Router.class));
         assertThat(destructor, is(notNullValue()));
@@ -48,9 +46,7 @@ public class WisperInstanceDestructorTest
     @Test
     public void acceptsDestructMessageTypeAsNotification() throws Exception
     {
-        Notification notification = new Notification();
-        notification.setMethodName("a.b.c:~");
-        notification.setParams(new Object[]{"ABCD1"});
+        Notification notification = new Notification("a.b.c:~", "ABCD1");
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(notification, mock(Router.class));
         assertThat(destructor, is(notNullValue()));
     }
@@ -106,7 +102,7 @@ public class WisperInstanceDestructorTest
         WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router.getRootRoute());
 
         Request request = destructRequest(wisperInstance.getInstanceIdentifier());
-        Notification notification = new Notification().withMethodName(request.getMethodName()).withParams(new Object[]{wisperInstance.getInstanceIdentifier()});
+        Notification notification = new Notification(request.getMethodName(), new Object[]{wisperInstance.getInstanceIdentifier()});
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(notification, router);
         destructor.destroy();
 
@@ -140,9 +136,8 @@ public class WisperInstanceDestructorTest
     //--------------------------
     private WisperInstanceModel createInstanceAndReturnWisperInstance(String mapName) throws InterruptedException
     {
-        Request creationRequest = new Request();
+        Request creationRequest = new Request(mapName + "~");
         creationRequest.setIdentifier("ABCD1");
-        creationRequest.setMethod(mapName + "~");
 
         final WisperInstanceModel[] _instanceModel = new WisperInstanceModel[1];
         WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class), RoutesTestObject.registerRpcClass(), creationRequest);
@@ -165,9 +160,6 @@ public class WisperInstanceDestructorTest
     @NotNull
     private Request destructRequest(String instanceId)
     {
-        Request destructReq = new Request();
-        destructReq.setMethod("whatever:~");
-        destructReq.setParams(new Object[]{instanceId});
-        return destructReq;
+        return new Request("whatever:~", null, instanceId);
     }
 }

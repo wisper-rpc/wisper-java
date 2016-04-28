@@ -27,8 +27,7 @@ public class WisperMethodCallerTest
     @Test(expected = WisperException.class)
     public void givenWrongMessageType_ThrowsException() throws Exception
     {
-        Request request = new Request();
-        request.setMethod("a.b.c:~");
+        Request request = new Request("a.b.c:~");
         new WisperMethodCaller(mock(ClassRouter.class), mock(WisperClassModel.class), request);
     }
 
@@ -38,7 +37,7 @@ public class WisperMethodCallerTest
     public void callDispatchesStaticMethods() throws Exception
     {
         String methodName = "methodName";
-        Request request = new Request().withMethodName("whatever.whatever.thing." + methodName);
+        Request request = new Request("whatever.whatever.thing." + methodName);
 
         WisperMethodCaller methodCaller = spy(new WisperMethodCaller(mock(ClassRouter.class), mock(WisperClassModel.class), request));
         methodCaller.call();
@@ -50,7 +49,7 @@ public class WisperMethodCallerTest
     public void callDispatchesInstanceMethods() throws Exception
     {
         String methodName = "methodName";
-        Request request = new Request().withMethodName("whatever.whatever.thing:" + methodName);
+        Request request = new Request("whatever.whatever.thing:" + methodName);
 
         WisperMethodCaller methodCaller = spy(new WisperMethodCaller(mock(ClassRouter.class), mock(WisperClassModel.class), request));
         methodCaller.call();
@@ -61,8 +60,7 @@ public class WisperMethodCallerTest
     public void givenStaticMethodRequest_CallsStaticMethodOnTheActualClass() throws Exception
     {
         String methodName = "append";
-        Request request = new Request().withMethodName("whatever.whatever.thing." + methodName);
-        request.setParams(new Object[]{"str1", "str2"});
+        Request request = new Request("whatever.whatever.thing." + methodName, null, "str1", "str2");
         WisperMethodCaller methodCaller = new WisperMethodCaller(mock(ClassRouter.class), RoutesTestObject.registerRpcClass(), request);
         assertThat(RoutesTestObject.staticMethodCalled(), is(false));
         methodCaller.call();
@@ -74,11 +72,11 @@ public class WisperMethodCallerTest
     public void givenInstanceMethodRequest_CallsInstanceMethodOnTheActualInstance() throws Exception
     {
         String methodName = "append";
-        Request request = new Request().withMethodName("whatever.whatever.thing:" + methodName);
 
         WisperInstanceModel instanceModel = createWisperInstanceForTestObject("whatever.whatever.thing");
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, mock(Router.class));
-        request.setParams(new Object[]{instanceModel.getInstanceIdentifier(), "str1", "str2"});
+
+        Request request = new Request("whatever.whatever.thing:" + methodName, null, instanceModel.getInstanceIdentifier(), "str1", "str2");
 
         RoutesTestObject actualInstance = (RoutesTestObject) instanceModel.getInstance();
         assertThat(actualInstance.instanceMethodCalled(), is(false));
@@ -92,12 +90,11 @@ public class WisperMethodCallerTest
     //--------------------------
     private WisperInstanceModel createWisperInstanceForTestObject(String mapName) throws InterruptedException
     {
-        Request creationRequest = new Request();
+        Request creationRequest = new Request(mapName + "~");
         creationRequest.setIdentifier("ABCD1");
-        creationRequest.setMethod(mapName + "~");
 
         final WisperInstanceModel[] _instanceModel = new WisperInstanceModel[1];
-        WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class),RoutesTestObject.registerRpcClass(), creationRequest);
+        WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class), RoutesTestObject.registerRpcClass(), creationRequest);
         creator.create(new RemoteInstanceCreatorCallback()
         {
             @Override
@@ -108,7 +105,9 @@ public class WisperMethodCallerTest
         });
 
         if (_instanceModel[0] == null)
+        {
             Thread.sleep(400);
+        }
 
         return _instanceModel[0];
     }

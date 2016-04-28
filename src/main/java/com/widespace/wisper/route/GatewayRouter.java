@@ -67,8 +67,9 @@ public class GatewayRouter extends Router implements GatewayCallback
     {
         if (message instanceof Event)
         {
-            String methodName = ((Event) message).getMethodName();
-            ((Event) message).setMethodName(path + methodName);
+            Event event = (Event) message;
+            gateway.sendMessage(new Event(path + event.getMethodName(), event.getParams()));
+            return;
         }
 
         gateway.sendMessage(message);

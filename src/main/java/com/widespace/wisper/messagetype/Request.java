@@ -1,5 +1,6 @@
 package com.widespace.wisper.messagetype;
 
+import org.jetbrains.annotations.NotNull;
 import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.controller.ResponseBlock;
 import org.json.JSONArray;
@@ -19,42 +20,54 @@ public class Request extends AbstractMessage
     private ResponseBlock responseBlock;
 
     private String identifier;
-    private String method;
-    private Object[] params;
+
+    private final String method;
+    private final Object[] params;
 
 
-    public Request()
+    public Request(@NotNull JSONObject json) throws JSONException
     {
-        super();
-    }
-
-    public Request(JSONObject json) throws JSONException
-    {
-        if (json == null)
-        {
-            return;
-        }
-
         if (json.has(Constants.ID))
         {
             identifier = json.getString(Constants.ID);
         }
 
-        if (json.has(Constants.METHOD))
-        {
-            method = json.getString(Constants.METHOD);
-        }
+        method = json.getString(Constants.METHOD);
 
-        if (json.has(Constants.PARAMS))
-        {
-            params = (Object[]) deserialize(json.getJSONArray(Constants.PARAMS));
-        }
+        params = (Object[]) deserialize(json.getJSONArray(Constants.PARAMS));
     }
 
-    public Request(JSONObject json, ResponseBlock block) throws JSONException
+    public Request(@NotNull JSONObject json, ResponseBlock block) throws JSONException
     {
         this(json);
         this.responseBlock = block;
+    }
+
+    /**
+     * Shorthand to create a Request with a method, but without any response block or parameters.
+     * @param method
+     */
+    public Request(String method)
+    {
+        this(method, null);
+    }
+
+    /**
+     * Create a Request with a method, a response block and a set of parameters.
+     * @param method
+     * @param block
+     * @param params
+     */
+    public Request(String method, ResponseBlock block, Object ...params) {
+
+        this.method = method;
+        this.responseBlock = block;
+        this.params = params;
+    }
+
+    public void setResponseBlock(ResponseBlock block)
+    {
+        responseBlock = block;
     }
 
 
@@ -63,17 +76,11 @@ public class Request extends AbstractMessage
         return responseBlock;
     }
 
-    public void setResponseBlock(ResponseBlock responseBlock)
-    {
-        this.responseBlock = responseBlock;
-    }
-
     @Override
     public RPCMessageType type()
     {
         return RPCMessageType.REQUEST;
     }
-
 
     /**
      * The id of this request used to identify what response is paired with what request. A response to this request must have the exact same requestIdentifier.
@@ -100,19 +107,9 @@ public class Request extends AbstractMessage
         return method;
     }
 
-    public void setMethod(String methodName)
-    {
-        this.method = methodName;
-    }
-
     public Object[] getParams()
     {
         return params;
-    }
-
-    public void setParams(Object[] params)
-    {
-        this.params = params;
     }
 
     /**
@@ -136,17 +133,4 @@ public class Request extends AbstractMessage
 
         return jsonObject;
     }
-
-    public Request withMethodName(String methodName)
-    {
-        this.setMethod(methodName);
-        return this;
-    }
-
-    public Request withParams(Object[] params)
-    {
-        this.setParams(params);
-        return this;
-    }
-
 }

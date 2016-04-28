@@ -1,6 +1,5 @@
 package com.widespace.wisper.route;
 
-import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.controller.ResponseBlock;
@@ -9,19 +8,13 @@ import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.messagetype.error.WisperException;
-
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -38,8 +31,7 @@ public class WisperInstanceConstructorTest
     @Test(expected = WisperException.class)
     public void wrongMessageCallTypeIsNotAccepted() throws Exception
     {
-        Request request = new Request();
-        request.setMethod("a.b.c:call");
+        Request request = new Request("a.b.c:call");
         request.setIdentifier("ABCD1");
 
         new WisperInstanceConstructor(mock(ClassRouter.class), mock(WisperClassModel.class), request);
@@ -171,8 +163,7 @@ public class WisperInstanceConstructorTest
     @Test
     public void testGivenConstructor_returnsInitializedPropertiesInResponse() throws Exception
     {
-        Request request = testObjectCreateRequest();
-        request.setParams(new Object[]{"something"});
+        Request request = testObjectCreateRequest("something");
         final Object[] responseBlockResponse = new Object[1];
         request.setResponseBlock(new ResponseBlock()
         {
@@ -270,11 +261,10 @@ public class WisperInstanceConstructorTest
     }
 
     //--------------------------
-    private Request testObjectCreateRequest()
+    private Request testObjectCreateRequest(Object ...params)
     {
-        Request creationRequest = new Request();
+        Request creationRequest = new Request("whatever.whatever.thing~", null, params);
         creationRequest.setIdentifier("ABCD1");
-        creationRequest.setMethod("whatever.whatever.thing~");
         return creationRequest;
     }
 }

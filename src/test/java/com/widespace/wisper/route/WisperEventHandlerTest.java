@@ -28,15 +28,14 @@ public class WisperEventHandlerTest
     @Test(expected = WisperException.class)
     public void givenNonEventMessage_throwsException() throws Exception
     {
-        Notification nonEventMessage = new Notification();
-        nonEventMessage.setMethodName("a.b.c:d");
+        Notification nonEventMessage = new Notification("a.b.c:d");
         new WisperEventHandler(mock(Router.class), mock(WisperClassModel.class), nonEventMessage).handle();
     }
 
     @Test(expected = WisperException.class)
     public void givenNonEventMessage_ShouldThrowException() throws Exception
     {
-        Request nonNotif = new Request().withMethodName("a.b.a!");
+        Request nonNotif = new Request("a.b.a!");
         new WisperEventHandler(mock(Router.class), mock(WisperClassModel.class), nonNotif).handle();
     }
 
@@ -114,9 +113,8 @@ public class WisperEventHandlerTest
     //--------------------------
     private WisperInstanceModel createInstanceAndReturnWisperInstance(String mapName) throws InterruptedException
     {
-        Request creationRequest = new Request();
+        Request creationRequest = new Request(mapName + "~");
         creationRequest.setIdentifier("ABCD1");
-        creationRequest.setMethod(mapName + "~");
 
         final WisperInstanceModel[] _instanceModel = new WisperInstanceModel[1];
         WisperInstanceConstructor creator = new WisperInstanceConstructor(mock(ClassRouter.class), RoutesTestObject.registerRpcClass(), creationRequest);

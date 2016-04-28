@@ -4,12 +4,9 @@ import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.ResponseBlock;
 import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
-
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -22,7 +19,7 @@ public class WisperRemoteObject
     private String instanceIdentifier;
     private Gateway gateway;
 
-    private MessageQueue<AbstractMessage> instanceMessageQueue;
+    private Queue<IncompleteMessage> messageQueue;
 
 
     /**
@@ -36,7 +33,7 @@ public class WisperRemoteObject
     {
         this.mapName = mapName;
         this.gateway = gateway;
-        instanceMessageQueue = new MessageQueue<AbstractMessage>();
+        messageQueue = new LinkedList<IncompleteMessage>();
     }
 
     public String getInstanceIdentifier()
@@ -55,28 +52,13 @@ public class WisperRemoteObject
 
     private void sendEnqueuedMessages()
     {
-        while (instanceMessageQueue.hasMessage())
+        for (IncompleteMessage message : messageQueue)
         {
-            AbstractMessage message = instanceMessageQueue.pop();
-
-            if (message instanceof Request)
-            {
-                Object[] objects = ((Request) message).getParams() != null ? ((Request) message).getParams() : new Object[]{};
-                List<Object> newParams = new LinkedList<Object>(Arrays.asList(objects));
-                newParams.add(0, instanceIdentifier);
-                ((Request) message).setParams(newParams.toArray(new Object[newParams.size()]));
-            }
-            if (message instanceof Event)
-            {
-                Object[] objects = ((Event) message).getParams() != null ? ((Event) message).getParams() : new Object[]{};
-                List<Object> newParams = new LinkedList<Object>(Arrays.asList(objects));
-                newParams.add(0, instanceIdentifier);
-                ((Event) message).setParams(newParams.toArray(new Object[newParams.size()]));
-
-            }
-            gateway.sendMessage(message);
-
+            gateway.sendMessage(message.completeWithIdentifier(instanceIdentifier));
         }
+
+        // Let the GC reclaim the queue.
+        messageQueue = null;
     }
 
     /**
@@ -89,19 +71,19 @@ public class WisperRemoteObject
 
     public void callInstanceMethod(@NotNull String methodName, Object[] params, final CompletionBlock completion)
     {
-        final Request request = new Request();
-        request.setMethod(mapName + ":" + methodName);
-        request.setParams(params);
-        request.setResponseBlock(new ResponseBlock()
+        ResponseBlock block = new ResponseBlock()
         {
             @Override
             public void perform(Response response, RPCErrorMessage error)
             {
                 if (completion != null)
+                {
                     completion.perform(response.getResult(), error);
+                }
             }
-        });
-        deferAndSendInstanceCalls(request);
+        };
+
+        deferAndSendInstanceCalls(new Request(mapName + ":" + methodName, block, params));
 
     }
 
@@ -111,14 +93,9 @@ public class WisperRemoteObject
      * @param methodName The method name, you should not provide the map name of this class before the method name.
      * @param params     The params you want to pass to the remote method.
      */
-    public void callInstanceMethod(@NotNull String methodName, Object[] params)
+    public void callInstanceMethod(@NotNull String methodName, Object... params)
     {
         callInstanceMethod(methodName, params, null);
-    }
-
-    public void callInstanceMethod(@NotNull String methodName, Object params)
-    {
-        callInstanceMethod(methodName, params!= null ? new Object[]{params} : null, null);
     }
 
     /**
@@ -130,20 +107,19 @@ public class WisperRemoteObject
      */
     public void callStaticMethod(@NotNull String methodName, Object[] params, final CompletionBlock completion)
     {
-        final Request request = new Request();
-        request.setMethod(mapName + "." + methodName);
-        request.setParams(params);
-        request.setResponseBlock(new ResponseBlock()
+        ResponseBlock block = new ResponseBlock()
         {
             @Override
             public void perform(Response response, RPCErrorMessage error)
             {
                 if (completion != null)
+                {
                     completion.perform(response.getResult(), error);
+                }
             }
-        });
+        };
 
-        gateway.sendMessage(request);
+        gateway.sendMessage(new Request(mapName + "." + methodName, block, params));
     }
 
 
@@ -153,23 +129,10 @@ public class WisperRemoteObject
      * @param methodName The method name, you should not provide the map name of this class before the method name.
      * @param params     The parameters array you want to pass to the remote method.
      */
-    public void callStaticMethod(@NotNull String methodName, Object[] params)
+    public void callStaticMethod(@NotNull String methodName, Object... params)
     {
         callStaticMethod(methodName, params, null);
     }
-
-
-    /**
-     * Call a remote static method with no return value. This message is sent as a request.
-     *
-     * @param methodName The method name, you should not provide the map name of this class before the method name.
-     * @param param      The parameter you want to pass to the remote method.
-     */
-    public void callStaticMethod(@NotNull String methodName, Object param)
-    {
-        callStaticMethod(methodName, new Object[]{param}, null);
-    }
-
 
     /**
      * Sends an instance event.
@@ -179,11 +142,7 @@ public class WisperRemoteObject
      */
     public void sendInstanceEvent(@NotNull String name, Object value)
     {
-        Notification notification = new Notification();
-        notification.setMethodName(mapName + ":!");
-        notification.setParams(new Object[]{name, value});
-        deferAndSendInstanceCalls(notification);
-
+        deferAndSendInstanceCalls(new Notification(mapName + ":!", name, value));
     }
 
     /**
@@ -194,10 +153,7 @@ public class WisperRemoteObject
      */
     public void sendStaticEvent(@NotNull String name, Object value)
     {
-        Notification notification = new Notification();
-        notification.setMethodName(mapName + "!");
-        notification.setParams(new Object[]{name, value});
-        gateway.sendMessage(notification);
+        gateway.sendMessage(new Notification(mapName + "!", name, value));
     }
 
     /**
@@ -213,6 +169,40 @@ public class WisperRemoteObject
             return;
         }
 
-        instanceMessageQueue.push(message);
+        messageQueue.add(new IncompleteMessage(message));
+    }
+
+    class IncompleteMessage
+    {
+        private final AbstractMessage message;
+
+        public IncompleteMessage(AbstractMessage message)
+        {
+            this.message = message;
+        }
+
+        public AbstractMessage completeWithIdentifier(String id)
+        {
+            if (message instanceof Request)
+            {
+                return request((Request) message, id);
+            }
+            if (message instanceof Event)
+            {
+                return event((Event) message, id);
+            }
+
+            return message;
+        }
+
+        private AbstractMessage event(Event event, String id)
+        {
+            return new Event(event.getMethodName(), id, event.getParams());
+        }
+
+        private AbstractMessage request(Request request, String id)
+        {
+            return new Request(request.getMethodName(), request.getResponseBlock(), id, request.getParams());
+        }
     }
 }
