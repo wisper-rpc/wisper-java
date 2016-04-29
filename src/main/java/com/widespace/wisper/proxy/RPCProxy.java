@@ -33,7 +33,7 @@ public class RPCProxy
      */
     public void handleRequest(Request request)
     {
-        Request proxied = new Request(extractMethodName(request.getMethodName()), request.getResponseBlock(), request.getParams());
+        Request proxied = new Request(extractMethodName(request.getMethodName()), request.getParams()).withResponseBlock(request.getResponseBlock());
         proxied.setIdentifier(request.getIdentifier());
         receiver.handleMessage(proxied.toJsonString());
     }

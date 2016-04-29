@@ -66,14 +66,14 @@ public class MessageFactoryTest
     @Test
     public void canDetermineRequestTypeFromAbstractMessage() throws Exception
     {
-        Request request = new Request("foo", null);
+        Request request = new Request("foo");
         assertThat(messageFactory.determineMessageType(request), is(RPCMessageType.REQUEST));
     }
 
     @Test
     public void canDetermineResponseTypeFromAbstractMessage() throws Exception
     {
-        Response response = new Response(new Request("foo", null));
+        Response response = new Response(new Request("foo"));
         assertThat(messageFactory.determineMessageType(response), is(RPCMessageType.RESPONSE));
     }
 

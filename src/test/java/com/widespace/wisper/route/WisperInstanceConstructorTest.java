@@ -263,7 +263,7 @@ public class WisperInstanceConstructorTest
     //--------------------------
     private Request testObjectCreateRequest(Object ...params)
     {
-        Request creationRequest = new Request("whatever.whatever.thing~", null, params);
+        Request creationRequest = new Request("whatever.whatever.thing~", params);
         creationRequest.setIdentifier("ABCD1");
         return creationRequest;
     }

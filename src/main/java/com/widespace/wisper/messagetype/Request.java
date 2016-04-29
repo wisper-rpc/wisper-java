@@ -21,20 +21,33 @@ public class Request extends AbstractMessage
 
     private String identifier;
 
+    @NotNull
     private final String method;
+
+    @NotNull
     private final Object[] params;
 
+    /**
+     * Create a Request with a method and an optional set of parameters.
+     *
+     * @param method
+     * @param params
+     */
+    public Request(String method, Object... params)
+    {
+
+        this.method = method;
+        this.params = params;
+    }
 
     public Request(@NotNull JSONObject json) throws JSONException
     {
+        this(json.getString(Constants.METHOD), jsonArrayToArray(json.getJSONArray(Constants.PARAMS)));
+
         if (json.has(Constants.ID))
         {
             identifier = json.getString(Constants.ID);
         }
-
-        method = json.getString(Constants.METHOD);
-
-        params = (Object[]) deserialize(json.getJSONArray(Constants.PARAMS));
     }
 
     public Request(@NotNull JSONObject json, ResponseBlock block) throws JSONException
@@ -43,26 +56,10 @@ public class Request extends AbstractMessage
         this.responseBlock = block;
     }
 
-    /**
-     * Shorthand to create a Request with a method, but without any response block or parameters.
-     * @param method
-     */
-    public Request(String method)
+    public Request withResponseBlock(ResponseBlock block)
     {
-        this(method, null);
-    }
-
-    /**
-     * Create a Request with a method, a response block and a set of parameters.
-     * @param method
-     * @param block
-     * @param params
-     */
-    public Request(String method, ResponseBlock block, Object ...params) {
-
-        this.method = method;
-        this.responseBlock = block;
-        this.params = params;
+        responseBlock = block;
+        return this;
     }
 
     public void setResponseBlock(ResponseBlock block)
@@ -107,7 +104,9 @@ public class Request extends AbstractMessage
         return method;
     }
 
-    public Object[] getParams()
+    public
+    @NotNull
+    Object[] getParams()
     {
         return params;
     }
@@ -128,8 +127,8 @@ public class Request extends AbstractMessage
     {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(Constants.ID, identifier == null ? "" : identifier);
-        jsonObject.put(Constants.METHOD, method == null ? "" : method);
-        jsonObject.put(Constants.PARAMS, params == null ? new String[]{} : (JSONArray) serialize(params));
+        jsonObject.put(Constants.METHOD, method);
+        jsonObject.put(Constants.PARAMS, (JSONArray) serialize(params));
 
         return jsonObject;
     }

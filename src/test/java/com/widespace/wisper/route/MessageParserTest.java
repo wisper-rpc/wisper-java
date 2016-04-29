@@ -96,7 +96,7 @@ public class MessageParserTest
     public void givenMessageWithParams_returnsParams() throws Exception
     {
         Object[] sampleParams = {"param1", "param2"};
-        Request request = new Request("a.b.c.m", null, sampleParams);
+        Request request = new Request("a.b.c.m", sampleParams);
         Object[] params = MessageParser.getParams(request);
         assertThat(params, is(equalTo(sampleParams)));
         assertThat((String) params[0], is(equalTo("param1")));

@@ -79,7 +79,7 @@ public class RemoteGatewayTest
         inner_request.setIdentifier("inner_001");
 
         Object[] params = new Object[]{remoteGatewayWisperInstanceModel.getInstanceIdentifier(), inner_request.toJsonString()};
-        final Request outer_request = new Request("Gateway:sendMessage", null, params);
+        final Request outer_request = new Request("Gateway:sendMessage", params);
         outer_request.setIdentifier("outer_001");
         outer_request.setResponseBlock(new ResponseBlock()
         {

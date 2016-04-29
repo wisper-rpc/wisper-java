@@ -71,10 +71,9 @@ public class RPCProxyTests
         Gateway receiverMock = mock(Gateway.class);
         proxy.setReceiver(receiverMock);
         proxy.setMapName("proxy.map.name");
-        Notification sampleNotification = new Notification(new JSONObject("{ \"method\" : \"proxy.map.name.wisp.ai.MyWisperTestObject:~\", \"params\" : [\"" + SAMPLE_INSTANCE_ID + "\"] }"));
 
         String expected = "{\"method\":\"my.receiver.mapname.wisp.ai.MyWisperTestObject:~\",\"params\":[\"1234\"]}";
-        proxy.handleNotification(sampleNotification);
+        proxy.handleNotification(new Notification("proxy.map.name.wisp.ai.MyWisperTestObject:~", SAMPLE_INSTANCE_ID));
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         verify(receiverMock).handleMessage(argument.capture());

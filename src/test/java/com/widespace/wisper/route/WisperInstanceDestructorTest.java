@@ -160,6 +160,6 @@ public class WisperInstanceDestructorTest
     @NotNull
     private Request destructRequest(String instanceId)
     {
-        return new Request("whatever:~", null, instanceId);
+        return new Request("whatever:~", instanceId);
     }
 }

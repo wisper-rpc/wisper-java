@@ -83,7 +83,7 @@ public class WisperRemoteObject
             }
         };
 
-        deferAndSendInstanceCalls(new Request(mapName + ":" + methodName, block, params));
+        deferAndSendInstanceCalls(new Request(mapName + ":" + methodName, params).withResponseBlock(block));
 
     }
 
@@ -119,7 +119,7 @@ public class WisperRemoteObject
             }
         };
 
-        gateway.sendMessage(new Request(mapName + "." + methodName, block, params));
+        gateway.sendMessage(new Request(mapName + "." + methodName, params).withResponseBlock(block));
     }
 
 
@@ -202,7 +202,7 @@ public class WisperRemoteObject
 
         private AbstractMessage request(Request request, String id)
         {
-            return new Request(request.getMethodName(), request.getResponseBlock(), id, request.getParams());
+            return new Request(request.getMethodName(), id, request.getParams()).withResponseBlock(request.getResponseBlock());
         }
     }
 }

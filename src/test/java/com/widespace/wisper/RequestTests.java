@@ -12,8 +12,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -73,7 +73,7 @@ public class RequestTests
     public void withMethodNameSetsTheMethodNmae() throws Exception
     {
         String methodName = "a.b.c~";
-        Request request = new Request(methodName, null);
+        Request request = new Request(methodName);
         assertThat(request.getMethodName(), is(methodName));
     }
 
@@ -81,7 +81,7 @@ public class RequestTests
     public void withParamsSetsParamsCorrectly() throws Exception
     {
         Object[] params = {"x", "y", "z"};
-        Request request = new Request("foo", null, params);
+        Request request = new Request("foo", params);
         assertThat(request.getParams(), is(params));
     }
 
@@ -97,7 +97,7 @@ public class RequestTests
                 " ]" +
                 "}";
 
-        request = new Request(new JSONObject(requestStr), mock(ResponseBlock.class));
+        Request request = new Request(new JSONObject(requestStr));
         Object[] requestParams = request.getParams();
 
         //Number of params
@@ -110,9 +110,8 @@ public class RequestTests
         assertEquals(225.008, requestParams[1]);
 
         //Array
-        Object[] innerArray = {"string_in_array_idx1", "string_in_array_idx2"};
-        List<Object> expected = Arrays.asList(innerArray);
-        assertArrayEquals(expected.toArray(new Object[2]), (Object[]) requestParams[2]);
+        Object[] expected = {"string_in_array_idx1", "string_in_array_idx2"};
+        assertThat(Arrays.asList(expected), is(equalTo(requestParams[2])));
 
         //Hashmap (json obj)
         HashMap<String, String> innerObject = new HashMap<String, String>();
@@ -144,7 +143,7 @@ public class RequestTests
         expected.add(innerObject);
 
 
-        assertArrayEquals(expected.toArray(new Object[3]), (Object[]) requestParams[0]);
+        assertThat(expected, is(equalTo(requestParams[0])));
     }
 
 

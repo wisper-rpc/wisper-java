@@ -2,24 +2,15 @@ package com.widespace.wisper.messagetype;
 
 import com.widespace.wisper.messagetype.error.RPCError;
 import com.widespace.wisper.utils.ClassUtils;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static com.widespace.wisper.base.Constants.CODE;
-import static com.widespace.wisper.base.Constants.DATA;
-import static com.widespace.wisper.base.Constants.DOMAIN;
-import static com.widespace.wisper.base.Constants.MESSAGE;
-import static com.widespace.wisper.base.Constants.NAME;
-import static com.widespace.wisper.base.Constants.UNDERLYING_ERROR;
+import static com.widespace.wisper.base.Constants.*;
 
 /**
  * Abstract message type calss for RPC. All message types will be children of this abstract class.
@@ -61,7 +52,8 @@ public abstract class AbstractMessage
      * @return an object array filled with the same objects as existed in json array
      * @throws JSONException If json representation of the array could not be parsed
      */
-    protected Object[] jsonArrayToArray(JSONArray jsonArray) throws JSONException
+    @NotNull
+    static Object[] jsonArrayToArray(@Nullable JSONArray jsonArray) throws JSONException
     {
         ArrayList<Object> arrayList = new ArrayList<Object>();
         if (jsonArray != null)
@@ -92,7 +84,7 @@ public abstract class AbstractMessage
     }
 
 
-    private Map<String, Object> jsonToMap(JSONObject json) throws JSONException
+    private static Map<String, Object> jsonToMap(JSONObject json) throws JSONException
     {
         Map<String, Object> retMap = new HashMap<String, Object>();
 
@@ -103,7 +95,7 @@ public abstract class AbstractMessage
         return retMap;
     }
 
-    private Map<String, Object> toMap(JSONObject jsonObject) throws JSONException
+    private static Map<String, Object> toMap(JSONObject jsonObject) throws JSONException
     {
         Map<String, Object> map = new HashMap<String, Object>();
 
@@ -125,7 +117,7 @@ public abstract class AbstractMessage
         return map;
     }
 
-    private List<Object> toList(JSONArray array) throws JSONException
+    private static List<Object> toList(JSONArray array) throws JSONException
     {
         return Arrays.asList(jsonArrayToArray(array));
     }
@@ -188,7 +180,7 @@ public abstract class AbstractMessage
         }
     }
 
-    protected Object deserialize(Object result)
+    static Object deserialize(Object result)
     {
         if (result instanceof JSONArray)
         {
