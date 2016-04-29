@@ -5,7 +5,6 @@ import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.Response;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -147,7 +146,6 @@ public class RequestTests
     }
 
 
-    @Ignore
     @Test
     public void testNestedHashmapInArrayParamDetermination() throws Exception
     {
@@ -168,17 +166,15 @@ public class RequestTests
         assertEquals(1, requestParams.length);
 
         HashMap<String, Object> expected = new HashMap<String, Object>();
-        expected.put("first", new Object[]{1, 2, 3});
+        expected.put("first", Arrays.asList(1, 2, 3));
         expected.put("second", "string_in_obj");
         expected.put("third", 225.008);
 
         HashMap<String, Object> innerJsonObj = new HashMap<String, Object>();
-        innerJsonObj.put("inner_first", new Object[]{1, 2, 3, "oh shit it's actually working!"});
+        innerJsonObj.put("inner_first", Arrays.asList(1, 2, 3, "oh shit it's actually working!"));
 
         expected.put("fourth", innerJsonObj);
 
-        assertTrue(expected.equals((HashMap) requestParams[0]));
-
-
+        assertThat(expected, is(equalTo(requestParams[0])));
     }
 }

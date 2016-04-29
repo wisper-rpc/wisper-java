@@ -37,7 +37,7 @@ public class Notification extends AbstractMessage
 
         if (jsonObject.has(Constants.PARAMS))
         {
-            params = (Object[]) deserialize(jsonObject.getJSONArray(Constants.PARAMS));
+            params = deserializeArray(jsonObject.getJSONArray(Constants.PARAMS));
         }
     }
 
