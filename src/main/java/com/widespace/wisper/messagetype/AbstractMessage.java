@@ -20,6 +20,8 @@ import static com.widespace.wisper.base.Constants.*;
  */
 public abstract class AbstractMessage
 {
+    public static final Object[] EMPTY_PARAMS = new Object[0];
+
     /**
      * Returns the message type
      *
@@ -108,7 +110,8 @@ public abstract class AbstractMessage
             if (value instanceof JSONArray)
             {
                 value = toList((JSONArray) value);
-            } else if (value instanceof JSONObject)
+            }
+            else if (value instanceof JSONObject)
             {
                 value = toMap((JSONObject) value);
             }
@@ -130,7 +133,9 @@ public abstract class AbstractMessage
     protected Object serialize(Object newResult)
     {
         if (newResult == null)
+        {
             return null;
+        }
 
         if (newResult.getClass().isArray())
         {
@@ -142,7 +147,8 @@ public abstract class AbstractMessage
             }
 
             return array;
-        } else if (newResult instanceof List)
+        }
+        else if (newResult instanceof List)
         {
             JSONArray array = new JSONArray();
             for (java.lang.Object object : (List) newResult)
@@ -150,19 +156,24 @@ public abstract class AbstractMessage
                 array.put(serialize(object));
             }
             return array;
-        } else if (ClassUtils.isPrimitive(newResult.getClass()) || newResult.getClass().equals(String.class))
+        }
+        else if (ClassUtils.isPrimitive(newResult.getClass()) || newResult.getClass().equals(String.class))
         {
             return newResult;
-        } else if (newResult.getClass().equals(JSONObject.class) || newResult.getClass().equals(JSONArray.class))
+        }
+        else if (newResult.getClass().equals(JSONObject.class) || newResult.getClass().equals(JSONArray.class))
         {
             return newResult;
-        } else if (newResult.getClass().isAssignableFrom(Map.class) || newResult.getClass().isAssignableFrom(HashMap.class))
+        }
+        else if (newResult.getClass().isAssignableFrom(Map.class) || newResult.getClass().isAssignableFrom(HashMap.class))
         {
             return new JSONObject((Map) newResult);
-        } else if (Number.class.isAssignableFrom(newResult.getClass()))
+        }
+        else if (Number.class.isAssignableFrom(newResult.getClass()))
         {
             return newResult;
-        } else if (newResult instanceof RPCError)
+        }
+        else if (newResult instanceof RPCError)
         {
             JSONObject json = new JSONObject();
             RPCError error = (RPCError) newResult;
@@ -174,7 +185,8 @@ public abstract class AbstractMessage
             json.put(UNDERLYING_ERROR, error.getUnderlyingError() == null ? "" : serialize(error.getUnderlyingError()));
 
             return json;
-        } else
+        }
+        else
         {
             return null;
         }
@@ -182,6 +194,11 @@ public abstract class AbstractMessage
 
     static Object deserialize(Object result)
     {
+        if (result == JSONObject.NULL)
+        {
+            return null;
+        }
+
         if (result instanceof JSONArray)
         {
             ArrayList<Object> arrayList = new ArrayList<Object>();
@@ -192,10 +209,12 @@ public abstract class AbstractMessage
             }
 
             return arrayList.toArray(new Object[arrayList.size()]);
-        } else if ((result instanceof String) || result.getClass().isPrimitive() || (result instanceof Number))
+        }
+        else if ((result instanceof String) || result.getClass().isPrimitive() || (result instanceof Number))
         {
             return result;
-        } else if (result instanceof JSONObject)
+        }
+        else if (result instanceof JSONObject)
         {
             JSONObject json = (JSONObject) result;
             HashMap<String, Object> map = new HashMap<String, Object>();
@@ -209,7 +228,8 @@ public abstract class AbstractMessage
             return map;
 
             //TODO: Handle RPCError ??
-        } else
+        }
+        else
         {
             return result;
         }

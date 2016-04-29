@@ -6,8 +6,6 @@ import com.widespace.wisper.messagetype.error.Error;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.widespace.wisper.base.Constants.EMPTY;
-
 /**
  * When an instance handling an Request has finished, it should generate an instance of this object and fill it with the results.
  * This object is then passed to the other endpoint either through the Response's responseBlock or through the Gateway.
@@ -110,8 +108,8 @@ public class Response extends AbstractMessage
     public JSONObject toJson() throws JSONException
     {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put(Constants.ID, identifier == null ? EMPTY : identifier);
-        jsonObject.put(Constants.RESULT, result == null ? EMPTY : serialize(result));
+        jsonObject.put(Constants.ID, identifier == null ? JSONObject.NULL : identifier);
+        jsonObject.put(Constants.RESULT, result == null ? JSONObject.NULL : serialize(result));
 
         return jsonObject;
     }

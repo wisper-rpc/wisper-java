@@ -12,7 +12,12 @@ public class Notification extends AbstractMessage
     protected String methodName;
     protected Object[] params;
 
-    public Notification(String methodName, Object ...params)
+    public Notification(String methodName)
+    {
+        this(methodName, EMPTY_PARAMS);
+    }
+
+    public Notification(String methodName, Object[] params)
     {
         this.methodName = methodName;
         this.params = params;

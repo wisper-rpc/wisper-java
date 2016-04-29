@@ -142,7 +142,7 @@ public class WisperRemoteObject
      */
     public void sendInstanceEvent(@NotNull String name, Object value)
     {
-        deferAndSendInstanceCalls(new Notification(mapName + ":!", name, value));
+        deferAndSendInstanceCalls(new Event(mapName + ":!", name, value));
     }
 
     /**
@@ -153,7 +153,7 @@ public class WisperRemoteObject
      */
     public void sendStaticEvent(@NotNull String name, Object value)
     {
-        gateway.sendMessage(new Notification(mapName + "!", name, value));
+        gateway.sendMessage(new Event(mapName + "!", name, value));
     }
 
     /**

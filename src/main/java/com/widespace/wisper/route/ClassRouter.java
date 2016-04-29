@@ -80,7 +80,9 @@ public class ClassRouter extends Router
             public void result(WisperInstanceModel instanceModel, WisperException ex)
             {
                 if (ex != null)
+                {
                     throw ex;
+                }
 
                 saveInstance(instanceModel);
             }
@@ -145,7 +147,7 @@ public class ClassRouter extends Router
 
     public void removeInstance(WisperInstanceModel instanceModel)
     {
-        Notification destructNotification = new Notification("created.by.router:~", instanceModel.getInstanceIdentifier());
+        Notification destructNotification = new Notification("created.by.router:~", new Object[]{instanceModel.getInstanceIdentifier()});
         new WisperInstanceDestructor(destructNotification, this).destroy();
     }
 

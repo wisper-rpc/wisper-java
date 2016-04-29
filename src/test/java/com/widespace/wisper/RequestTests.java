@@ -57,8 +57,8 @@ public class RequestTests
     @Test
     public void testResponseCreationWorks() throws Exception
     {
-        Response expectedResponse = new Response(new JSONObject("{\"result\":\"\",\"id\":\"abcd1\"}"));
-        JSONAssert.assertEquals(expectedResponse.toJson(), request.createResponse().toJson(), false);
+        Response expectedResponse = new Response(new JSONObject("{\"result\":null,\"id\":\"abcd1\"}"));
+        assertThat(expectedResponse.toJsonString(), is(equalTo(request.createResponse().toJsonString())));
     }
 
     @Test

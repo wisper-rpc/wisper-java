@@ -16,8 +16,6 @@ import org.json.JSONObject;
  */
 public class Request extends AbstractMessage
 {
-    private static final Object[] EMPTY = new Object[0];
-
     private ResponseBlock responseBlock;
 
     private String identifier;
@@ -30,7 +28,7 @@ public class Request extends AbstractMessage
 
     public Request(String method)
     {
-        this(method, EMPTY);
+        this(method, EMPTY_PARAMS);
     }
 
     /**
