@@ -106,7 +106,7 @@ public class ClassRouterTest
     public void givenStaticMethodCall_methodWillGetCalledOnActualClass() throws Exception
     {
         ROUTE_PATH = "whatever.append";
-        Request request = new Request("a.b.c.append", "x1", "x2");
+        Request request = new Request("a.b.c.append", new Object[]{"x1", "x2"});
 
         assertThat(RoutesTestObject.staticMethodCalled(), is(false));
         classRouter.routeMessage(request, ROUTE_PATH);
@@ -124,7 +124,7 @@ public class ClassRouterTest
 
         WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anInstance, "ABCD-1");
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
-        Request request = new Request("a.b.c.printInstanceId", instanceModel1.getInstanceIdentifier(), "suffix");
+        Request request = new Request("a.b.c.printInstanceId", new Object[]{instanceModel1.getInstanceIdentifier(), "suffix"});
 
         classRouter.routeMessage(request, ROUTE_PATH);
 
@@ -147,7 +147,7 @@ public class ClassRouterTest
         WisperInstanceModel param_instance = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anotherInstance, "ABCD-2");
         WisperInstanceRegistry.sharedInstance().addInstance(object_instance, classRouter);
         WisperInstanceRegistry.sharedInstance().addInstance(param_instance, classRouter);
-        Request request = new Request("a.b.c:printInstanceId", object_instance.getInstanceIdentifier(), param_instance.getInstanceIdentifier(), "suffix");
+        Request request = new Request("a.b.c:printInstanceId", new Object[]{object_instance.getInstanceIdentifier(), param_instance.getInstanceIdentifier(), "suffix"});
 
         classRouter.routeMessage(request, ROUTE_PATH);
 

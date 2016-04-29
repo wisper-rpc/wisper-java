@@ -16,6 +16,7 @@ import org.json.JSONObject;
  */
 public class Request extends AbstractMessage
 {
+    private static final Object[] EMPTY = new Object[0];
 
     private ResponseBlock responseBlock;
 
@@ -27,13 +28,18 @@ public class Request extends AbstractMessage
     @NotNull
     private final Object[] params;
 
+    public Request(String method)
+    {
+        this(method, EMPTY);
+    }
+
     /**
-     * Create a Request with a method and an optional set of parameters.
+     * Create a Request with a method and a set of parameters.
      *
      * @param method
      * @param params
      */
-    public Request(String method, Object... params)
+    public Request(String method, Object[] params)
     {
 
         this.method = method;

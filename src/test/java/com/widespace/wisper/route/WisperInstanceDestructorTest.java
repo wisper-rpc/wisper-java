@@ -46,7 +46,7 @@ public class WisperInstanceDestructorTest
     @Test
     public void acceptsDestructMessageTypeAsNotification() throws Exception
     {
-        Notification notification = new Notification("a.b.c:~", "ABCD1");
+        Notification notification = new Notification("a.b.c:~", new Object[]{"ABCD1"});
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(notification, mock(Router.class));
         assertThat(destructor, is(notNullValue()));
     }
@@ -160,6 +160,6 @@ public class WisperInstanceDestructorTest
     @NotNull
     private Request destructRequest(String instanceId)
     {
-        return new Request("whatever:~", instanceId);
+        return new Request("whatever:~", new Object[] {instanceId});
     }
 }

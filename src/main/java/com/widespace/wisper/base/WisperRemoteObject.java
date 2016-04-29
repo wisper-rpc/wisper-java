@@ -202,7 +202,16 @@ public class WisperRemoteObject
 
         private AbstractMessage request(Request request, String id)
         {
-            return new Request(request.getMethodName(), id, request.getParams()).withResponseBlock(request.getResponseBlock());
+            Object[] initialParams = request.getParams();
+
+            // Must create a copy of the parameters that's one longer
+            Object[] params = new Object[ initialParams.length + 1 ];
+            System.arraycopy(initialParams, 0, params, 1, initialParams.length);
+
+            // And add the id
+            params[ 0 ] = id;
+
+            return new Request(request.getMethodName(), params).withResponseBlock(request.getResponseBlock());
         }
     }
 }

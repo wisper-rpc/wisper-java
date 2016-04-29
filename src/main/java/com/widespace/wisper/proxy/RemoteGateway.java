@@ -261,7 +261,7 @@ public class RemoteGateway extends WisperObject
                 }
             };
 
-            Request proxiedRequest = new Request(replacedMethodName, block, ((Request) message).getParams());
+            Request proxiedRequest = new Request(replacedMethodName, ((Request) message).getParams()).withResponseBlock(block);
 
             classRouter.getRootGateway().sendMessage(proxiedRequest);
 

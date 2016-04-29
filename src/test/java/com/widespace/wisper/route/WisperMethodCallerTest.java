@@ -60,7 +60,7 @@ public class WisperMethodCallerTest
     public void givenStaticMethodRequest_CallsStaticMethodOnTheActualClass() throws Exception
     {
         String methodName = "append";
-        Request request = new Request("whatever.whatever.thing." + methodName, "str1", "str2");
+        Request request = new Request("whatever.whatever.thing." + methodName, new Object[]{"str1", "str2"});
         WisperMethodCaller methodCaller = new WisperMethodCaller(mock(ClassRouter.class), RoutesTestObject.registerRpcClass(), request);
         assertThat(RoutesTestObject.staticMethodCalled(), is(false));
         methodCaller.call();
@@ -76,7 +76,7 @@ public class WisperMethodCallerTest
         WisperInstanceModel instanceModel = createWisperInstanceForTestObject("whatever.whatever.thing");
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, mock(Router.class));
 
-        Request request = new Request("whatever.whatever.thing:" + methodName, instanceModel.getInstanceIdentifier(), "str1", "str2");
+        Request request = new Request("whatever.whatever.thing:" + methodName, new Object[]{instanceModel.getInstanceIdentifier(), "str1", "str2"});
 
         RoutesTestObject actualInstance = (RoutesTestObject) instanceModel.getInstance();
         assertThat(actualInstance.instanceMethodCalled(), is(false));
