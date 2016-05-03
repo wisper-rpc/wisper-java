@@ -1,12 +1,13 @@
 package com.widespace.wisper.base;
 
-import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.ResponseBlock;
 import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
 
 /**
@@ -15,24 +16,33 @@ import java.util.*;
  */
 public class WisperRemoteObject
 {
+    public static final ResponseBlock DoNothingResponseBlock = new ResponseBlock()
+    {
+        @Override
+        public void perform(Response response, RPCErrorMessage error)
+        {
+            // do nothing
+        }
+    };
+
     private String mapName;
     private String instanceIdentifier;
-    private Gateway gateway;
+    private Channel channel;
 
     private Queue<IncompleteMessage> messageQueue;
 
 
     /**
-     * Constructs the object with the given map name and gateway.
+     * Constructs the object with the given map name and channel.
      *
      * @param mapName the map name to be used for this remote object.
-     * @param gateway The gateway through which the remote object is accessible.
+     * @param channel The channel through which the remote object is accessible.
      */
 
-    public WisperRemoteObject(@NotNull String mapName, @NotNull Gateway gateway)
+    public WisperRemoteObject(@NotNull String mapName, @NotNull Channel channel)
     {
         this.mapName = mapName;
-        this.gateway = gateway;
+        this.channel = channel;
         messageQueue = new LinkedList<IncompleteMessage>();
     }
 
@@ -54,7 +64,7 @@ public class WisperRemoteObject
     {
         for (IncompleteMessage message : messageQueue)
         {
-            gateway.sendMessage(message.completeWithIdentifier(instanceIdentifier));
+            channel.sendMessage(message.completeWithIdentifier(instanceIdentifier));
         }
 
         // Let the GC reclaim the queue.
@@ -68,23 +78,18 @@ public class WisperRemoteObject
      * @param params     The params you want to pass to the remote method.
      * @param completion Completion block that will be triggered when done with the call.
      */
-
-    public void callInstanceMethod(@NotNull String methodName, Object[] params, final CompletionBlock completion)
+    public void callInstanceMethod(@NotNull String methodName, Object[] params, CompletionBlock completion)
     {
-        ResponseBlock block = new ResponseBlock()
+        ResponseBlock block = blockForCompletion(completion);
+
+        if (instanceIdentifier == null)
         {
-            @Override
-            public void perform(Response response, RPCErrorMessage error)
-            {
-                if (completion != null)
-                {
-                    completion.perform(response.getResult(), error);
-                }
-            }
-        };
-
-        deferAndSendInstanceCalls(new Request(mapName + ":" + methodName, params).withResponseBlock(block));
-
+            messageQueue.add(new IncompleteRequest(mapName + ":" + methodName, params, block));
+        }
+        else
+        {
+            channel.sendMessage(new Request(mapName + ":" + methodName, prepend(instanceIdentifier, params)).withResponseBlock(block));
+        }
     }
 
     /**
@@ -93,9 +98,27 @@ public class WisperRemoteObject
      * @param methodName The method name, you should not provide the map name of this class before the method name.
      * @param params     The params you want to pass to the remote method.
      */
-    public void callInstanceMethod(@NotNull String methodName, Object... params)
+    public void callInstanceMethod(@NotNull String methodName, Object[] params)
     {
         callInstanceMethod(methodName, params, null);
+    }
+
+    @NotNull
+    private ResponseBlock blockForCompletion(@Nullable final CompletionBlock completion)
+    {
+        if (completion == null)
+        {
+            return DoNothingResponseBlock;
+        }
+
+        return new ResponseBlock()
+        {
+            @Override
+            public void perform(Response response, RPCErrorMessage error)
+            {
+                completion.perform(response.getResult(), error);
+            }
+        };
     }
 
     /**
@@ -105,21 +128,9 @@ public class WisperRemoteObject
      * @param params     The params you want to pass to the remote method.
      * @param completion Completion block that will be triggered when done with the call.
      */
-    public void callStaticMethod(@NotNull String methodName, Object[] params, final CompletionBlock completion)
+    public void callStaticMethod(@NotNull String methodName, Object[] params, CompletionBlock completion)
     {
-        ResponseBlock block = new ResponseBlock()
-        {
-            @Override
-            public void perform(Response response, RPCErrorMessage error)
-            {
-                if (completion != null)
-                {
-                    completion.perform(response.getResult(), error);
-                }
-            }
-        };
-
-        gateway.sendMessage(new Request(mapName + "." + methodName, params).withResponseBlock(block));
+        channel.sendMessage(new Request(mapName + "." + methodName, params).withResponseBlock(blockForCompletion(completion)));
     }
 
 
@@ -129,7 +140,7 @@ public class WisperRemoteObject
      * @param methodName The method name, you should not provide the map name of this class before the method name.
      * @param params     The parameters array you want to pass to the remote method.
      */
-    public void callStaticMethod(@NotNull String methodName, Object... params)
+    public void callStaticMethod(@NotNull String methodName, Object[] params)
     {
         callStaticMethod(methodName, params, null);
     }
@@ -142,7 +153,14 @@ public class WisperRemoteObject
      */
     public void sendInstanceEvent(@NotNull String name, Object value)
     {
-        deferAndSendInstanceCalls(new Event(mapName + ":!", name, value));
+        if (instanceIdentifier == null)
+        {
+            messageQueue.add(new IncompleteEvent(mapName + ":!", name, value));
+        }
+        else
+        {
+            channel.sendMessage(new Event(mapName + ":!", instanceIdentifier, name, value));
+        }
     }
 
     /**
@@ -153,65 +171,61 @@ public class WisperRemoteObject
      */
     public void sendStaticEvent(@NotNull String name, Object value)
     {
-        gateway.sendMessage(new Event(mapName + "!", name, value));
+        channel.sendMessage(new Event(mapName + "!", name, value));
     }
 
-    /**
-     * holds the messaged in a queue until an instance identifier is received.
-     *
-     * @param message
-     */
-    private void deferAndSendInstanceCalls(AbstractMessage message)
+    interface IncompleteMessage
     {
-        if (instanceIdentifier != null)
-        {
-            gateway.sendMessage(message);
-            return;
-        }
-
-        messageQueue.add(new IncompleteMessage(message));
+        AbstractMessage completeWithIdentifier(String id);
     }
 
-    class IncompleteMessage
+    class IncompleteEvent implements IncompleteMessage
     {
-        private final AbstractMessage message;
+        private final String method;
+        private final String name;
+        private final Object value;
 
-        public IncompleteMessage(AbstractMessage message)
+        public IncompleteEvent(String method, String name, Object value)
         {
-            this.message = message;
+            this.method = method;
+            this.name = name;
+            this.value = value;
         }
 
         public AbstractMessage completeWithIdentifier(String id)
         {
-            if (message instanceof Request)
-            {
-                return request((Request) message, id);
-            }
-            if (message instanceof Event)
-            {
-                return event((Event) message, id);
-            }
-
-            return message;
+            return new Event(method, id, name, value);
         }
+    }
 
-        private AbstractMessage event(Event event, String id)
+    class IncompleteRequest implements IncompleteMessage
+    {
+        private final String method;
+        private final Object[] params;
+        private final ResponseBlock block;
+
+        public IncompleteRequest(String method, Object[] params, ResponseBlock block)
         {
-            return new Event(event.getMethodName(), id, event.getParams());
+            this.method = method;
+            this.params = params;
+            this.block = block;
         }
 
-        private AbstractMessage request(Request request, String id)
+        public AbstractMessage completeWithIdentifier(String id)
         {
-            Object[] initialParams = request.getParams();
-
-            // Must create a copy of the parameters that's one longer
-            Object[] params = new Object[ initialParams.length + 1 ];
-            System.arraycopy(initialParams, 0, params, 1, initialParams.length);
-
-            // And add the id
-            params[ 0 ] = id;
-
-            return new Request(request.getMethodName(), params).withResponseBlock(request.getResponseBlock());
+            return new Request(method, prepend(id, params)).withResponseBlock(block);
         }
+    }
+
+    private static Object[] prepend(Object param, Object[] initialParams)
+    {
+        // Must create a copy of the parameters that's one longer
+        Object[] params = new Object[initialParams.length + 1];
+        System.arraycopy(initialParams, 0, params, 1, initialParams.length);
+
+        // And add the id
+        params[0] = param;
+
+        return params;
     }
 }
