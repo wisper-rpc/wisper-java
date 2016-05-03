@@ -1,16 +1,12 @@
 package com.widespace.wisper.controller;
 
 
-import com.widespace.wisper.messagetype.AbstractMessage;
-import com.widespace.wisper.messagetype.MessageFactory;
-import com.widespace.wisper.messagetype.RPCMessageType;
-import com.widespace.wisper.messagetype.Request;
-import com.widespace.wisper.messagetype.Response;
+import com.widespace.wisper.base.Channel;
+import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.ErrorDomain;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.messagetype.error.RPCErrorMessageBuilder;
-
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +21,7 @@ import java.util.HashMap;
  * Created by Ehssan Hoorvash on 21/05/14.
  */
 
-public class Gateway
+public class Gateway implements Channel
 {
     protected GatewayCallback callback;
     private HashMap<String, Request> requests;
