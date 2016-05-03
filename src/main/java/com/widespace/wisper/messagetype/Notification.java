@@ -4,6 +4,8 @@ import com.widespace.wisper.base.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+
 /**
  * Created by Ehssan Hoorvash on 22/05/14.
  */
@@ -39,6 +41,18 @@ public class Notification extends AbstractMessage
         {
             params = deserializeArray(jsonObject.getJSONArray(Constants.PARAMS));
         }
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (!(o instanceof Notification)) {
+            return false;
+        }
+
+        Notification other = (Notification) o;
+
+        return other.methodName.equals(methodName) && Arrays.deepEquals(other.params, params);
     }
 
     @Override

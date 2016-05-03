@@ -1,11 +1,13 @@
 package com.widespace.wisper.messagetype;
 
-import org.jetbrains.annotations.NotNull;
 import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.controller.ResponseBlock;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Arrays;
 
 /**
  * Request object that you can either use yourself to request the other RPC endpoint or you will get from the RPC controller when the other endpoint is asking you for it.
@@ -124,6 +126,19 @@ public class Request extends AbstractMessage
     public Response createResponse()
     {
         return new Response(this);
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (!(o instanceof Request))
+        {
+            return false;
+        }
+
+        Request other = (Request) o;
+
+        return other.method.equals(method) && Arrays.deepEquals(other.params, params) && other.responseBlock == responseBlock;
     }
 
     @Override
