@@ -56,6 +56,13 @@ public class Notification extends AbstractMessage
     }
 
     @Override
+    public int hashCode()
+    {
+        return methodName.hashCode() ^ Arrays.hashCode(params);
+    }
+
+
+    @Override
     public RPCMessageType type()
     {
         return RPCMessageType.NOTIFICATION;

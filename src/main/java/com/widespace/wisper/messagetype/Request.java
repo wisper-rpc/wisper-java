@@ -142,6 +142,12 @@ public class Request extends AbstractMessage
     }
 
     @Override
+    public int hashCode()
+    {
+        return method.hashCode() ^ Arrays.hashCode(params);
+    }
+
+    @Override
     public JSONObject toJson() throws JSONException
     {
         JSONObject jsonObject = new JSONObject();
