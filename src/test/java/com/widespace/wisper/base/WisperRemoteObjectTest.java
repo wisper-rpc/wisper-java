@@ -2,22 +2,21 @@ package com.widespace.wisper.base;
 
 import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.GatewayCallback;
-import com.widespace.wisper.messagetype.AbstractMessage;
-import com.widespace.wisper.messagetype.Event;
-import com.widespace.wisper.messagetype.Request;
-import com.widespace.wisper.messagetype.Response;
+import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
+import com.widespace.wisper.route.FunctionRouter;
 import com.widespace.wisper.route.GatewayRouter;
+import com.widespace.wisper.route.Router;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class WisperRemoteObjectTest
 {
@@ -25,7 +24,7 @@ public class WisperRemoteObjectTest
     @Test
     public void testInstanceIdentifier() throws Exception
     {
-        WisperRemoteObject obj = new WisperRemoteObject("Foo", mock(GatewayRouter.class));
+        WisperRemoteObject obj = new MyWisperRemoteObject("Foo", mock(GatewayRouter.class));
 
         assertThat(obj.getInstanceIdentifier(), is(equalTo(null)));
 
@@ -39,7 +38,7 @@ public class WisperRemoteObjectTest
     public void testCallInstanceMethod() throws Exception
     {
         StubbedGatewayRouter channel = new StubbedGatewayRouter();
-        WisperRemoteObject obj = new WisperRemoteObject("Foo", channel);
+        WisperRemoteObject obj = new MyWisperRemoteObject("Foo", channel);
 
         // Call a method before instance identifier has been set
         obj.callInstanceMethod("bar", new Object[]{1, 2, 3});
@@ -68,7 +67,7 @@ public class WisperRemoteObjectTest
     public void testCallStaticMethod() throws Exception
     {
         StubbedGatewayRouter channel = new StubbedGatewayRouter();
-        WisperRemoteObject obj = new WisperRemoteObject("Foo", channel);
+        WisperRemoteObject obj = new MyWisperRemoteObject("Foo", channel);
 
         obj.callStaticMethod("foo", new Object[]{1});
 
@@ -94,7 +93,7 @@ public class WisperRemoteObjectTest
     public void testSendInstanceEvent() throws Exception
     {
         StubbedGatewayRouter channel = new StubbedGatewayRouter();
-        WisperRemoteObject obj = new WisperRemoteObject("Foo", channel);
+        WisperRemoteObject obj = new MyWisperRemoteObject("Foo", channel);
 
         obj.sendInstanceEvent("baz", 1);
 
@@ -120,7 +119,7 @@ public class WisperRemoteObjectTest
     public void testSendStaticEvent() throws Exception
     {
         StubbedGatewayRouter router = new StubbedGatewayRouter();
-        WisperRemoteObject obj = new WisperRemoteObject("Foo", router);
+        WisperRemoteObject obj = new MyWisperRemoteObject("Foo", router);
 
         obj.sendStaticEvent("create", null);
 
@@ -129,6 +128,60 @@ public class WisperRemoteObjectTest
         assertThat(router.messages.size(), is(equalTo(1)));
         assertThat((Event) router.messages.get(0), is(equalTo(expected)));
     }
+
+
+    @Test
+    public void testWhenCreatedGatewayRouter_canRouteMapName() throws Exception
+    {
+        StubbedGatewayRouter gatewayRouter = new StubbedGatewayRouter();
+        WisperRemoteObject object = new MyWisperRemoteObject("whatever.some.thing", gatewayRouter);
+
+        assertThat(gatewayRouter.getRoutes().containsKey("whatever"), is(true));
+        Router router1 = gatewayRouter.getRoutes().get("whatever");
+
+        assertThat(router1.getRoutes().containsKey("some"), is(true));
+        Router router2 = router1.getRoutes().get("some");
+
+        assertThat(router2.getRoutes().containsKey("thing"), is(true));
+
+        assertThat(gatewayRouter.hasRoute("whatever.some.thing"), is(true));
+    }
+
+    @Test
+    public void testWhenRemoteObjectCreated_EventRouterIsAddedToGatewayRouter() throws Exception
+    {
+        StubbedGatewayRouter gatewayRouter = new StubbedGatewayRouter();
+        WisperRemoteObject object = new MyWisperRemoteObject("a.b.c", gatewayRouter);
+
+        assertThat(gatewayRouter.hasRoute("a.b.c"), is(true));
+
+        Router finalRouter = gatewayRouter.getRoutes().get("a").getRoutes().get("b").getRoutes().get("c");
+        assertThat(finalRouter, is(instanceOf(FunctionRouter.class)));
+        assertThat(finalRouter, is(instanceOf(EventRouter.class)));
+    }
+
+    //region Remote Object Events
+    //==================================================================
+
+    @Test
+    public void testWisperRemoteObject_handlesInstanceEvent() throws Exception
+    {
+        String instanceId = "testIdentifier";
+        StubbedGatewayRouter stubbedGatewayRouter = new StubbedGatewayRouter();
+        MyWisperRemoteObject remoteObject = new MyWisperRemoteObject("a.b.c",stubbedGatewayRouter);
+        remoteObject.registerInstanceOnEventRouter(instanceId);
+        Event instanceEvent = new WisperEventBuilder().withInstanceIdentifier(instanceId).withMethodName("a.b.c").buildInstanceEvent();
+        stubbedGatewayRouter.routeMessage(instanceEvent,"a.b.c");
+
+        assertThat(remoteObject.recievedEvent, is(notNullValue()));
+        assertThat(remoteObject.recievedEvent.getIdentifier(),is(equalTo(instanceEvent.getIdentifier())));
+        assertThat(remoteObject.recievedEvent.getInstanceIdentifier(),is(equalTo(instanceEvent.getInstanceIdentifier())));
+    }
+
+
+    //region Utilities
+    //==================================================================
+
 
     private class StubbedGatewayRouter extends GatewayRouter
     {
@@ -157,4 +210,5 @@ public class WisperRemoteObjectTest
             // do nothing
         }
     }
+
 }

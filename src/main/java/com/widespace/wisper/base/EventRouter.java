@@ -66,6 +66,9 @@ public class EventRouter extends FunctionRouter
     private void handleInstanceEvent(Notification message)
     {
         Event instanceEvent = new Event(message);
+
+        if (remoteObjects.containsKey(instanceEvent.getInstanceIdentifier()))
+            remoteObjects.get(instanceEvent.getInstanceIdentifier()).handleInstanceEvent(instanceEvent);
     }
 
     public void addInstance(String instanceIdentifier, WisperRemoteObject wisperRemoteObject)

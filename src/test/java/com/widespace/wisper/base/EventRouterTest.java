@@ -35,4 +35,17 @@ public class EventRouterTest
         assertThat(eventRouter.getRemoteObjects().size(), is(1));
         assertThat(eventRouter.getRemoteObjects().containsKey("id123"), is(true));
     }
+
+    @Test
+    public void testRemoveInstance_removesWisperRemoteObject() throws Exception
+    {
+        EventRouter eventRouter = new EventRouter(mock(WisperRemoteObject.class));
+
+        WisperRemoteObject wisperRemoteObject = mock(WisperRemoteObject.class);
+        eventRouter.addInstance("1234",wisperRemoteObject);
+
+        assertThat(eventRouter.getRemoteObjects().size(),is(1));
+        eventRouter.removeInstance("1234");
+        assertThat(eventRouter.getRemoteObjects().size(),is(0));
+    }
 }

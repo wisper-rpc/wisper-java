@@ -16,7 +16,7 @@ import java.util.Queue;
  * Object intended to be the remote instance representative. You can start calling methods even before the remote
  * is initialized. All messages will be queued up and run sequentially as soon as the remote is ready.
  */
-public class WisperRemoteObject
+public abstract class WisperRemoteObject
 {
     public static final ResponseBlock DoNothingResponseBlock = new ResponseBlock()
     {
@@ -32,11 +32,13 @@ public class WisperRemoteObject
     private GatewayRouter gatewayRouter;
 
     private Queue<IncompleteMessage> messageQueue;
+    private EventRouter eventRouter;
 
 
     /**
      * Constructs the object with the given map name and gatewayRouter.
-     *  @param mapName the map name to be used for this remote object.
+     *
+     * @param mapName       the map name to be used for this remote object.
      * @param gatewayRouter The gatewayRouter through which the remote object is accessible.
      */
 
@@ -45,7 +47,24 @@ public class WisperRemoteObject
         this.mapName = mapName;
         this.gatewayRouter = gatewayRouter;
         messageQueue = new LinkedList<IncompleteMessage>();
+
+        exposeRouterOnMapname(mapName, gatewayRouter);
     }
+
+    private void exposeRouterOnMapname(@NotNull String mapName, @NotNull GatewayRouter gatewayRouter)
+    {
+        if (!gatewayRouter.hasRoute(mapName))
+        {
+            eventRouter = new EventRouter(this);
+            gatewayRouter.exposeRoute(mapName, eventRouter);
+        }
+    }
+
+    protected void registerInstanceOnEventRouter(String wisperInstanceIdentifier)
+    {
+        eventRouter.addInstance(wisperInstanceIdentifier, this);
+    }
+
 
     public String getInstanceIdentifier()
     {
@@ -183,6 +202,15 @@ public class WisperRemoteObject
     {
         AbstractMessage completeWithIdentifier(String id);
     }
+
+
+    public static void handleStaticEvent(Event event)
+    {
+        // Must be implemented by children
+    }
+
+
+    abstract public void handleInstanceEvent(Event event);
 
     class IncompleteEvent implements IncompleteMessage
     {
