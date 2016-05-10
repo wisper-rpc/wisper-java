@@ -8,6 +8,8 @@ import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.error.WisperException;
+import com.widespace.wisper.messagetype.error.WisperExceptionHandler;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,17 +18,20 @@ public class GatewayRouter extends Router implements GatewayCallback
 {
     private Gateway gateway;
     private GatewayCallback gatewayCallback;
+    private WisperExceptionHandler exceptionHandler;
 
 
     public GatewayRouter()
     {
         this.gateway = new Gateway(this);
+        exceptionHandler = new WisperExceptionHandler(gateway);
     }
 
     public GatewayRouter(@NotNull Gateway gateway)
     {
         this.gateway = gateway;
         this.gateway.setCallback(this);
+        exceptionHandler = new WisperExceptionHandler(gateway);
     }
 
     public GatewayCallback getGatewayCallback()
@@ -96,11 +101,17 @@ public class GatewayRouter extends Router implements GatewayCallback
         if (methodName == null || methodName.equals(".handshake"))
             return;
 
-        if (message instanceof Notification)
-            routeMessage(message, ((Notification) message).getMethodName());
+        try
+        {
+            if (message instanceof Notification)
+                routeMessage(message, ((Notification) message).getMethodName());
 
-        else if (message instanceof Request)
-            routeMessage(message, ((Request) message).getMethodName());
+            else if (message instanceof Request)
+                routeMessage(message, ((Request) message).getMethodName());
+        } catch (WisperException wisperException)
+        {
+            exceptionHandler.handle(wisperException, message);
+        }
     }
 
     @Override

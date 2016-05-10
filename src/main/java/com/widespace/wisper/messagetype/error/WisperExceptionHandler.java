@@ -3,7 +3,9 @@ package com.widespace.wisper.messagetype.error;
 import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Request;
+
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -18,25 +20,27 @@ public class WisperExceptionHandler
 {
     public static final int CODE_CANNOT_BE_DETERMINED = -2;
     private final Gateway gateway;
-    private AbstractMessage message;
 
 
-    public WisperExceptionHandler(@NotNull Gateway gateway,@NotNull AbstractMessage message)
+    public WisperExceptionHandler(@NotNull Gateway gateway)
     {
         this.gateway = gateway;
-        this.message = message;
     }
 
 
-    public void handle(WisperException ex)
+    public void handle(@NotNull WisperException ex, @Nullable AbstractMessage message)
     {
+        System.err.println("Handling Exception Thrown by Wisper: ");
+        ex.printStackTrace();
+
         RPCErrorMessage errorMessage = new RPCErrorMessageBuilder(ErrorDomain.NATIVE, ex.getErrorCode())
                 .withMessage(ex.getMessage())
                 .withName(ex.getError().name())
                 .withUnderlyingError(getUnderlyingError(ex))
                 .build();
 
-        if (message instanceof Request)
+
+        if (message != null && message instanceof Request)
         {
             respondTheRequestWithError((Request) message, errorMessage);
             return;
