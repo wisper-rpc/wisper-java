@@ -4,6 +4,7 @@ import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
+import com.widespace.wisper.route.EventRouter;
 import com.widespace.wisper.route.FunctionRouter;
 import com.widespace.wisper.route.GatewayRouter;
 import com.widespace.wisper.route.Router;
@@ -156,7 +157,6 @@ public class WisperRemoteObjectTest
         assertThat(gatewayRouter.hasRoute("a.b.c"), is(true));
 
         Router finalRouter = gatewayRouter.getRoutes().get("a").getRoutes().get("b").getRoutes().get("c");
-        assertThat(finalRouter, is(instanceOf(FunctionRouter.class)));
         assertThat(finalRouter, is(instanceOf(EventRouter.class)));
     }
 

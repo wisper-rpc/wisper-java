@@ -3,6 +3,7 @@ package com.widespace.wisper.base;
 import com.widespace.wisper.controller.ResponseBlock;
 import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
+import com.widespace.wisper.route.EventRouter;
 import com.widespace.wisper.route.GatewayRouter;
 
 import org.jetbrains.annotations.NotNull;
@@ -206,7 +207,7 @@ public abstract class WisperRemoteObject
 
     public static void handleStaticEvent(Event event)
     {
-        // Must be implemented by children
+        // NO-USE
     }
 
 

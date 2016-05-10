@@ -1,5 +1,6 @@
 package com.widespace.wisper.base;
 
+import com.widespace.wisper.route.EventRouter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,12 +16,6 @@ import static org.mockito.Mockito.mock;
 public class EventRouterTest
 {
 
-    @Before
-    public void setUp() throws Exception
-    {
-
-
-    }
 
     @Test
     public void testAddInstance_addsInstanceToRemoteObjects() throws Exception
@@ -48,4 +43,6 @@ public class EventRouterTest
         eventRouter.removeInstance("1234");
         assertThat(eventRouter.getRemoteObjects().size(),is(0));
     }
+
+
 }

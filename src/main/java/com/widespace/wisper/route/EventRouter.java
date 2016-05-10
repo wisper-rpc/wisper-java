@@ -1,9 +1,12 @@
-package com.widespace.wisper.base;
+package com.widespace.wisper.route;
 
+import com.widespace.wisper.base.WisperRemoteObject;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
 import com.widespace.wisper.route.FunctionRouter;
 import com.widespace.wisper.route.MessageParser;
@@ -17,7 +20,7 @@ import sun.misc.MessageUtils;
 /**
  * Created by ehssanhoorvash on 09/05/16.
  */
-public class EventRouter extends FunctionRouter
+public class EventRouter extends Router
 {
     private WisperRemoteObject wisperRemoteObject;
     private Map<String, WisperRemoteObject> remoteObjects;
@@ -47,9 +50,11 @@ public class EventRouter extends FunctionRouter
                 }
                 break;
                 default:
-                    //todo: err
-                    break;
+                    super.routeMessage(message, path);
             }
+        } else if (message instanceof Request)
+        {
+            ((Request) message).getResponseBlock().perform(((Request) message).createResponse(), null);
         }
     }
 
@@ -60,7 +65,7 @@ public class EventRouter extends FunctionRouter
 
     private void handleStaticEvent(Notification message)
     {
-        wisperRemoteObject.handleStaticEvent(new Event(message));
+        WisperRemoteObject.handleStaticEvent(new Event(message));
     }
 
     private void handleInstanceEvent(Notification message)
