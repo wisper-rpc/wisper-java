@@ -47,7 +47,7 @@ public class WisperRemoteObjectTest
         Request createRequest = (Request)router.messages.get(0);
 
         assertThat(createRequest.getMethodName(), is(equalTo("Foo~")));
-        assertThat(createRequest.getParams(), is(equalTo(null)));
+        assertThat(createRequest.getParams(), is(equalTo(new Object[]{})));
     }
 
     @Test
@@ -98,6 +98,38 @@ public class WisperRemoteObjectTest
         EventRouter eventRouter = (EventRouter) router.getRoutes().get("Foo");
 
         assertThat(eventRouter.getRemoteObjects().size(), is(0));
+    }
+
+    @Test
+    public void testRouteStaticEventToInstance() throws Exception
+    {
+        GatewayRouter router = new GatewayRouter();
+        MyWisperRemoteObject obj = new MyWisperRemoteObject("Foo", router);
+
+        //Create static event
+        Notification eventNotification = new Notification("Foo!", new Object[]{"volume", 1.0});
+
+        //Route event
+        router.gatewayReceivedMessage(eventNotification);
+
+        assertThat(obj.recievedStaticEvent.getName(), is("volume"));
+    }
+
+    @Test
+    public void testRouteInstanceEventToInstance() throws Exception
+    {
+        GatewayRouter router = new GatewayRouter();
+        MyWisperRemoteObject obj = new MyWisperRemoteObject("Foo", router);
+
+        obj.setInstanceIdentifier("mockedInstanceID0x00");
+
+        //Create static event
+        Notification eventNotification = new Notification("Foo:!", new Object[]{"mockedInstanceID0x00", "volume", 1.0});
+
+        //Route event
+        router.gatewayReceivedMessage(eventNotification);
+
+        assertThat(obj.recievedEvent.getName(), is("volume"));
     }
 
     @Test
