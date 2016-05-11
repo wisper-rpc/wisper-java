@@ -55,8 +55,12 @@ public abstract class WisperRemoteObject implements RemoteObjectEventInterface
         sendCreateMessageWithParams(null);
     }
 
-    public void sendCreateMessageWithParams(String[] params)
+    public void sendCreateMessageWithParams(Object[] params)
     {
+        if (params == null)
+        {
+            params = new Object[]{};
+        }
         gatewayRouter.getGateway().sendMessage(new Request(mapName + "~", params).withResponseBlock(new ResponseBlock() {
             @Override
             public void perform(Response response, RPCErrorMessage error) {
