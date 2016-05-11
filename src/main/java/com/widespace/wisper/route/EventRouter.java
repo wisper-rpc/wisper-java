@@ -7,6 +7,7 @@ import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.error.WisperException;
 
+import java.lang.reflect.Method;
 import java.rmi.server.RemoteObject;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,9 +19,11 @@ import java.util.Map;
 public class EventRouter extends Router
 {
     private Map<String, RemoteObjectEventInterface> remoteObjects;
+    private Class<? extends RemoteObjectEventInterface> remoteObjectClass;
 
-    public EventRouter(RemoteObjectEventInterface wisperRemoteObject)
+    public EventRouter(Class<? extends RemoteObjectEventInterface> remoteObjectClass)
     {
+        this.remoteObjectClass = remoteObjectClass;
         remoteObjects = new HashMap<String, RemoteObjectEventInterface>();
     }
 
@@ -58,10 +61,14 @@ public class EventRouter extends Router
 
     private void handleStaticEvent(Notification message)
     {
-        for (Map.Entry<String, RemoteObjectEventInterface> entry : remoteObjects.entrySet())
+        try
         {
-            RemoteObjectEventInterface remoteObject = (RemoteObjectEventInterface) entry.getValue();
-            remoteObject.handleStaticEvent(new Event(message));
+            Method staticEventMethod = remoteObjectClass.getMethod("handleStaticEvent", Event.class);
+            staticEventMethod.setAccessible(true);
+            staticEventMethod.invoke(null, new Event(message));
+        } catch (Exception e)
+        {
+            System.out.println("WisperEventRouter : Exception swallowed : " + e.toString());
         }
     }
 
