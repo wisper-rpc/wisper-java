@@ -5,6 +5,7 @@ import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.route.EventRouter;
 import com.widespace.wisper.route.GatewayRouter;
+import com.widespace.wisper.route.RemoteObjectEventInterface;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +19,7 @@ import java.util.Queue;
  * Object intended to be the remote instance representative. You can start calling methods even before the remote
  * is initialized. All messages will be queued up and run sequentially as soon as the remote is ready.
  */
-public abstract class WisperRemoteObject
+public abstract class WisperRemoteObject implements RemoteObjectEventInterface
 {
     public static final ResponseBlock DoNothingResponseBlock = new ResponseBlock()
     {
@@ -249,13 +250,13 @@ public abstract class WisperRemoteObject
         AbstractMessage completeWithIdentifier(String id);
     }
 
-
-    public static void handleStaticEvent(Event event)
+    @Override
+    public void handleStaticEvent(Event event)
     {
         // NO-USE
     }
 
-
+    @Override
     abstract public void handleInstanceEvent(Event event);
 
     class IncompleteEvent implements IncompleteMessage
