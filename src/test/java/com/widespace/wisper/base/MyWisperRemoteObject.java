@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  */
 class MyWisperRemoteObject extends WisperRemoteObject
 {
-    public Event recievedStaticEvent;
+    public static Event recievedStaticEvent;
     public Event recievedEvent;
 
     /**
@@ -23,8 +23,8 @@ class MyWisperRemoteObject extends WisperRemoteObject
         super(mapName, gatewayRouter);
     }
 
-    @Override
-    public void handleStaticEvent(Event event)
+
+    public static void handleStaticEvent(Event event)
     {
         recievedStaticEvent = event;
     }
