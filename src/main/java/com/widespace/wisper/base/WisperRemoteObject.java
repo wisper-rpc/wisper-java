@@ -84,7 +84,7 @@ public abstract class WisperRemoteObject implements RemoteObjectEventInterface
     {
         if (!gatewayRouter.hasRoute(mapName))
         {
-            eventRouter = new EventRouter(this);
+            eventRouter = new EventRouter(this.getClass());
             gatewayRouter.exposeRoute(mapName, eventRouter);
         }
     }
@@ -254,8 +254,8 @@ public abstract class WisperRemoteObject implements RemoteObjectEventInterface
         AbstractMessage completeWithIdentifier(String id);
     }
 
-    @Override
-    public void handleStaticEvent(Event event)
+
+    public static void handleStaticEvent(Event event)
     {
         // NO-USE
     }
