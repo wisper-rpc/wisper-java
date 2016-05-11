@@ -61,7 +61,7 @@ public class WisperRemoteObjectTest
         EventRouter eventRouter = (EventRouter) router.getRoutes().get("Foo");
 
         assertThat(eventRouter.getRemoteObjects().size(), is(1));
-        assertThat(eventRouter.getRemoteObjects().get("mockedInstanceId0x00"), is(equalTo(obj)));
+        assertThat((WisperRemoteObject)eventRouter.getRemoteObjects().get("mockedInstanceId0x00"), is(equalTo(obj)));
     }
 
     @Test
