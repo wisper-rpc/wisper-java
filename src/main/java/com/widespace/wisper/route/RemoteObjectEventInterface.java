@@ -7,6 +7,7 @@ import com.widespace.wisper.messagetype.Event;
  */
 public interface RemoteObjectEventInterface
 {
-    void handleStaticEvent(Event event);
+    // To receive static events, implement the following method. (It will be invoked through reflection)
+    //static void handleStaticEvent(Event event);
     void handleInstanceEvent(Event event);
 }
