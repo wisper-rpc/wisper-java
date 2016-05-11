@@ -130,9 +130,19 @@ public class Router
         }
     }
 
-    public boolean hasRoute(String route)
+    public boolean hasRoute(String path)
     {
-        return routes != null && routes.containsKey(route);
+        List<String> tokens = Arrays.asList(path.split("\\."));
+        String firstChunk = tokens.get(0);
+        String remainingPath = getRemainingPath(path, firstChunk);
+
+        if (routes == null || !routes.containsKey(firstChunk))
+            return false;
+
+        if ((remainingPath == null || remainingPath.isEmpty()) && routes.containsKey(firstChunk))
+            return true;
+
+        return (routes.get(firstChunk)).hasRoute(remainingPath);
     }
 
     public HashMap<String, Router> getRoutes()

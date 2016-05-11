@@ -3,6 +3,9 @@ package com.widespace.wisper.base;
 import com.widespace.wisper.controller.ResponseBlock;
 import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
+import com.widespace.wisper.route.EventRouter;
+import com.widespace.wisper.route.GatewayRouter;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +17,7 @@ import java.util.Queue;
  * Object intended to be the remote instance representative. You can start calling methods even before the remote
  * is initialized. All messages will be queued up and run sequentially as soon as the remote is ready.
  */
-public class WisperRemoteObject
+public abstract class WisperRemoteObject
 {
     public static final ResponseBlock DoNothingResponseBlock = new ResponseBlock()
     {
@@ -27,24 +30,42 @@ public class WisperRemoteObject
 
     private String mapName;
     private String instanceIdentifier;
-    private Channel channel;
+    private GatewayRouter gatewayRouter;
 
     private Queue<IncompleteMessage> messageQueue;
+    private EventRouter eventRouter;
 
 
     /**
-     * Constructs the object with the given map name and channel.
+     * Constructs the object with the given map name and gatewayRouter.
      *
-     * @param mapName the map name to be used for this remote object.
-     * @param channel The channel through which the remote object is accessible.
+     * @param mapName       the map name to be used for this remote object.
+     * @param gatewayRouter The gatewayRouter through which the remote object is accessible.
      */
 
-    public WisperRemoteObject(@NotNull String mapName, @NotNull Channel channel)
+    public WisperRemoteObject(@NotNull String mapName, @NotNull GatewayRouter gatewayRouter)
     {
         this.mapName = mapName;
-        this.channel = channel;
+        this.gatewayRouter = gatewayRouter;
         messageQueue = new LinkedList<IncompleteMessage>();
+
+        exposeRouterOnMapname(mapName, gatewayRouter);
     }
+
+    private void exposeRouterOnMapname(@NotNull String mapName, @NotNull GatewayRouter gatewayRouter)
+    {
+        if (!gatewayRouter.hasRoute(mapName))
+        {
+            eventRouter = new EventRouter(this);
+            gatewayRouter.exposeRoute(mapName, eventRouter);
+        }
+    }
+
+    protected void registerInstanceOnEventRouter(String wisperInstanceIdentifier)
+    {
+        eventRouter.addInstance(wisperInstanceIdentifier, this);
+    }
+
 
     public String getInstanceIdentifier()
     {
@@ -64,7 +85,7 @@ public class WisperRemoteObject
     {
         for (IncompleteMessage message : messageQueue)
         {
-            channel.sendMessage(message.completeWithIdentifier(instanceIdentifier));
+            gatewayRouter.getGateway().sendMessage(message.completeWithIdentifier(instanceIdentifier));
         }
 
         // Let the GC reclaim the queue.
@@ -85,10 +106,9 @@ public class WisperRemoteObject
         if (instanceIdentifier == null)
         {
             messageQueue.add(new IncompleteRequest(mapName + ":" + methodName, params, block));
-        }
-        else
+        } else
         {
-            channel.sendMessage(new Request(mapName + ":" + methodName, prepend(instanceIdentifier, params)).withResponseBlock(block));
+            gatewayRouter.getGateway().sendMessage(new Request(mapName + ":" + methodName, prepend(instanceIdentifier, params)).withResponseBlock(block));
         }
     }
 
@@ -102,6 +122,12 @@ public class WisperRemoteObject
     {
         callInstanceMethod(methodName, params, null);
     }
+
+    public void callInstanceMethod(@NotNull String methodName)
+    {
+        callInstanceMethod(methodName, new Object[]{});
+    }
+
 
     @NotNull
     private ResponseBlock blockForCompletion(@Nullable final CompletionBlock completion)
@@ -130,7 +156,7 @@ public class WisperRemoteObject
      */
     public void callStaticMethod(@NotNull String methodName, Object[] params, CompletionBlock completion)
     {
-        channel.sendMessage(new Request(mapName + "." + methodName, params).withResponseBlock(blockForCompletion(completion)));
+        gatewayRouter.getGateway().sendMessage(new Request(mapName + "." + methodName, params).withResponseBlock(blockForCompletion(completion)));
     }
 
 
@@ -156,10 +182,9 @@ public class WisperRemoteObject
         if (instanceIdentifier == null)
         {
             messageQueue.add(new IncompleteEvent(mapName + ":!", name, value));
-        }
-        else
+        } else
         {
-            channel.sendMessage(new Event(mapName + ":!", instanceIdentifier, name, value));
+            gatewayRouter.getGateway().sendMessage(new Event(mapName + ":!", instanceIdentifier, name, value));
         }
     }
 
@@ -171,13 +196,22 @@ public class WisperRemoteObject
      */
     public void sendStaticEvent(@NotNull String name, Object value)
     {
-        channel.sendMessage(new Event(mapName + "!", name, value));
+        gatewayRouter.getGateway().sendMessage(new Event(mapName + "!", name, value));
     }
 
     interface IncompleteMessage
     {
         AbstractMessage completeWithIdentifier(String id);
     }
+
+
+    public static void handleStaticEvent(Event event)
+    {
+        // NO-USE
+    }
+
+
+    abstract public void handleInstanceEvent(Event event);
 
     class IncompleteEvent implements IncompleteMessage
     {

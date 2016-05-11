@@ -42,6 +42,28 @@ public class RouterTest
         assertThat(router.hasRoute("y"), is(true));
     }
 
+
+    @Test
+    public void hasRouteWorksForSingleChunkedPaths() throws Exception
+    {
+        router.exposeRoute("y", new Router());
+        assertThat(router.hasRoute("y"), is(true));
+    }
+
+    @Test
+    public void hasRouteWorksForMultipleChunkedPaths() throws Exception
+    {
+        router.exposeRoute("a.b.c", new Router());
+        assertThat(router.hasRoute("a"), is(true));
+        assertThat(router.hasRoute("a.b"), is(true));
+        assertThat(router.hasRoute("a.b.c"), is(true));
+
+        assertThat(router.hasRoute("a.b.d"), is(false));
+        assertThat(router.hasRoute("b"), is(false));
+        assertThat(router.hasRoute("b.c"), is(false));
+    }
+
+
     @Test(expected = WisperException.class)
     public void doubleRouteForSamePathNotAccepted() throws Exception
     {
