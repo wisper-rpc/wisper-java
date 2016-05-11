@@ -9,6 +9,7 @@ import com.widespace.wisper.route.GatewayRouter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -50,6 +51,28 @@ public abstract class WisperRemoteObject
         messageQueue = new LinkedList<IncompleteMessage>();
 
         exposeRouterOnMapname(mapName, gatewayRouter);
+        sendCreateMessageWithParams(null);
+    }
+
+    public void sendCreateMessageWithParams(String[] params)
+    {
+        gatewayRouter.getGateway().sendMessage(new Request(mapName + "~", params).withResponseBlock(new ResponseBlock() {
+            @Override
+            public void perform(Response response, RPCErrorMessage error) {
+
+                String instanceId = (String) (response.getResult() != null ? ((HashMap) response.getResult()).get("id") : null);
+                setInstanceIdentifier(instanceId);
+            }
+        }));
+    }
+
+    public void destroy()
+    {
+        //Send destroy message
+        callInstanceMethod("~");
+
+        //Unregister
+        unregisterInstanceOnEventRouter(getInstanceIdentifier());
     }
 
     private void exposeRouterOnMapname(@NotNull String mapName, @NotNull GatewayRouter gatewayRouter)
@@ -66,6 +89,11 @@ public abstract class WisperRemoteObject
         eventRouter.addInstance(wisperInstanceIdentifier, this);
     }
 
+    protected void unregisterInstanceOnEventRouter(String wisperInstanceIdentifier)
+    {
+        eventRouter.removeInstance(wisperInstanceIdentifier);
+    }
+
 
     public String getInstanceIdentifier()
     {
@@ -77,6 +105,7 @@ public abstract class WisperRemoteObject
         if (instanceIdentifier != null)
         {
             this.instanceIdentifier = instanceIdentifier;
+            registerInstanceOnEventRouter(instanceIdentifier);
             sendEnqueuedMessages();
         }
     }
@@ -101,14 +130,24 @@ public abstract class WisperRemoteObject
      */
     public void callInstanceMethod(@NotNull String methodName, Object[] params, CompletionBlock completion)
     {
-        ResponseBlock block = blockForCompletion(completion);
+        ResponseBlock block = null;
+        if (completion != null)
+        {
+            block = blockForCompletion(completion);
+        }
 
         if (instanceIdentifier == null)
         {
             messageQueue.add(new IncompleteRequest(mapName + ":" + methodName, params, block));
         } else
         {
-            gatewayRouter.getGateway().sendMessage(new Request(mapName + ":" + methodName, prepend(instanceIdentifier, params)).withResponseBlock(block));
+            if (completion == null)
+            {
+                gatewayRouter.getGateway().sendMessage(new Notification(mapName + ":" + methodName, prepend(instanceIdentifier, params)));
+            } else
+            {
+                gatewayRouter.getGateway().sendMessage(new Request(mapName + ":" + methodName, prepend(instanceIdentifier, params)).withResponseBlock(block));
+            }
         }
     }
 
@@ -156,7 +195,13 @@ public abstract class WisperRemoteObject
      */
     public void callStaticMethod(@NotNull String methodName, Object[] params, CompletionBlock completion)
     {
-        gatewayRouter.getGateway().sendMessage(new Request(mapName + "." + methodName, params).withResponseBlock(blockForCompletion(completion)));
+        if (completion == null)
+        {
+            gatewayRouter.getGateway().sendMessage(new Notification(mapName + "." + methodName, params));
+        } else
+        {
+            gatewayRouter.getGateway().sendMessage(new Request(mapName + "." + methodName, params).withResponseBlock(blockForCompletion(completion)));
+        }
     }
 
 
@@ -247,6 +292,11 @@ public abstract class WisperRemoteObject
 
         public AbstractMessage completeWithIdentifier(String id)
         {
+            if (block == null)
+            {
+                return new Notification(method, prepend(id, params));
+            }
+
             return new Request(method, prepend(id, params)).withResponseBlock(block);
         }
     }
