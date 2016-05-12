@@ -50,8 +50,17 @@ public class Router
         if (firstChunk.equals(path))
             firstChunk = firstChunk.split(":")[0];
 
+        firstChunk = getPathUntilSpecialMarkers(firstChunk);
         checkPathExists(message, firstChunk);
         routes.get(firstChunk).routeMessage(message, remainingPath);
+    }
+
+    private String getPathUntilSpecialMarkers(String path)
+    {
+        String result = path.split(":")[0];
+        result = result.split("~")[0];
+        result = result.split("!")[0];
+        return result;
     }
 
     private String getRemainingPath(String path, String firstChunk)
@@ -60,6 +69,7 @@ public class Router
         String[] split = result.split(":");
         result = split[0];
         result = result.replace("~", "");
+        result = result.replace("!", "");
         return result;
     }
 

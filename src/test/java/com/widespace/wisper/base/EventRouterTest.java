@@ -1,6 +1,12 @@
 package com.widespace.wisper.base;
 
+import com.widespace.wisper.messagetype.Event;
+import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.route.EventRouter;
+import com.widespace.wisper.route.GatewayRouter;
+import com.widespace.wisper.route.RemoteObjectEventInterface;
+import com.widespace.wisper.route.Router;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,7 +26,7 @@ public class EventRouterTest
     @Test
     public void testAddInstance_addsInstanceToRemoteObjects() throws Exception
     {
-        EventRouter eventRouter = new EventRouter(mock(WisperRemoteObject.class));
+        EventRouter eventRouter = new EventRouter(WisperRemoteObject.class);
 
         WisperRemoteObject addedRemoteObject = mock(WisperRemoteObject.class);
         eventRouter.addInstance("id123", addedRemoteObject);
@@ -34,7 +40,7 @@ public class EventRouterTest
     @Test
     public void testRemoveInstance_removesWisperRemoteObject() throws Exception
     {
-        EventRouter eventRouter = new EventRouter(mock(WisperRemoteObject.class));
+        EventRouter eventRouter = new EventRouter(WisperRemoteObject.class);
 
         WisperRemoteObject wisperRemoteObject = mock(WisperRemoteObject.class);
         eventRouter.addInstance("1234",wisperRemoteObject);
@@ -43,6 +49,5 @@ public class EventRouterTest
         eventRouter.removeInstance("1234");
         assertThat(eventRouter.getRemoteObjects().size(),is(0));
     }
-
 
 }

@@ -43,7 +43,7 @@ public class GatewayTest
     public void testGatewayGeneratesUniqueIdForRequests() throws Exception
     {
         String identifier = gateway.uniqueRequestIdentifier();
-        assertThat("WISPER-ANDROID-1", is(equalTo(identifier)));
+        assertThat("WISPER-ANDROID-", is(equalTo(identifier.substring(0, 15))));
     }
 
     @Test

@@ -7,21 +7,24 @@ import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.error.WisperException;
 
+import java.lang.reflect.Method;
+import java.rmi.server.RemoteObject;
 import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * Created by ehssanhoorvash on 09/05/16.
  */
 public class EventRouter extends Router
 {
-    private WisperRemoteObject wisperRemoteObject;
-    private Map<String, WisperRemoteObject> remoteObjects;
+    private Map<String, RemoteObjectEventInterface> remoteObjects;
+    private Class<? extends RemoteObjectEventInterface> remoteObjectClass;
 
-    public EventRouter(WisperRemoteObject wisperRemoteObject)
+    public EventRouter(Class<? extends RemoteObjectEventInterface> remoteObjectClass)
     {
-        this.wisperRemoteObject = wisperRemoteObject;
-        remoteObjects = new HashMap<String, WisperRemoteObject>();
+        this.remoteObjectClass = remoteObjectClass;
+        remoteObjects = new HashMap<String, RemoteObjectEventInterface>();
     }
 
     @Override
@@ -45,20 +48,28 @@ public class EventRouter extends Router
                 default:
                     super.routeMessage(message, path);
             }
-        } else if (message instanceof Request)
-        {
-            ((Request) message).getResponseBlock().perform(((Request) message).createResponse(), null);
+            return;
         }
+
+        super.routeMessage(message, path);
     }
 
-    public Map<String, WisperRemoteObject> getRemoteObjects()
+    public Map<String, RemoteObjectEventInterface> getRemoteObjects()
     {
         return remoteObjects;
     }
 
     private void handleStaticEvent(Notification message)
     {
-        WisperRemoteObject.handleStaticEvent(new Event(message));
+        try
+        {
+            Method staticEventMethod = remoteObjectClass.getMethod("handleStaticEvent", Event.class);
+            staticEventMethod.setAccessible(true);
+            staticEventMethod.invoke(null, new Event(message));
+        } catch (Exception e)
+        {
+            System.out.println("WisperEventRouter : Exception swallowed : " + e.toString());
+        }
     }
 
     private void handleInstanceEvent(Notification message)
@@ -69,7 +80,7 @@ public class EventRouter extends Router
             remoteObjects.get(instanceEvent.getInstanceIdentifier()).handleInstanceEvent(instanceEvent);
     }
 
-    public void addInstance(String instanceIdentifier, WisperRemoteObject wisperRemoteObject)
+    public void addInstance(String instanceIdentifier, RemoteObjectEventInterface wisperRemoteObject)
     {
         remoteObjects.put(instanceIdentifier, wisperRemoteObject);
     }
