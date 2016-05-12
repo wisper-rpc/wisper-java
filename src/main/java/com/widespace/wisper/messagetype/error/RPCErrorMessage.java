@@ -1,8 +1,8 @@
 package com.widespace.wisper.messagetype.error;
 
-import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.RPCMessageType;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,6 +41,8 @@ public class RPCErrorMessage extends AbstractMessage
             this.error = new RPCError(json.getJSONObject(ERROR));
         }
     }
+
+
 
     @Override
     public RPCMessageType type()

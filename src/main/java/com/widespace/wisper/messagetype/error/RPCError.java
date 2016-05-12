@@ -2,7 +2,14 @@ package com.widespace.wisper.messagetype.error;
 
 import org.json.JSONObject;
 
-import static com.widespace.wisper.base.Constants.*;
+import java.util.Map;
+
+import static com.widespace.wisper.base.Constants.CODE;
+import static com.widespace.wisper.base.Constants.DATA;
+import static com.widespace.wisper.base.Constants.DOMAIN;
+import static com.widespace.wisper.base.Constants.MESSAGE;
+import static com.widespace.wisper.base.Constants.NAME;
+import static com.widespace.wisper.base.Constants.UNDERLYING_ERROR;
 
 /**
  * Created by ehssanhoorvash on 21/10/15.
@@ -21,6 +28,11 @@ public class RPCError
     public RPCError()
     {
         domain = ErrorDomain.NATIVE.getDomainCode();
+    }
+
+    public RPCError(Map<String, Object> errorMap)
+    {
+        this(new JSONObject(errorMap));
     }
 
     public RPCError(JSONObject jsonObject)
