@@ -77,6 +77,7 @@ public abstract class WisperRemoteObject
         if (instanceIdentifier != null)
         {
             this.instanceIdentifier = instanceIdentifier;
+            registerInstanceOnEventRouter(instanceIdentifier);
             sendEnqueuedMessages();
         }
     }
@@ -128,24 +129,6 @@ public abstract class WisperRemoteObject
         callInstanceMethod(methodName, new Object[]{});
     }
 
-
-    @NotNull
-    private ResponseBlock blockForCompletion(@Nullable final CompletionBlock completion)
-    {
-        if (completion == null)
-        {
-            return DoNothingResponseBlock;
-        }
-
-        return new ResponseBlock()
-        {
-            @Override
-            public void perform(Response response, RPCErrorMessage error)
-            {
-                completion.perform(response.getResult(), error);
-            }
-        };
-    }
 
     /**
      * Call a remote static method expecting a return value. This message is sent as a request.
@@ -199,12 +182,6 @@ public abstract class WisperRemoteObject
         gatewayRouter.getGateway().sendMessage(new Event(mapName + "!", name, value));
     }
 
-    interface IncompleteMessage
-    {
-        AbstractMessage completeWithIdentifier(String id);
-    }
-
-
     public static void handleStaticEvent(Event event)
     {
         // NO-USE
@@ -212,6 +189,16 @@ public abstract class WisperRemoteObject
 
 
     abstract public void handleInstanceEvent(Event event);
+
+
+
+    //region Privates
+    //=============================================
+
+    interface IncompleteMessage
+    {
+        AbstractMessage completeWithIdentifier(String id);
+    }
 
     class IncompleteEvent implements IncompleteMessage
     {
@@ -261,5 +248,23 @@ public abstract class WisperRemoteObject
         params[0] = param;
 
         return params;
+    }
+
+    @NotNull
+    private ResponseBlock blockForCompletion(@Nullable final CompletionBlock completion)
+    {
+        if (completion == null)
+        {
+            return DoNothingResponseBlock;
+        }
+
+        return new ResponseBlock()
+        {
+            @Override
+            public void perform(Response response, RPCErrorMessage error)
+            {
+                completion.perform(response.getResult(), error);
+            }
+        };
     }
 }

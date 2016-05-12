@@ -55,58 +55,74 @@ public abstract class AbstractMessage
      * @throws JSONException If json representation of the array could not be parsed
      */
     @NotNull
-    static Object[] jsonArrayToArray(@NotNull JSONArray jsonArray) throws JSONException
+    static Object[] jsonArrayToArray(@Nullable JSONArray jsonArray) throws JSONException
     {
+        ArrayList<Object> arrayList = new ArrayList<Object>();
+        if (jsonArray != null)
+        {
+            int len = jsonArray.length();
+            for (int i = 0; i < len; i++)
+            {
+                //in case of string and primitive (number)
+                Object theParam = jsonArray.get(i);
 
-        return toList(jsonArray).toArray();
+                //in case of ARRAY
+                if (theParam instanceof JSONArray)
+                {
+                    theParam = toList((JSONArray) theParam);
+                }
+
+                //in case of Hashmap
+                if (theParam instanceof JSONObject)
+                {
+                    theParam = jsonToMap((JSONObject) theParam);
+                }
+
+                arrayList.add(theParam);
+            }
+        }
+
+        return arrayList.toArray();
     }
 
 
-    @NotNull
-    private static Map<String, Object> toMap(@NotNull JSONObject object) throws JSONException
+    private static Map<String, Object> jsonToMap(JSONObject json) throws JSONException
+    {
+        Map<String, Object> retMap = new HashMap<String, Object>();
+
+        if (json != JSONObject.NULL)
+        {
+            retMap = toMap(json);
+        }
+        return retMap;
+    }
+
+    private static Map<String, Object> toMap(JSONObject jsonObject) throws JSONException
     {
         Map<String, Object> map = new HashMap<String, Object>();
 
-        for (String key : iterable((Iterator<String>) object.keys()))
+        Iterator<?> keysItr = jsonObject.keys();
+        while (keysItr.hasNext())
         {
-            map.put(key, deserialize(object.get(key)));
-        }
+            String key = (String) keysItr.next();
+            Object value = jsonObject.get(key);
 
+            if (value instanceof JSONArray)
+            {
+                value = toList((JSONArray) value);
+            }
+            else if (value instanceof JSONObject)
+            {
+                value = toMap((JSONObject) value);
+            }
+            map.put(key, value);
+        }
         return map;
     }
 
-    /**
-     * Get an Iterable from an Iterator.
-     *
-     * @param iterator an iterator
-     * @return an iterable
-     */
-    @NotNull
-    private static <T> Iterable<? extends T> iterable(@NotNull final Iterator<T> iterator)
+    private static List<Object> toList(JSONArray array) throws JSONException
     {
-        return new Iterable<T>()
-        {
-            @Override
-            public Iterator<T> iterator()
-            {
-                return iterator;
-            }
-        };
-    }
-
-    @NotNull
-    private static List<Object> toList(@NotNull JSONArray jsonArray) throws JSONException
-    {
-
-        ArrayList<Object> arrayList = new ArrayList<Object>();
-
-        int len = jsonArray.length();
-        for (int i = 0; i < len; i++)
-        {
-            arrayList.add(deserialize(jsonArray.get(i)));
-        }
-
-        return arrayList;
+        return Arrays.asList(jsonArrayToArray(array));
     }
 
     public String getIdentifier()
@@ -114,31 +130,32 @@ public abstract class AbstractMessage
         return null;
     }
 
-    private JSONArray serializeList(@NotNull List list)
-    {
-        JSONArray array = new JSONArray();
-        for (Object object : list)
-        {
-            array.put(serialize(object));
-        }
-        return array;
-    }
-
-    @Nullable
-    protected Object serialize(@Nullable Object newResult)
+    protected Object serialize(Object newResult)
     {
         if (newResult == null)
         {
-            return JSONObject.NULL;
+            return null;
         }
 
         if (newResult.getClass().isArray())
         {
-            return serializeList(Arrays.asList((Object[]) newResult));
+            JSONArray array = new JSONArray();
+
+            for (Object object : (Object[]) newResult)
+            {
+                array.put(serialize(object));
+            }
+
+            return array;
         }
         else if (newResult instanceof List)
         {
-            return serializeList((List) newResult);
+            JSONArray array = new JSONArray();
+            for (java.lang.Object object : (List) newResult)
+            {
+                array.put(serialize(object));
+            }
+            return array;
         }
         else if (ClassUtils.isPrimitive(newResult.getClass()) || newResult.getClass().equals(String.class))
         {
@@ -175,20 +192,7 @@ public abstract class AbstractMessage
         }
     }
 
-    /**
-     * Deserialize the given JSONArray to an Object array.
-     *
-     * @param array the JSON array
-     * @return a plain array
-     */
-    @NotNull
-    static Object[] deserializeArray(@NotNull JSONArray array)
-    {
-        return toList(array).toArray();
-    }
-
-    @Nullable
-    static Object deserialize(@NotNull Object result)
+    static Object deserialize(Object result)
     {
         if (result == JSONObject.NULL)
         {
@@ -197,16 +201,39 @@ public abstract class AbstractMessage
 
         if (result instanceof JSONArray)
         {
-            return toList((JSONArray) result);
-        }
+            ArrayList<Object> arrayList = new ArrayList<Object>();
+            JSONArray jsonArray = (JSONArray) result;
+            for (int i = 0; i < jsonArray.length(); i++)
+            {
+                arrayList.add(deserialize(jsonArray.get(i)));
+            }
 
-        if (result instanceof JSONObject)
+            return arrayList.toArray(new Object[arrayList.size()]);
+        }
+        else if ((result instanceof String) || result.getClass().isPrimitive() || (result instanceof Number))
         {
-            return toMap((JSONObject) result);
+            return result;
+        }
+        else if (result instanceof JSONObject)
+        {
+            JSONObject json = (JSONObject) result;
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            Iterator keys = json.keys();
+            while (keys.hasNext())
+            {
+                String key = (String) keys.next();
+                map.put(key, deserialize(json.get(key)));
+            }
+
+            return map;
+
             //TODO: Handle RPCError ??
         }
+        else
+        {
+            return result;
+        }
 
-        // Primitives
-        return result;
+
     }
 }
