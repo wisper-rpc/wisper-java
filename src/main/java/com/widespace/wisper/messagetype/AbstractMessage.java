@@ -130,7 +130,7 @@ public abstract class AbstractMessage
         return null;
     }
 
-    protected Object serialize(Object newResult)
+    protected static Object serialize(Object newResult)
     {
         if (newResult == null)
         {
@@ -165,7 +165,7 @@ public abstract class AbstractMessage
         {
             return newResult;
         }
-        else if (newResult.getClass().isAssignableFrom(Map.class) || newResult.getClass().isAssignableFrom(HashMap.class))
+        else if (Map.class.isAssignableFrom(newResult.getClass()))
         {
             return new JSONObject((Map) newResult);
         }
