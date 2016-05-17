@@ -5,11 +5,11 @@ import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.CallMessage;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.error.WisperException;
 import com.widespace.wisper.messagetype.error.WisperExceptionHandler;
 
-import com.widespace.wisper.messagetype.Invocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -106,9 +106,9 @@ public class GatewayRouter extends Router implements GatewayCallback
 
         try
         {
-            if (message instanceof Invocation)
+            if (message instanceof CallMessage)
             {
-                routeMessage(message, ((Invocation) message).getMethodName());
+                routeMessage(message, ((CallMessage) message).getMethodName());
             }
         }
         catch (WisperException wisperException)

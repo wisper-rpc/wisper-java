@@ -13,10 +13,10 @@ import java.util.Arrays;
  * Request object that you can either use yourself to request the other RPC endpoint or you will get from the RPC controller when the other endpoint is asking you for it.
  * The WSRPCRequest is a subclass of AbstractMessage.
  *
- * @see Invocation
+ * @see CallMessage
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class Request extends Invocation
+public class Request extends CallMessage
 {
     private ResponseBlock responseBlock;
     private String identifier;

@@ -10,7 +10,7 @@ import java.util.Arrays;
 /**
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class Notification extends Invocation
+public class Notification extends CallMessage
 {
     public Notification(@NotNull String methodName)
     {
