@@ -1,14 +1,11 @@
 package com.widespace.wisper.route;
 
-import com.widespace.wisper.base.WisperRemoteObject;
-import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.CallMessage;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.Notification;
-import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.error.WisperException;
 
 import java.lang.reflect.Method;
-import java.rmi.server.RemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +25,7 @@ public class EventRouter extends Router
     }
 
     @Override
-    public void routeMessage(AbstractMessage message, String path) throws WisperException
+    public void routeMessage(CallMessage message, String path) throws WisperException
     {
         if (message instanceof Notification)
         {

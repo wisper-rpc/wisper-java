@@ -108,7 +108,8 @@ public class GatewayRouter extends Router implements GatewayCallback
         {
             if (message instanceof CallMessage)
             {
-                routeMessage(message, ((CallMessage) message).getMethodName());
+                CallMessage call = (CallMessage) message;
+                routeMessage(call, call.getMethodName());
             }
         }
         catch (WisperException wisperException)

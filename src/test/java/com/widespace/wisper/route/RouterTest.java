@@ -1,9 +1,6 @@
 package com.widespace.wisper.route;
 
-import com.widespace.wisper.messagetype.AbstractMessage;
-import com.widespace.wisper.messagetype.Notification;
-import com.widespace.wisper.messagetype.WisperEventBuilder;
-import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -12,11 +9,11 @@ import org.junit.Test;
 
 import java.util.HashMap;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 public class RouterTest
@@ -208,7 +205,7 @@ public class RouterTest
 
         router.routeMessage(notificaton, notificaton.getMethodName());
 
-        verify(router_y).routeMessage((AbstractMessage) anyObject(), anyString());
+        verify(router_y).routeMessage((CallMessage) anyObject(), anyString());
     }
 
 

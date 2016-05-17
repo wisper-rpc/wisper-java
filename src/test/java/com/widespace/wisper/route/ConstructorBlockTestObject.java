@@ -5,7 +5,7 @@ import com.widespace.wisper.classrepresentation.CallBlock;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.classrepresentation.WisperMethod;
-import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.CallMessage;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.utils.ClassUtils;
@@ -24,7 +24,7 @@ public class ConstructorBlockTestObject implements Wisper
         classModel.addStaticMethod(new WisperMethod("~", new CallBlock()
         {
             @Override
-            public void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, AbstractMessage message) throws Exception
+            public void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, CallMessage message) throws Exception
             {
                 // 1. Remember, default constructor ConstructorBlockTestObject() is always called first. That's because we need the instance for block.
                 // In Objective-C they can just do [ClassName alloc] and get an instance without running the initializer, whereas in Java we have to run

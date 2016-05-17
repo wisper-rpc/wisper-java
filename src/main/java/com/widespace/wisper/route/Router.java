@@ -1,9 +1,9 @@
 package com.widespace.wisper.route;
 
 import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.CallMessage;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +39,7 @@ public class Router
      * @param path    the path the message is supposed to be routed to.
      * @throws WisperException when no route is found for the given path.
      */
-    public void routeMessage(AbstractMessage message, String path) throws WisperException
+    public void routeMessage(CallMessage message, String path) throws WisperException
     {
         if (path == null)
             throw new WisperException(Error.ROUTE_NOT_FOUND, null, "Route was null on message : " + message.toJsonString());
@@ -74,7 +74,7 @@ public class Router
     }
 
 
-    private void checkPathExists(AbstractMessage message, String path)
+    private void checkPathExists(CallMessage message, String path)
     {
         if (routes == null || path == null || !routes.containsKey(path))
         {

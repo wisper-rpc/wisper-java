@@ -1,6 +1,6 @@
 package com.widespace.wisper.route;
 
-import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.CallMessage;
 import com.widespace.wisper.messagetype.error.WisperException;
 
 /**
@@ -11,5 +11,5 @@ import com.widespace.wisper.messagetype.error.WisperException;
 public abstract class FunctionRouter extends Router
 {
     @Override
-    public abstract void routeMessage(AbstractMessage message, String path) throws WisperException;
+    public abstract void routeMessage(CallMessage message, String path) throws WisperException;
 }

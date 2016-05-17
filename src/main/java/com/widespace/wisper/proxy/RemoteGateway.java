@@ -2,26 +2,12 @@ package com.widespace.wisper.proxy;
 
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.base.WisperObject;
-import com.widespace.wisper.classrepresentation.CallBlock;
-import com.widespace.wisper.classrepresentation.WisperClassModel;
-import com.widespace.wisper.classrepresentation.WisperInstanceModel;
-import com.widespace.wisper.classrepresentation.WisperMethod;
-import com.widespace.wisper.classrepresentation.WisperParameterType;
+import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.controller.ResponseBlock;
-import com.widespace.wisper.messagetype.AbstractMessage;
-import com.widespace.wisper.messagetype.MessageFactory;
-import com.widespace.wisper.messagetype.Notification;
-import com.widespace.wisper.messagetype.Request;
-import com.widespace.wisper.messagetype.Response;
+import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.messagetype.error.WisperException;
-import com.widespace.wisper.route.Channel;
-import com.widespace.wisper.route.ClassRouter;
-import com.widespace.wisper.route.FunctionRouter;
-import com.widespace.wisper.route.GatewayRouter;
-import com.widespace.wisper.route.MessageParser;
-import com.widespace.wisper.route.Router;
-
+import com.widespace.wisper.route.*;
 import org.json.JSONObject;
 
 
@@ -118,7 +104,7 @@ public class RemoteGateway extends WisperObject
     private static class SendMessageCallBlock implements CallBlock
     {
         @Override
-        public void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, final AbstractMessage message) throws Exception
+        public void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, final CallMessage message) throws Exception
         {
             if (message instanceof Request)
             {
@@ -195,7 +181,7 @@ public class RemoteGateway extends WisperObject
         }
 
         @Override
-        public void routeMessage(final AbstractMessage message, String path) throws WisperException
+        public void routeMessage(final CallMessage message, String path) throws WisperException
         {
             if (proxiedRequestTypeMessage(message))
             {
