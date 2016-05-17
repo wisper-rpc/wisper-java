@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,25 +109,47 @@ public class AbstractMessageTest
         assertThat(deserialize(new JSONArray(array)), is(equalTo((Object) array)));
 
         assertThat(deserialize(new JSONArray(asList(1, 2))), is(equalTo((Object) array)));
+
+        assertThat((Object[]) deserialize(new JSONArray(Collections.singletonList(new JSONArray()))), is(equalTo(new Object[]{new Object[0]})));
     }
 
     @Test
     public void testDeserializeMaps()
     {
+        final Object[] array = {41, "nick"};
+
+        final Map<String, Object> internalMap = new HashMap<String, Object>()
+        {{
+            put("name", "Oskar");
+        }};
+
         Map<String, Object> map = new HashMap<String, Object>()
         {
             {
                 put("foo", "charlie");
-                put("bar", 13);
+                put("baz", internalMap);
             }
         };
 
+        JSONObject object = new JSONObject()
+        {
+            {
+                put("foo", "charlie");
+                put("bar", new JSONArray(array));
+                put("baz", new JSONObject(internalMap));
+            }
+        };
 
-        JSONObject object = new JSONObject(map);
-
-        Object deserialized = deserialize(object);
+        Map<String, Object> deserialized = (Map<String, Object>) deserialize(object);
 
         assertThat(deserialized, is(instanceOf(Map.class)));
+
+        // TODO: do we really want to deal with these annoying arrays?
+        // Check the array element separately, since array.equals(other) is the same as array == other.
+        // Then remove the array for the following comparison.
+        assertThat((Object[]) deserialized.get("bar"), is(equalTo(array)));
+        deserialized.remove("bar");
+
         assertThat(deserialized, is(equalTo((Object) map)));
     }
 
