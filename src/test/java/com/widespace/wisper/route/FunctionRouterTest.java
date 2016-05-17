@@ -1,6 +1,5 @@
 package com.widespace.wisper.route;
 
-import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.CallMessage;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.error.Error;

@@ -56,7 +56,7 @@ public class WisperInstanceDestructorTest
     {
         String mapName = "whatever.whatever.thing";
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance(mapName);
-        Router router = mock(Router.class);
+        Router router = new Router();
         WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router.getRootRoute());
 
         Request destructReq = destructRequest(wisperInstance.getInstanceIdentifier());
@@ -73,7 +73,7 @@ public class WisperInstanceDestructorTest
     public void givenWrongInstance_WisperExceptionIsThrown() throws Exception
     {
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance("whatever.map.name");
-        Router router = mock(Router.class);
+        Router router = new Router();
         WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router);
 
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest("fakeId"), router);
@@ -84,7 +84,7 @@ public class WisperInstanceDestructorTest
     public void destructRemovesTheInstanceFromRegistry() throws Exception
     {
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance("whatever.map.name");
-        Router router = mock(Router.class);
+        Router router = new Router();
         WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router.getRootRoute());
 
         WisperInstanceDestructor destructor = new WisperInstanceDestructor(destructRequest(wisperInstance.getInstanceIdentifier()), router);
@@ -114,7 +114,7 @@ public class WisperInstanceDestructorTest
     public void destructRespondsBackOnRequest() throws Exception
     {
         WisperInstanceModel wisperInstance = createInstanceAndReturnWisperInstance("whatever.map.name");
-        Router router = mock(Router.class);
+        Router router = new Router();
         WisperInstanceRegistry.sharedInstance().addInstance(wisperInstance, router.getRootRoute());
         Request request = destructRequest(wisperInstance.getInstanceIdentifier());
         final boolean[] callblockCalled = {false};

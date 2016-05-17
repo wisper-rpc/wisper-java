@@ -84,7 +84,7 @@ public class WisperInstanceRegistryTest
     @Test
     public void givenExistingInstance_findsTheWisperInstanceIfRegistered() throws Exception
     {
-        Router router = mock(Router.class);
+        Router router = new Router();
         RoutesTestObject actualInstance = new RoutesTestObject();
         WisperInstanceModel instanceModel = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), actualInstance, "ABCD-1");
         instanceRegistry.addInstance(instanceModel, router.getRootRoute());
