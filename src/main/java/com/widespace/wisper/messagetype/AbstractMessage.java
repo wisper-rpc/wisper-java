@@ -210,11 +210,8 @@ public abstract class AbstractMessage
 
             return arrayList.toArray(new Object[arrayList.size()]);
         }
-        else if ((result instanceof String) || result.getClass().isPrimitive() || (result instanceof Number))
-        {
-            return result;
-        }
-        else if (result instanceof JSONObject)
+
+        if (result instanceof JSONObject)
         {
             JSONObject json = (JSONObject) result;
             HashMap<String, Object> map = new HashMap<String, Object>();
@@ -229,11 +226,7 @@ public abstract class AbstractMessage
 
             //TODO: Handle RPCError ??
         }
-        else
-        {
-            return result;
-        }
 
-
+        return result;
     }
 }
