@@ -1,18 +1,13 @@
 package com.widespace.wisper.route;
 
 import com.widespace.wisper.base.Wisper;
-import com.widespace.wisper.classrepresentation.WisperClassModel;
-import com.widespace.wisper.classrepresentation.WisperInstanceModel;
-import com.widespace.wisper.classrepresentation.WisperParameterType;
-import com.widespace.wisper.classrepresentation.WisperProperty;
-import com.widespace.wisper.classrepresentation.WisperPropertyAccess;
+import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
 import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
 import com.widespace.wisper.utils.RPCUtilities;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -170,14 +165,18 @@ public class WisperEventHandler
         // Instance method
         Class[] parameterTypes = RPCUtilities.convertRpcParameterTypeToClassType(property.getSetterMethodParameterType());
 
+        // Extract the value for use when invoking the setter method
+        Object value = eventMessage.getValue();
+
         // If property is pointing to an RPC instance, replace the pointer to the actual value
         if (property.getSetterMethodParameterType() == WisperParameterType.INSTANCE)
         {
-            WisperInstanceModel paramInstanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId((String) eventMessage.getValue());
+            WisperInstanceModel paramInstanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId((String) value);
             if (paramInstanceModel != null)
             {
-                eventMessage.setValue(paramInstanceModel.getInstance());
-                parameterTypes[0] = paramInstanceModel.getInstance().getClass();
+                // Replace the value, if we find an instance for the given reference
+                value = paramInstanceModel.getInstance();
+                parameterTypes[0] = value.getClass();
             }
         }
 
@@ -185,7 +184,7 @@ public class WisperEventHandler
         {
             Method method = getMethod(instance.getClass(), setterMethodName, parameterTypes);
             method.setAccessible(true);
-            method.invoke(instance, eventMessage.getValue());
+            method.invoke(instance, value);
 
         } catch (NoSuchMethodException e)
         {
