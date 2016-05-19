@@ -5,12 +5,11 @@ import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.classrepresentation.WisperMethod;
 import com.widespace.wisper.classrepresentation.WisperParameterType;
-import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.CallMessage;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -24,9 +23,9 @@ public class WisperMethodCaller
 {
     private ClassRouter router;
     private WisperClassModel classModel;
-    private AbstractMessage message;
+    private CallMessage message;
 
-    public WisperMethodCaller(@NotNull ClassRouter router, @NotNull WisperClassModel classModel, @NotNull AbstractMessage message) throws WisperException
+    public WisperMethodCaller(@NotNull ClassRouter router, @NotNull WisperClassModel classModel, @NotNull CallMessage message) throws WisperException
     {
         this.router = router;
         this.classModel = classModel;

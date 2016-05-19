@@ -1,6 +1,6 @@
 package com.widespace.wisper.route;
 
-import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.CallMessage;
 import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
@@ -23,7 +23,7 @@ public class FunctionRouterTest
         router.exposeRoute("a.b.c", new FunctionRouter()
         {
             @Override
-            public void routeMessage(AbstractMessage message, String path) throws WisperException
+            public void routeMessage(CallMessage message, String path) throws WisperException
             {
                 assertThat(message, is(notNullValue()));
                 assertThat(message, is(instanceOf(Request.class)));
@@ -45,7 +45,7 @@ public class FunctionRouterTest
         router.exposeRoute("a.b.c", new FunctionRouter()
         {
             @Override
-            public void routeMessage(AbstractMessage message, String path) throws WisperException
+            public void routeMessage(CallMessage message, String path) throws WisperException
             {
                 throw sample_exception;
             }

@@ -5,9 +5,8 @@ import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.controller.Gateway;
 import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.CallMessage;
 import com.widespace.wisper.messagetype.Event;
-import com.widespace.wisper.messagetype.Notification;
-import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.messagetype.error.WisperException;
 import com.widespace.wisper.messagetype.error.WisperExceptionHandler;
 
@@ -94,21 +93,26 @@ public class GatewayRouter extends Router implements GatewayCallback
     public void gatewayReceivedMessage(AbstractMessage message)
     {
         if (gatewayCallback != null)
+        {
             gatewayCallback.gatewayReceivedMessage(message);
+        }
 
         String methodName = MessageParser.getFullMethodName(message);
 
         if (methodName == null || methodName.equals(".handshake"))
+        {
             return;
+        }
 
         try
         {
-            if (message instanceof Notification)
-                routeMessage(message, ((Notification) message).getMethodName());
-
-            else if (message instanceof Request)
-                routeMessage(message, ((Request) message).getMethodName());
-        } catch (WisperException wisperException)
+            if (message instanceof CallMessage)
+            {
+                CallMessage call = (CallMessage) message;
+                routeMessage(call, call.getMethodName());
+            }
+        }
+        catch (WisperException wisperException)
         {
             exceptionHandler.handle(wisperException, message);
         }
@@ -118,9 +122,9 @@ public class GatewayRouter extends Router implements GatewayCallback
     public void gatewayGeneratedMessage(String message)
     {
         if (gatewayCallback != null)
+        {
             gatewayCallback.gatewayGeneratedMessage(message);
+        }
         // no-op
     }
-
-
 }

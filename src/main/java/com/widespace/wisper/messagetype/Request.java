@@ -13,22 +13,15 @@ import java.util.Arrays;
  * Request object that you can either use yourself to request the other RPC endpoint or you will get from the RPC controller when the other endpoint is asking you for it.
  * The WSRPCRequest is a subclass of AbstractMessage.
  *
- * @see Notification
+ * @see CallMessage
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class Request extends AbstractMessage
+public class Request extends CallMessage
 {
     private ResponseBlock responseBlock;
-
     private String identifier;
 
-    @NotNull
-    private final String method;
-
-    @NotNull
-    private final Object[] params;
-
-    public Request(String method)
+    public Request(@NotNull String method)
     {
         this(method, EMPTY_PARAMS);
     }
@@ -39,11 +32,9 @@ public class Request extends AbstractMessage
      * @param method
      * @param params
      */
-    public Request(String method, Object[] params)
+    public Request(@NotNull String method, @NotNull Object[] params)
     {
-
-        this.method = method;
-        this.params = params;
+        super(method, params);
     }
 
     public Request(@NotNull JSONObject json) throws JSONException
@@ -103,18 +94,6 @@ public class Request extends AbstractMessage
     public void setIdentifier(String identifier)
     {
         this.identifier = identifier;
-    }
-
-    public String getMethodName()
-    {
-        return method;
-    }
-
-    public
-    @NotNull
-    Object[] getParams()
-    {
-        return params;
     }
 
     /**

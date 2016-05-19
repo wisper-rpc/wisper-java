@@ -13,6 +13,7 @@ import java.util.ArrayList;
  */
 public class Event extends Notification
 {
+    private final String methodName;
     private String instanceIdentifier;
     private String name;
     private Object value;
@@ -21,6 +22,7 @@ public class Event extends Notification
     public Event(String methodName, Object... params)
     {
         super(methodName, params);
+        this.methodName = methodName.replace(":!", "").replace("!", "");
 
         if (params.length == 2)
         {
@@ -44,7 +46,7 @@ public class Event extends Notification
             case STATIC_EVENT:
             {
                 this.instanceIdentifier = null;
-                if (notificationParams != null && notificationParams.length > 1)
+                if (notificationParams.length > 1)
                 {
                     this.name = (String) notificationParams[0];
                     this.value = notificationParams[1];

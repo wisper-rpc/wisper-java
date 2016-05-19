@@ -1,6 +1,7 @@
 package com.widespace.wisper.messagetype;
 
 import com.widespace.wisper.base.Constants;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -9,56 +10,40 @@ import java.util.Arrays;
 /**
  * Created by Ehssan Hoorvash on 22/05/14.
  */
-public class Notification extends AbstractMessage
+public class Notification extends CallMessage
 {
-    protected String methodName;
-    protected Object[] params;
-
-    public Notification(String methodName)
+    public Notification(@NotNull String methodName)
     {
-        this(methodName, EMPTY_PARAMS);
+        super(methodName);
     }
 
     public Notification(String methodName, Object[] params)
     {
-        this.methodName = methodName;
-        this.params = params;
+        super(methodName, params);
     }
 
     public Notification(JSONObject jsonObject) throws JSONException
     {
-        if (jsonObject == null)
-        {
-            return;
-        }
-
-        if (jsonObject.has(Constants.METHOD))
-        {
-            this.methodName = jsonObject.getString(Constants.METHOD);
-        }
-
-        if (jsonObject.has(Constants.PARAMS))
-        {
-            params = (Object[]) deserialize(jsonObject.getJSONArray(Constants.PARAMS));
-        }
+        super(jsonObject.getString(Constants.METHOD), (Object[]) deserialize(jsonObject.getJSONArray(Constants.PARAMS)));
     }
 
     @Override
     public boolean equals(Object o)
     {
-        if (!(o instanceof Notification)) {
+        if (!(o instanceof Notification))
+        {
             return false;
         }
 
         Notification other = (Notification) o;
 
-        return other.methodName.equals(methodName) && Arrays.deepEquals(other.params, params);
+        return other.method.equals(method) && Arrays.deepEquals(other.params, params);
     }
 
     @Override
     public int hashCode()
     {
-        return methodName.hashCode() ^ Arrays.hashCode(params);
+        return method.hashCode() ^ Arrays.hashCode(params);
     }
 
 
@@ -68,23 +53,15 @@ public class Notification extends AbstractMessage
         return RPCMessageType.NOTIFICATION;
     }
 
-    public String getMethodName()
-    {
-        return methodName;
-    }
-
-    public Object[] getParams()
-    {
-        return params;
-    }
-
     @Override
     public JSONObject toJson() throws JSONException
     {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(Constants.METHOD, methodName == null ? "" : methodName);
-        jsonObject.put(Constants.PARAMS, getParams() == null ? "" : serialize(getParams()));
-
-        return jsonObject;
+        return new JSONObject()
+        {
+            {
+                put(Constants.METHOD, method);
+                put(Constants.PARAMS, serialize(params));
+            }
+        };
     }
 }

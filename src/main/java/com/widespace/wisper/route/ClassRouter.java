@@ -6,14 +6,10 @@ import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.controller.Gateway;
-import com.widespace.wisper.messagetype.AbstractMessage;
-import com.widespace.wisper.messagetype.Event;
-import com.widespace.wisper.messagetype.Notification;
-import com.widespace.wisper.messagetype.WisperEventBuilder;
-import com.widespace.wisper.messagetype.error.*;
+import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.Error;
+import com.widespace.wisper.messagetype.error.WisperException;
 import com.widespace.wisper.utils.ClassUtils;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -40,7 +36,7 @@ public class ClassRouter extends Router
 
 
     @Override
-    public void routeMessage(AbstractMessage message, String path) throws WisperException
+    public void routeMessage(CallMessage message, String path) throws WisperException
     {
         switch (MessageParser.getCallType(message))
         {
@@ -62,10 +58,12 @@ public class ClassRouter extends Router
             case INSTANCE_EVENT:
                 handleInstanceEvent(message);
                 break;
+            /* TODO: What's this all about?
             case UNKNOWN:
             default:
                 super.routeMessage(message, path);
                 break;
+            */
         }
     }
 
@@ -103,12 +101,12 @@ public class ClassRouter extends Router
     //region Method Calls
     //=====================================================================================
 
-    private void callStaticMethod(AbstractMessage message) throws WisperException
+    private void callStaticMethod(CallMessage message) throws WisperException
     {
         new WisperMethodCaller(this, wisperClassModel, message).call();
     }
 
-    private void callInstancecMethod(AbstractMessage message) throws WisperException
+    private void callInstancecMethod(CallMessage message) throws WisperException
     {
         new WisperMethodCaller(this, wisperClassModel, message).call();
     }

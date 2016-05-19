@@ -8,6 +8,7 @@ import com.widespace.wisper.classrepresentation.WisperProperty;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
 import com.widespace.wisper.route.WisperInstanceRegistry;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -32,7 +33,7 @@ public class ClassUtils
         objectTobuiltInMap.put(Void.class, void.class);
     }
 
-    public static boolean isPrimitive(Class clazz)
+    public static boolean isPrimitive(@NotNull Class clazz)
     {
         return (clazz.isPrimitive() || objectTobuiltInMap.containsKey(clazz) && objectTobuiltInMap.get(clazz).isPrimitive());
     }
@@ -49,6 +50,16 @@ public class ClassUtils
         return classes;
     }
 
+    /**
+     * Returns a Map of properties of a given instance where properties are both Wisper Properties and are also initialized during
+     * object construction.
+     *
+     * @param wisperInstanceModel wisper instance whose properties to be looked up
+     * @param classModel          class model of the same instance.
+     * @return a map of initialized properties.
+     * @throws WisperException An exception might be thrown in cases where the properties are poorly defined (no getter or setter for the properties), or where the
+     *                         property is defined but not found.
+     */
     public static HashMap<String, Object> fetchInitializedProperties(WisperInstanceModel wisperInstanceModel, WisperClassModel classModel) throws WisperException
     {
         HashMap<String, Object> initializedProperties = new HashMap<String, Object>();
