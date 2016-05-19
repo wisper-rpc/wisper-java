@@ -60,7 +60,7 @@ public class Notification extends CallMessage
         {
             {
                 put(Constants.METHOD, method);
-                put(Constants.PARAMS, params);
+                put(Constants.PARAMS, serialize(params));
             }
         };
     }
