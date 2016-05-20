@@ -40,6 +40,7 @@ public class WisperInstanceDestructor
 
         instanceModel.getInstance().destruct();
 
+        // TODO: should this be kept?
         //sendDestroyEvent(instanceModel);
 
         respondToDestructRequest(wisperInstanceIdentifier);
@@ -47,11 +48,11 @@ public class WisperInstanceDestructor
         WisperInstanceRegistry.sharedInstance().removeInstance(wisperInstanceIdentifier);
     }
 
-    private void sendDestroyEvent(WisperInstanceModel instanceModel)
-    {
-        Event destroyEvent = new WisperEventBuilder().withInstanceIdentifier(instanceModel.getInstanceIdentifier()).withMethodName("~").withValue(null).buildInstanceEvent();
-        router.reverseRoute(destroyEvent, null);
-    }
+//    private void sendDestroyEvent(WisperInstanceModel instanceModel)
+//    {
+//        String identifier = instanceModel.getInstanceIdentifier();
+//        router.reverseRoute(new Event(":!", identifier, "~"), null);
+//    }
 
     private void respondToDestructRequest(String wisperInstanceIdentifier)
     {
