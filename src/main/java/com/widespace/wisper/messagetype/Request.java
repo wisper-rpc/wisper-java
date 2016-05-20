@@ -3,7 +3,6 @@ package com.widespace.wisper.messagetype;
 import com.widespace.wisper.base.Constants;
 import com.widespace.wisper.controller.ResponseBlock;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -121,19 +120,12 @@ public class Request extends CallMessage
     }
 
     @Override
-    public int hashCode()
-    {
-        return method.hashCode() ^ Arrays.hashCode(params);
-    }
-
-    @Override
     public JSONObject toJson() throws JSONException
     {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(Constants.ID, identifier == null ? "" : identifier);
-        jsonObject.put(Constants.METHOD, method);
-        jsonObject.put(Constants.PARAMS, (JSONArray) serialize(params));
+        final JSONObject object = super.toJson();
 
-        return jsonObject;
+        object.put(Constants.ID, identifier);
+
+        return object;
     }
 }
