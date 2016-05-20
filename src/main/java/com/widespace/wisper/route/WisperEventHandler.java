@@ -2,9 +2,7 @@ package com.widespace.wisper.route;
 
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
-import com.widespace.wisper.messagetype.AbstractMessage;
 import com.widespace.wisper.messagetype.Event;
-import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
 import com.widespace.wisper.utils.RPCUtilities;
@@ -14,43 +12,28 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static com.widespace.wisper.messagetype.error.Error.UNEXPECTED_TYPE_ERROR;
-
 public class WisperEventHandler
 {
-    private Router router;
     private WisperClassModel wisperClassModel;
-    private AbstractMessage message;
+    private Event event;
 
-    public WisperEventHandler(@NotNull Router router, @NotNull WisperClassModel wisperClassModel, @NotNull AbstractMessage message)
+    public WisperEventHandler(@NotNull WisperClassModel wisperClassModel, @NotNull Event event)
     {
-        this.router = router;
         this.wisperClassModel = wisperClassModel;
-        this.message = message;
+        this.event = event;
     }
 
     public void handle() throws WisperException
     {
-        WisperCallType callType = MessageParser.getCallType(message);
-        if (! ((message instanceof Notification) && (callType == WisperCallType.STATIC_EVENT || callType == WisperCallType.INSTANCE_EVENT) ))
-            throw new WisperException(UNEXPECTED_TYPE_ERROR, null, "Remote instance event handler was called with a non-Notification/Event message type.");
+        WisperCallType callType = MessageParser.getCallType(event);
 
-        Event event = new Event((Notification)message);
-        message = null;
-        handle(event, callType);
-    }
-
-    private void handle(Event eventMessage, WisperCallType callType)
-    {
         switch (callType)
         {
             case STATIC_EVENT:
-                handleStaticEvent(eventMessage);
+                handleStaticEvent();
                 break;
             case INSTANCE_EVENT:
-                handleInstacneEvent(eventMessage);
-                break;
-            default:
+                handleInstanceEvent(event);
                 break;
         }
     }
@@ -58,18 +41,18 @@ public class WisperEventHandler
     //------------------------------------------------------------------------
     //region Static Events
     //------------------------------------------------------------------------
-    private void handleStaticEvent(Event eventMessage)
+    private void handleStaticEvent()
     {
         try
         {
-            handledStaticPropertySet(eventMessage);
+            handledStaticPropertySet(event);
         } catch (WisperException ex)
         {
             //Swallow
             System.out.println("WisperEventHandler : Wisper Exception swallowed : " + ex.toString());
         } finally
         {
-            callStaticEventHandlerOnClass(eventMessage);
+            callStaticEventHandlerOnClass(event);
         }
     }
 
@@ -99,7 +82,7 @@ public class WisperEventHandler
         {
             if (proprtyName == null)
             {
-                String errorMessage = "Property name or value does not exist in the event notification. " + this.message.toJsonString();
+                String errorMessage = "Property name or value does not exist in the event notification. " + this.event.toJsonString();
                 throw new WisperException(Error.FORMAT_ERROR, npe, errorMessage);
             }
         }
@@ -122,13 +105,13 @@ public class WisperEventHandler
     //------------------------------------------------------------------------
     //region Instance Events
     //------------------------------------------------------------------------
-    private void handleInstacneEvent(Event eventMessage)
+    private void handleInstanceEvent(Event eventMessage)
     {
         String instanceIdentifier = eventMessage.getInstanceIdentifier();
         WisperInstanceModel wisperInstanceModel = WisperInstanceRegistry.sharedInstance().findInstanceWithId(instanceIdentifier);
         if (wisperInstanceModel == null)
         {
-            throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "Instance with ID " + instanceIdentifier + "not found in instance registry. Make sure the instance is registered and it comes with the message.");
+            throw new WisperException(Error.WISPER_INSTANCE_INVALID, null, "Instance with ID " + instanceIdentifier + "not found in instance registry. Make sure the instance is registered and it comes with the event.");
         }
 
         try

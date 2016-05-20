@@ -53,10 +53,10 @@ public class ClassRouter extends Router
                 callInstancecMethod(message);
                 break;
             case STATIC_EVENT:
-                handleStaticEvent(message);
+                handleStaticEvent(new Event((Notification) message));
                 break;
             case INSTANCE_EVENT:
-                handleInstanceEvent(message);
+                handleInstanceEvent(new Event((Notification) message));
                 break;
             /* TODO: What's this all about?
             case UNKNOWN:
@@ -70,7 +70,7 @@ public class ClassRouter extends Router
     //=====================================================================================
     //region Construct and Destruct
     //=====================================================================================
-    private void createInstance(AbstractMessage message) throws WisperException
+    private void createInstance(CallMessage message) throws WisperException
     {
         new WisperInstanceConstructor(this, wisperClassModel, message).create(new RemoteInstanceCreatorCallback()
         {
@@ -87,7 +87,7 @@ public class ClassRouter extends Router
         });
     }
 
-    private void destroyInstance(AbstractMessage message) throws WisperException
+    private void destroyInstance(CallMessage message) throws WisperException
     {
         new WisperInstanceDestructor(message, this).destroy();
     }
@@ -114,14 +114,14 @@ public class ClassRouter extends Router
     //=====================================================================================
     //region Events
     //=====================================================================================
-    private void handleStaticEvent(AbstractMessage message) throws WisperException
+    private void handleStaticEvent(Event event) throws WisperException
     {
-        new WisperEventHandler(this, wisperClassModel, message).handle();
+        new WisperEventHandler(wisperClassModel, event).handle();
     }
 
-    private void handleInstanceEvent(AbstractMessage message) throws WisperException
+    private void handleInstanceEvent(Event event) throws WisperException
     {
-        new WisperEventHandler(this, wisperClassModel, message).handle();
+        new WisperEventHandler(wisperClassModel, event).handle();
     }
 
     //=====================================================================================
