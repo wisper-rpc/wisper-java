@@ -39,7 +39,8 @@ public class ClassRouterTest
     public void givenClass_setsClassModel() throws Exception
     {
         assertThat(classRouter.getWisperClassModel(), is(notNullValue()));
-        //assertThat(classRouter.getWisperClassModel(), is(equalTo(RoutesTestObject.registerRpcClass()))); needs equals() and hashCode() on classModel
+        // TODO: needs equals() and hashCode() on classModel
+        //assertThat(classRouter.getWisperClassModel(), is(equalTo(RoutesTestObject.registerRpcClass())));
     }
 
     @Test
@@ -184,7 +185,8 @@ public class ClassRouterTest
         RoutesTestObject anInstance = new RoutesTestObject();
         WisperInstanceModel instanceModel1 = new WisperInstanceModel(RoutesTestObject.registerRpcClass(), anInstance, "ABCD-1");
         WisperInstanceRegistry.sharedInstance().addInstance(instanceModel1, classRouter);
-        Event staticEventMessage = new WisperEventBuilder().withName("nonExistingPropertyName").withMethodName("something.somethingElse").withInstanceIdentifier(instanceModel1.getInstanceIdentifier()).buildInstanceEvent();
+
+        Event staticEventMessage = new Event("something.somethingElse:!", instanceModel1.getInstanceIdentifier(), "nonExistingPropertyName", null);
 
         assertThat(anInstance.isInstanceEventReceived(), is(false));
         classRouter.routeMessage(staticEventMessage, ROUTE_PATH);

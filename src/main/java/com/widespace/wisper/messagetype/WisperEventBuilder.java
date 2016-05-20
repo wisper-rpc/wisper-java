@@ -17,13 +17,13 @@ public class WisperEventBuilder
 
     public Event buildStaticEvent()
     {
-        methodName = (methodName == null) ? "!" : methodName+"!";
-        return new Event(methodName, instanceIdentifier, name, value);
+        methodName = (methodName == null) ? "!" : methodName + "!";
+        return new Event(methodName, name, value);
     }
 
     public Event buildInstanceEvent()
     {
-        methodName = (methodName == null) ? ":!" : methodName+":!";
+        methodName = (methodName == null) ? ":!" : methodName + ":!";
         return new Event(methodName, instanceIdentifier, name, value);
     }
 
@@ -47,7 +47,7 @@ public class WisperEventBuilder
 
     public WisperEventBuilder withValue(Object value)
     {
-        if (value!=null && value instanceof Map)
+        if (value != null && value instanceof Map)
         {
             this.value = new JSONObject((Map) value);
         }

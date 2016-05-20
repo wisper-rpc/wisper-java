@@ -17,12 +17,12 @@ public class Notification extends CallMessage
         super(methodName);
     }
 
-    public Notification(String methodName, Object[] params)
+    public Notification(@NotNull String methodName, @NotNull Object[] params)
     {
         super(methodName, params);
     }
 
-    public Notification(JSONObject jsonObject) throws JSONException
+    public Notification(@NotNull JSONObject jsonObject) throws JSONException
     {
         super(jsonObject.getString(Constants.METHOD), (Object[]) deserialize(jsonObject.getJSONArray(Constants.PARAMS)));
     }
