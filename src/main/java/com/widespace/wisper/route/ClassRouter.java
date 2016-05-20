@@ -136,7 +136,8 @@ public class ClassRouter extends Router
         HashMap<String, Object> idAndProps = new HashMap<String, Object>();
         idAndProps.put("id", instanceModel.getInstanceIdentifier());
         idAndProps.put("props", ClassUtils.fetchInitializedProperties(instanceModel, wisperClassModel));
-        Event event = new WisperEventBuilder().withName("~").withValue(idAndProps).buildStaticEvent();
+
+        Event event = new Event("!", "~", idAndProps);
 
         reverseRoute(event, null);
 
