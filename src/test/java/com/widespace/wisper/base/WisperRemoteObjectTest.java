@@ -5,7 +5,6 @@ import com.widespace.wisper.controller.GatewayCallback;
 import com.widespace.wisper.messagetype.*;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.route.EventRouter;
-import com.widespace.wisper.route.FunctionRouter;
 import com.widespace.wisper.route.GatewayRouter;
 import com.widespace.wisper.route.Router;
 import org.jetbrains.annotations.Nullable;
@@ -16,8 +15,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 public class WisperRemoteObjectTest
 {
@@ -263,7 +261,7 @@ public class WisperRemoteObjectTest
         StubbedGatewayRouter stubbedGatewayRouter = new StubbedGatewayRouter();
         MyWisperRemoteObject remoteObject = new MyWisperRemoteObject("a.b.c",stubbedGatewayRouter);
         remoteObject.setInstanceIdentifier(instanceId);
-        Event instanceEvent = new WisperEventBuilder().withInstanceIdentifier(instanceId).withMethodName("a.b.c").buildInstanceEvent();
+        Event instanceEvent = new Event("a.b.c:!", instanceId, "name", "value");
         stubbedGatewayRouter.routeMessage(instanceEvent,"a.b.c");
 
         assertThat(remoteObject.recievedEvent, is(notNullValue()));

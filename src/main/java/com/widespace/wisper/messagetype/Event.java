@@ -1,6 +1,7 @@
 package com.widespace.wisper.messagetype;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 
 /**
@@ -10,21 +11,56 @@ import org.jetbrains.annotations.NotNull;
  */
 public class Event extends Notification
 {
+    @Nullable
     private final String instanceIdentifier;
 
     @NotNull
     private final String name;
 
+    @Nullable
     private final Object value;
 
+    public Event(@NotNull String methodName, @NotNull String name, @Nullable Object value)
+    {
+        super(methodName, new Object[]{name, value});
 
-    public Event(String methodName, @NotNull Object... params)
+        if (!methodName.endsWith("!"))
+        {
+            throw new IllegalArgumentException("Event method names must end with '!'.");
+        }
+
+        if (methodName.endsWith(":!"))
+        {
+            throw new IllegalArgumentException("Static Event method names mustn't end with ':!'.");
+        }
+
+        this.instanceIdentifier = null;
+        this.name = name;
+        this.value = value;
+    }
+
+    public Event(@NotNull String methodName, @NotNull String id, @NotNull String name, @Nullable Object value)
+    {
+        super(methodName, new Object[]{id, name, value});
+
+        if (!methodName.endsWith(":!"))
+        {
+            throw new IllegalArgumentException("Instance Event method names must end with ':!'.");
+        }
+
+        this.instanceIdentifier = id;
+        this.name = name;
+        this.value = value;
+    }
+
+    public Event(@NotNull String methodName, @NotNull Object[] params)
     {
         super(methodName, params);
 
         boolean staticType = methodName.endsWith("!");
         boolean instanceType = staticType && methodName.endsWith(":!");
 
+        // Check for ':!' first, so we don't attempt process a '!' event by mistake.
         if (instanceType)
         {
             if (params.length != 3)
@@ -53,7 +89,7 @@ public class Event extends Notification
         }
     }
 
-    public Event(Notification notification)
+    public Event(@NotNull Notification notification)
     {
         this(notification.getMethodName(), notification.getParams());
     }

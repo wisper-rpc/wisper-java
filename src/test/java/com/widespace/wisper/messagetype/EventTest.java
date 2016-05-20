@@ -11,16 +11,45 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class EventTest
 {
+    final Object[] NO_PARAMS = new Object[0];
+
     @Test(expected = IllegalArgumentException.class)
-    public void createWithOneParameter()
+    public void createStaticWithMissingExclamation()
     {
-        new Event("foo!", 1);
+        // method name missing '!'
+        new Event("foo", "foo", 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void createWithFourParameters()
+    public void createStaticWithInstanceSignature()
     {
-        new Event("foo!", 1, 2, 3, 4);
+        // the method name should be "foo!"
+        new Event("foo:!", "foo", 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createInstanceWithMissingColon()
+    {
+        // the method name should be "foo:!"
+        new Event("foo!", "id", "foo", 4);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createInstanceWithWrongNumberOfParams()
+    {
+        new Event("foo:!", NO_PARAMS);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createStaticWithWrongNumberOfParams()
+    {
+        new Event("foo!", NO_PARAMS);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createWithBadEventName()
+    {
+        new Event("foo", NO_PARAMS);
     }
 
     @Test
@@ -60,12 +89,6 @@ public class EventTest
         assertThat((Integer) e.getValue(), is(1337));
     }
 
-    @Test(expected = ClassCastException.class)
-    public void createWithTwoParameterBadTypes()
-    {
-        new Event("foo!", 13, 37);
-    }
-
     @Test
     public void createWithThreeParameters()
     {
@@ -82,17 +105,4 @@ public class EventTest
         assertThat(e.getName(), is(equalTo("eventName")));
         assertThat((Integer) e.getValue(), is(1337));
     }
-
-    @Test(expected = ClassCastException.class)
-    public void createWithThreeParameterBadTypes1()
-    {
-        new Event("foo:!", "foo", 13, 37);
-    }
-
-    @Test(expected = ClassCastException.class)
-    public void createWithThreeParameterBadTypes2()
-    {
-        new Event("foo:!", 13, "foo", 37);
-    }
-
 }
