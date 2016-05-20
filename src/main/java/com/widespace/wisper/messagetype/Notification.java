@@ -40,28 +40,10 @@ public class Notification extends CallMessage
         return other.method.equals(method) && Arrays.deepEquals(other.params, params);
     }
 
-    @Override
-    public int hashCode()
-    {
-        return method.hashCode() ^ Arrays.hashCode(params);
-    }
-
 
     @Override
     public RPCMessageType type()
     {
         return RPCMessageType.NOTIFICATION;
-    }
-
-    @Override
-    public JSONObject toJson() throws JSONException
-    {
-        return new JSONObject()
-        {
-            {
-                put(Constants.METHOD, method);
-                put(Constants.PARAMS, serialize(params));
-            }
-        };
     }
 }
