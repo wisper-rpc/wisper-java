@@ -157,7 +157,7 @@ public class RemoteGateway extends WisperObject
                 }
                 else
                 {
-                    ((RemoteGateway) wisperInstanceModel.getInstance()).gatewayRouter.getGateway().handleMessage(wisperMessage);
+                    ((RemoteGateway) wisperInstanceModel.getInstance()).gatewayRouter.getGateway().sendMessage(wisperMessage);
                     //Response response = notification.createResponse();
                     //notification.getResponseBlock().perform(response, null);
                 }
