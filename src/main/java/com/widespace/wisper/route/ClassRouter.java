@@ -6,7 +6,9 @@ import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.WisperClassModel;
 import com.widespace.wisper.classrepresentation.WisperInstanceModel;
 import com.widespace.wisper.controller.Gateway;
-import com.widespace.wisper.messagetype.*;
+import com.widespace.wisper.messagetype.CallMessage;
+import com.widespace.wisper.messagetype.Event;
+import com.widespace.wisper.messagetype.Notification;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
 import com.widespace.wisper.utils.ClassUtils;
@@ -58,12 +60,11 @@ public class ClassRouter extends Router
             case INSTANCE_EVENT:
                 handleInstanceEvent(new Event((Notification) message));
                 break;
-            /* TODO: What's this all about?
             case UNKNOWN:
             default:
                 super.routeMessage(message, path);
                 break;
-            */
+
         }
     }
 

@@ -10,5 +10,5 @@ package com.widespace.wisper.classrepresentation;
  */
 public enum WisperParameterType
 {
-    STRING, NUMBER, ARRAY, HASHMAP, BOOLEAN, INSTANCE
+    STRING, NUMBER, ARRAY, HASHMAP, BOOLEAN, INSTANCE, ANDROID_CONTEXT
 }
