@@ -14,7 +14,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.widespace.wisper.messagetype.error.Error.UNEXPECTED_TYPE_ERROR;
 import static com.widespace.wisper.messagetype.error.Error.WISPER_INSTANCE_INVALID;
@@ -69,6 +71,7 @@ public class WisperMethodCaller
 
         Object[] messageParams = MessageParser.getParams(message);
         WisperMethod newMethodModel = replaceWisperInstanceParametersWithRealInstances(methodModel, messageParams);
+        newMethodModel = replaceAndroidContext(newMethodModel, messageParams);
         callMethodOnInstance(null, newMethodModel);
     }
 
@@ -82,6 +85,7 @@ public class WisperMethodCaller
 
         Object[] messageParams = MessageParser.getParams(message);
         WisperMethod newMethodModel = replaceWisperInstanceParametersWithRealInstances(methodModel, messageParams);
+        newMethodModel = replaceAndroidContext(newMethodModel, messageParams);
         callMethodOnInstance(wisperInstance, newMethodModel);
     }
 
@@ -91,7 +95,7 @@ public class WisperMethodCaller
         {
             if (methodModel.getCallBlock() != null)
             {
-                methodModel.getCallBlock().perform(router, wisperInstance, methodModel,  message);
+                methodModel.getCallBlock().perform(router, wisperInstance, methodModel, message);
                 return true;
             }
 
@@ -191,7 +195,24 @@ public class WisperMethodCaller
         }
 
         methodModel.setCallParameters(resultedParameters);
-        methodModel.setCallParameterTypes(parameterTypes);
+        return methodModel;
+    }
+
+    //TODO: This method, along with replaceWisperInstanceParametersWithRealInstances should not be here. They should be moved to their own classes that implement a certain interface. This class should have a list of "injectors" to go through.
+    //In this manner, android.content.Context type does not have to be known to wisper java library, so there will be no android dependency and at the same time casting is done automatically.
+    private WisperMethod replaceAndroidContext(WisperMethod methodModel, Object[] messageParams)
+    {
+        if (methodModel.getWisperParameterTypes() == null || methodModel.getWisperParameterTypes().isEmpty())
+            return methodModel;
+
+        if (methodModel.getWisperParameterTypes().get(0) != WisperParameterType.ANDROID_CONTEXT)
+            return methodModel;
+
+        List<Object> newParams = new ArrayList<Object>(Arrays.asList(messageParams));
+        newParams.add(0, router.getGatewayExtra("context"));
+
+        methodModel.setCallParameters(newParams.toArray(new Object[newParams.size()]));
+
         return methodModel;
     }
 
