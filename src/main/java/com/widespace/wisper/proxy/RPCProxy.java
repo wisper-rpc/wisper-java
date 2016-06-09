@@ -1,10 +1,9 @@
 package com.widespace.wisper.proxy;
 
-import com.widespace.wisper.controller.RPCController;
-import com.widespace.wisper.messagetype.RPCNotification;
-import com.widespace.wisper.messagetype.RPCRequest;
+import com.widespace.wisper.controller.Gateway;
+import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.Request;
 import com.widespace.wisper.utils.StringUtils;
-import org.json.JSONException;
 
 /**
  * Acts as an adapter between two remote object controllers.
@@ -15,13 +14,13 @@ public class RPCProxy
      * The object to forward the RPC call to.
      * Do not retain this object!
      */
-    private RPCController receiver;
+    private Gateway receiver;
     /**
      * The name of the resource we want to proxy that is available in the receiver.
      */
     private String receiverMapName;
     /**
-     * The name that this proxy listens to when registerer with an RPCController.
+     * The name that this proxy listens to when registerer with an Gateway.
      */
     private String mapName;
 
@@ -30,32 +29,25 @@ public class RPCProxy
      * Takes a request, transforms it and passes it on to the receiver.
      *
      * @param request The request that is trying to reach the other controller
-     * @see com.widespace.wisper.messagetype.RPCRequest
+     * @see Request
      */
-    public void handleRequest(RPCRequest request) throws JSONException
+    public void handleRequest(Request request)
     {
-        RPCRequest proxifiedRequest = new RPCRequest();
-        proxifiedRequest.setIdentifier(request.getIdentifier());
-        proxifiedRequest.setMethodName(extractMethodName(request.getMethodName()));
-        proxifiedRequest.setParams(request.getParams());
-        proxifiedRequest.setResponseBlock(request.getResponseBlock());
-        receiver.handle(proxifiedRequest.toJsonString());
+        Request proxied = new Request(extractMethodName(request.getMethodName()), request.getParams()).withResponseBlock(request.getResponseBlock());
+        proxied.setIdentifier(request.getIdentifier());
+        receiver.handleMessage(proxied.toJsonString());
     }
 
     /**
      * Takes a notification, transforms it and passes it on to the receiver.
      *
      * @param notification The notification that is trying to reach the other controller
-     * @see com.widespace.wisper.messagetype.RPCNotification
+     * @see Notification
      */
-    public void handleNotification(RPCNotification notification) throws JSONException
+    public void handleNotification(Notification notification)
     {
-        RPCNotification proxifiedNotification = new RPCNotification();
-        proxifiedNotification.setMethodName(extractMethodName(notification.getMethodName()));
-        proxifiedNotification.setParams(notification.getParams());
-        receiver.handle(proxifiedNotification.toJsonString());
+        receiver.handleMessage(new Notification(extractMethodName(notification.getMethodName()), notification.getParams()).toJsonString());
     }
-
 
 
     private String extractMethodName(String methodName)
@@ -72,12 +64,12 @@ public class RPCProxy
         return null;
     }
 
-    public RPCController getReceiver()
+    public Gateway getReceiver()
     {
         return receiver;
     }
 
-    public void setReceiver(RPCController receiver)
+    public void setReceiver(Gateway receiver)
     {
         this.receiver = receiver;
     }

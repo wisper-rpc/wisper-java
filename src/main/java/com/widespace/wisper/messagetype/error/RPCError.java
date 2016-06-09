@@ -1,75 +1,132 @@
 package com.widespace.wisper.messagetype.error;
 
-import com.widespace.wisper.messagetype.RPCAbstractMessage;
-import com.widespace.wisper.messagetype.RPCMessageType;
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Map;
+
+import static com.widespace.wisper.base.Constants.CODE;
+import static com.widespace.wisper.base.Constants.DATA;
+import static com.widespace.wisper.base.Constants.DOMAIN;
+import static com.widespace.wisper.base.Constants.MESSAGE;
+import static com.widespace.wisper.base.Constants.NAME;
+import static com.widespace.wisper.base.Constants.UNDERLYING_ERROR;
+
 /**
- * Created by Ehssan Hoorvash on 22/05/14.
+ * Created by ehssanhoorvash on 21/10/15.
  */
-public class RPCError extends RPCAbstractMessage
+public class RPCError
 {
-    public static String RPC_ANDROID_ERROR_DOMAIN = "20";
+
     private int code;
     private int domain;
     private String name;
     private String message;
 
-    private JSONObject data;
-    private RPCError underlying;
-    private String id;
+    private Object data;
+    private RPCError underlyingError;
 
-    public RPCError(RPCErrorBuilder builder)
+    public RPCError()
     {
-        this.id = builder.getId();
-        this.code = builder.getCode();
-        this.domain = builder.getDomain().getDomainCode();
-        this.name = builder.getName();
-        this.message = builder.getMessage();
-        this.data = builder.getData();
-        this.underlying = builder.getUnderlyingError();
+        domain = ErrorDomain.NATIVE.getDomainCode();
+    }
+
+    public RPCError(Map<String, Object> errorMap)
+    {
+        this(new JSONObject(errorMap));
     }
 
     public RPCError(JSONObject jsonObject)
     {
-        this.jsonForm = jsonObject;
-    }
-
-    @Override
-    public RPCMessageType type()
-    {
-        return RPCMessageType.ERROR;
-    }
-
-    @Override
-    public String toJsonString()
-    {
-        JSONObject errorJson = null;
-        try
+        if (jsonObject.has(DOMAIN))
         {
-            errorJson = new JSONObject();
-            errorJson.put("id", id);
-            JSONObject errorFields = new JSONObject();
-            errorFields.put("code", code);
-            errorFields.put("name", name);
-            errorFields.put("domain", domain);
-            errorFields.put("message", message);
-            errorFields.put("data", data);
-            if (underlying != null)
-            {
-                errorFields.put("underlying", new JSONObject(underlying.toJsonString())); //recursion check?
-            }
-            errorJson.put("error", errorFields);
-
-        }
-        catch (JSONException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            this.domain = jsonObject.getInt(DOMAIN);
         }
 
+        if (jsonObject.has(CODE))
+        {
+            this.code = jsonObject.getInt(CODE);
+        }
 
-        return errorJson.toString();
+        if (jsonObject.has(MESSAGE))
+        {
+            this.message = jsonObject.getString(MESSAGE);
+        }
+
+        if (jsonObject.has(NAME))
+        {
+            this.name = jsonObject.getString(NAME);
+        }
+
+        if (jsonObject.has(DATA))
+        {
+            this.data = jsonObject.get(DATA);
+        }
+
+        if (jsonObject.has(UNDERLYING_ERROR))
+        {
+            this.underlyingError = new RPCError(jsonObject.getJSONObject(UNDERLYING_ERROR));
+        }
     }
+
+    public int getCode()
+    {
+        return code;
+    }
+
+    public void setCode(int code)
+    {
+        this.code = code;
+    }
+
+    public int getDomain()
+    {
+        return domain;
+    }
+
+    public void setDomain(int domain)
+    {
+        this.domain = domain;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    public void setMessage(String message)
+    {
+        this.message = message;
+    }
+
+    public Object getData()
+    {
+        return data;
+    }
+
+    public void setData(Object data)
+    {
+        this.data = data;
+    }
+
+    public RPCError getUnderlyingError()
+    {
+        return underlyingError;
+    }
+
+    public void setUnderlyingError(RPCError underlyingError)
+    {
+        this.underlyingError = underlyingError;
+    }
+
+
 }

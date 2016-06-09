@@ -1,12 +1,10 @@
 package com.widespace.wisper.classrepresentation;
 
-import com.widespace.wisper.controller.RPCRemoteObjectController;
-import com.widespace.wisper.messagetype.RPCRequest;
+import com.widespace.wisper.messagetype.CallMessage;
+import com.widespace.wisper.route.ClassRouter;
 
-/**
- * Created by Ehssan Hoorvash on 26/05/14.
- */
+
 public interface CallBlock
 {
-    void perform(RPCRemoteObjectController remoteObjectController, RPCClassInstance classInstance, RPCClassMethod method, RPCRequest request);
+    void perform(ClassRouter router, WisperInstanceModel wisperInstanceModel, WisperMethod methodModel, CallMessage message) throws Exception;
 }

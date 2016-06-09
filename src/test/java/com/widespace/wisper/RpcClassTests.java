@@ -1,70 +1,113 @@
 package com.widespace.wisper;
 
+import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
+import com.widespace.wisper.route.ClassRouter;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 
-/**
- * Created by Ehssan Hoorvash on 10/06/14.
- */
 
 public class RpcClassTests
 {
-    private RPCClass rpcClass;
-    private String myTestObject;
+    private final String SAMPLE_MAP_NAME = "SAMPLE_MAP_NAME";
+    private WisperClassModel wisperClassModel;
+    private MyWisperObject SAMPLE_OBJECT;
 
 
     @Before
     public void setUp() throws Exception
     {
-        myTestObject = "my Test Object";
-        rpcClass = new RPCClass(myTestObject.getClass(), "theMapName");
+        SAMPLE_OBJECT =  new MyWisperObject();
     }
 
     @Test
     public void testMapNameIsCorrect() throws Exception
     {
-        assertEquals("RPC map name is not correct", rpcClass.getMapName(), "theMapName");
+        wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+        assertThat(SAMPLE_MAP_NAME, is(equalTo(wisperClassModel.getMapName())));
+    }
+
+    @Test
+    public void testMapNameCanBeChanged() throws Exception
+    {
+        wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+        wisperClassModel.setMapName("NEW");
+        assertThat("NEW", is(equalTo(wisperClassModel.getMapName())));
     }
 
     @Test
     public void testClassRefIsCorrect() throws Exception
     {
-        assertEquals("RPC map name is not correct", rpcClass.getClassRef(), myTestObject.getClass());
+        wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+        assertThat(SAMPLE_OBJECT, is(instanceOf(wisperClassModel.getClassRef())));
     }
+
+    @Test
+    public void testClassRefCouldBeOverwritten() throws Exception
+    {
+        wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+        wisperClassModel.setClassRef(null);
+        assertThat(wisperClassModel.getClassRef(), is(nullValue()));
+    }
+
 
     @Test
     public void testAddingStaticMethod() throws Exception
     {
-        RPCClassMethod someMethod = new RPCClassMethod("methodMap", "someName");
-        rpcClass.addStaticMethod(someMethod);
-        assertTrue(rpcClass.getStaticMethods().containsKey("methodMap"));
+        wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+        WisperMethod someMethod = new WisperMethod("methodMap", "someName");
+        wisperClassModel.addStaticMethod(someMethod);
+        assertThat(wisperClassModel.getStaticMethods().containsKey("methodMap"), is(true));
     }
 
     @Test
     public void testAddingInstanceMethod() throws Exception
     {
-        RPCClassMethod someMethod = new RPCClassMethod("methodMap", "someName");
-        rpcClass.addInstanceMethod(someMethod);
-        assertTrue(rpcClass.getInstanceMethods().containsKey("methodMap"));
+        wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
+        WisperMethod someMethod = new WisperMethod("methodMap", "someName");
+        wisperClassModel.addInstanceMethod(someMethod);
+        assertThat(wisperClassModel.getInstanceMethods().containsKey("methodMap"), is(true));
     }
 
     @Test
     public void testPropertiesAreAddedCorrectly() throws Exception
     {
-        RPCClassProperty property1 = new RPCClassProperty("prop1");
-        RPCClassProperty property2 = new RPCClassProperty("prop2", RPCClassPropertyMode.READ_WRITE, "setterName", RPCMethodParameterType.STRING);
+        wisperClassModel = new WisperClassModel(SAMPLE_OBJECT.getClass(), SAMPLE_MAP_NAME);
 
-        rpcClass.addProperty(property1);
-        rpcClass.addProperty(property2);
+        WisperProperty property1 = new WisperProperty("prop1");
+        WisperProperty property2 = new WisperProperty("prop2", WisperPropertyAccess.READ_WRITE, "setterName", WisperParameterType.STRING);
 
-        assertNotNull(rpcClass.getProperties());
-        assertEquals(2, rpcClass.getProperties().size());
-        assertEquals(property1, rpcClass.getProperties().get(property1.getMappingName()));
-        assertEquals(property2, rpcClass.getProperties().get(property2.getMappingName()));
+        wisperClassModel.addProperty(property1);
+        wisperClassModel.addProperty(property2);
+
+        assertThat(wisperClassModel.getProperties(), is(notNullValue()));
+        assertThat(wisperClassModel.getProperties().size(), is(2));
+        assertThat(wisperClassModel.getProperties().get(property1.getMappingName()), is(property1));
+        assertThat(wisperClassModel.getProperties().get(property2.getMappingName()), is(property2));
+    }
+
+    @After
+    public void tearDown() throws Exception
+    {
+        wisperClassModel = null;
+    }
+
+    private class MyWisperObject implements Wisper
+    {
+        @Override
+        public void setClassRouter(ClassRouter classRouter)
+        {
+
+        }
+
+        @Override
+        public void destruct()
+        {
+
+        }
     }
 }
