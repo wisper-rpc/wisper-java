@@ -86,6 +86,26 @@ public class WisperMethodCallerTest
         assertThat(actualInstance.instanceMethodCalled(), is(true));
     }
 
+    @Test
+    public void givenMethodWithContextParamType_contextIsInjectedAtCallTime() throws Exception
+    {
+        String methodName = "methodWithContext";
+
+        WisperInstanceModel instanceModel = createWisperInstanceForTestObject("whatever.whatever.thing");
+        WisperInstanceRegistry.sharedInstance().addInstance(instanceModel, mock(Router.class));
+        Request request = new Request("whatever.whatever.thing:" + methodName, new Object[]{instanceModel.getInstanceIdentifier(), "str1"});
+
+        RoutesTestObject actualInstance = (RoutesTestObject) instanceModel.getInstance();
+        assertThat(actualInstance.instanceMethodCalled(), is(false));
+
+        Object fakeAndroidContext = "dhjshdjdsh";
+        ClassRouter mock = mock(ClassRouter.class);
+        when(mock.getGatewayExtra("context")).thenReturn(fakeAndroidContext);
+        WisperMethodCaller methodCaller = new WisperMethodCaller(mock, instanceModel.getWisperClassModel(), request);
+        methodCaller.call();
+
+        assertThat(actualInstance.methodCalledWithConetxt(fakeAndroidContext), is(true));
+    }
 
     //--------------------------
     private WisperInstanceModel createWisperInstanceForTestObject(String mapName) throws InterruptedException

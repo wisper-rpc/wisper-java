@@ -261,7 +261,6 @@ public class WisperInstanceConstructor
         }
 
         methodModel.setCallParameters(resultedParameters);
-        methodModel.setCallParameterTypes(parameterTypes);
         return methodModel;
     }
 

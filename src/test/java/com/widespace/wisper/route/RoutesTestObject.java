@@ -3,6 +3,7 @@ package com.widespace.wisper.route;
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.classrepresentation.*;
 import com.widespace.wisper.messagetype.Event;
+import org.jetbrains.annotations.NotNull;
 
 
 class RoutesTestObject implements Wisper
@@ -18,6 +19,7 @@ class RoutesTestObject implements Wisper
     private String prop;
     private boolean instanceEventReceived;
     private ClassRouter classRouter;
+    private Object receivedContext;
 
     public static WisperClassModel registerRpcClass()
     {
@@ -27,9 +29,9 @@ class RoutesTestObject implements Wisper
         //2.Build class methods of instance or static methods you might need
         WisperMethod appendMethod = new WisperMethod("append", "appendString", WisperParameterType.STRING, WisperParameterType.STRING);
         WisperMethod printMethod = new WisperMethod("printInstanceId", "printInstanceId", WisperParameterType.INSTANCE, WisperParameterType.STRING);
+        WisperMethod contextMethod = new WisperMethod("methodWithContext", "methodWithContext", WisperParameterType.ANDROID_CONTEXT, WisperParameterType.STRING);
 
         WisperMethod customConstructor1 = new WisperMethod("~", "RoutesTestObject", WisperParameterType.STRING);
-
 
         WisperMethod appendStaticMethod = new WisperMethod("append", "appendStringStatic", WisperParameterType.STRING, WisperParameterType.STRING);
         WisperMethod printStaticMethod = new WisperMethod("printInstanceId", "printInstanceIdStatic", WisperParameterType.INSTANCE, WisperParameterType.STRING);
@@ -40,6 +42,7 @@ class RoutesTestObject implements Wisper
         //3. Add the method models to your class model
         classModel.addInstanceMethod(appendMethod);
         classModel.addInstanceMethod(printMethod);
+        classModel.addInstanceMethod(contextMethod);
 
         classModel.addStaticMethod(customConstructor1);
 
@@ -54,7 +57,6 @@ class RoutesTestObject implements Wisper
     }
 
 
-
     //region Constructors
     //==========================================================================
     public RoutesTestObject()
@@ -67,7 +69,6 @@ class RoutesTestObject implements Wisper
         this.testId = id;
         this.prop = "set-by-constructor";
     }
-
 
 
     //region Wisper Event Handlers
@@ -139,6 +140,11 @@ class RoutesTestObject implements Wisper
         printedValue = instance.getTestId() + message;
     }
 
+    public void methodWithContext(Object context, String param)
+    {
+        receivedContext = context;
+    }
+
 
     @Override
     public void setClassRouter(ClassRouter classRouter)
@@ -198,5 +204,13 @@ class RoutesTestObject implements Wisper
     public boolean isInstanceEventReceived()
     {
         return instanceEventReceived;
+    }
+
+    public boolean methodCalledWithConetxt(@NotNull Object context)
+    {
+        if (context.equals(receivedContext))
+            return true;
+
+        return false;
     }
 }

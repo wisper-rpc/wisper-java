@@ -1,7 +1,9 @@
 package com.widespace.wisper.classrepresentation;
 
 import com.widespace.wisper.utils.RPCUtilities;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,7 +21,7 @@ public class WisperMethod
     private List<WisperParameterType> paramTypes;
 
     private Object[] callParameters;
-    private Class[] callParameterTypes;
+
 
     public WisperMethod(String mapName, String methodName, WisperParameterType... parameterTypes)
     {
@@ -104,13 +106,24 @@ public class WisperMethod
         this.callParameters = callParameters;
     }
 
+
     public Class[] getCallParameterTypes()
     {
+        if (callParameters == null || callParameters.length == 0)
+            return null;
+
+        Class[] callParameterTypes = new Class[callParameters.length];
+        for (int i = 0; i < callParameters.length; i++)
+        {
+            callParameterTypes[i] = callParameters[i].getClass();
+        }
+
         return callParameterTypes;
     }
 
-    public void setCallParameterTypes(Class[] callParameterTypes)
+
+    public List<WisperParameterType> getWisperParameterTypes()
     {
-        this.callParameterTypes = callParameterTypes;
+        return paramTypes;
     }
 }
