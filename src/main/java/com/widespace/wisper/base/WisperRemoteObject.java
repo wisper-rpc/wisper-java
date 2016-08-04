@@ -1,7 +1,11 @@
 package com.widespace.wisper.base;
 
 import com.widespace.wisper.controller.ResponseBlock;
-import com.widespace.wisper.messagetype.*;
+import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.Event;
+import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
 import com.widespace.wisper.route.EventRouter;
 import com.widespace.wisper.route.GatewayRouter;
@@ -86,6 +90,10 @@ public abstract class WisperRemoteObject implements RemoteObjectEventInterface
         {
             eventRouter = new EventRouter(this.getClass());
             gatewayRouter.exposeRoute(mapName, eventRouter);
+        }
+        else
+        {
+            eventRouter = (EventRouter)gatewayRouter.getRouter(mapName);
         }
     }
 

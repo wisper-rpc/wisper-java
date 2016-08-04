@@ -2,12 +2,25 @@ package com.widespace.wisper.proxy;
 
 import com.widespace.wisper.base.Wisper;
 import com.widespace.wisper.base.WisperObject;
-import com.widespace.wisper.classrepresentation.*;
+import com.widespace.wisper.classrepresentation.CallBlock;
+import com.widespace.wisper.classrepresentation.WisperClassModel;
+import com.widespace.wisper.classrepresentation.WisperInstanceModel;
+import com.widespace.wisper.classrepresentation.WisperMethod;
+import com.widespace.wisper.classrepresentation.WisperParameterType;
 import com.widespace.wisper.controller.ResponseBlock;
-import com.widespace.wisper.messagetype.*;
+import com.widespace.wisper.messagetype.AbstractMessage;
+import com.widespace.wisper.messagetype.CallMessage;
+import com.widespace.wisper.messagetype.MessageFactory;
+import com.widespace.wisper.messagetype.Notification;
+import com.widespace.wisper.messagetype.Request;
+import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.RPCErrorMessage;
-import com.widespace.wisper.messagetype.error.WisperException;
-import com.widespace.wisper.route.*;
+import com.widespace.wisper.route.Channel;
+import com.widespace.wisper.route.ClassRouter;
+import com.widespace.wisper.route.GatewayRouter;
+import com.widespace.wisper.route.ProxyFunctionRouter;
+import com.widespace.wisper.route.Router;
+
 import org.json.JSONObject;
 
 
@@ -43,7 +56,7 @@ public class RemoteGateway extends WisperObject
         wisperClassModel.addInstanceMethod(new WisperMethod("~", "RemoteGateway", WisperParameterType.INSTANCE));
         wisperClassModel.addInstanceMethod(new WisperMethod("setChannel", "setChannel", WisperParameterType.INSTANCE));
         wisperClassModel.addInstanceMethod(new WisperMethod("sendMessage", new SendMessageCallBlock()));
-        wisperClassModel.addInstanceMethod(new WisperMethod("exposeRoute", "exposeRoute", WisperParameterType.STRING, WisperParameterType.STRING));
+        wisperClassModel.addInstanceMethod(new WisperMethod("exposeRoute", "exposeRoute", WisperParameterType.STRING, WisperParameterType.STRING, WisperParameterType.BOOLEAN));
         wisperClassModel.addInstanceMethod(new WisperMethod("exposeReference", "exposeReference", WisperParameterType.STRING, WisperParameterType.STRING));
 
         return wisperClassModel;
@@ -95,10 +108,16 @@ public class RemoteGateway extends WisperObject
     /**
      * @param newRoute new path under which myRoute will be exposed to the gateway router of this RemoteGateway.
      * @param myRoute  path to which we will proxy incoming messages to the new route.
+     * @param reverseRoute
      */
-    public void exposeRoute(final String newRoute, final String myRoute)
+    public void exposeRoute(final String newRoute, final String myRoute, final Boolean reverseRoute)
     {
-        gatewayRouter.exposeRoute(newRoute, new ExposeRouteFunctionRouter(newRoute, myRoute));
+        gatewayRouter.exposeRoute(newRoute, new ProxyFunctionRouter(newRoute, myRoute, (GatewayRouter) classRouter.getRootRoute()));
+
+        if(reverseRoute)
+        {
+            ((GatewayRouter)classRouter.getRootRoute()).exposeRoute(myRoute, new ProxyFunctionRouter(myRoute, newRoute, gatewayRouter));
+        }
     }
 
     private static class SendMessageCallBlock implements CallBlock
@@ -161,97 +180,7 @@ public class RemoteGateway extends WisperObject
                     //Response response = notification.createResponse();
                     //notification.getResponseBlock().perform(response, null);
                 }
-
             }
-
-
-        }
-    }
-
-
-    private class ExposeRouteFunctionRouter extends FunctionRouter
-    {
-        private final String newRoute;
-        private final String myRoute;
-
-        public ExposeRouteFunctionRouter(String newRoute, String myRoute)
-        {
-            this.newRoute = newRoute;
-            this.myRoute = myRoute;
-        }
-
-        @Override
-        public void routeMessage(final CallMessage message, String path) throws WisperException
-        {
-            if (proxiedRequestTypeMessage(message))
-            {
-                return;
-            }
-
-            proxyNotificationTypeMessage(message);
-
-
-        }
-
-        private void proxyNotificationTypeMessage(AbstractMessage message)
-        {
-            if (!(message instanceof Notification))
-            {
-                return;
-            }
-
-            String methodName = MessageParser.getFullMethodName(message);
-            String replacedMethodName = methodName.replaceFirst(newRoute, myRoute);
-
-            classRouter.getRootGateway().sendMessage(new Notification(replacedMethodName, ((Notification) message).getParams()));
-        }
-
-        private boolean proxiedRequestTypeMessage(final AbstractMessage message)
-        {
-            if (!(message instanceof Request))
-            {
-                return false;
-            }
-
-            String methodName = MessageParser.getFullMethodName(message);
-            String replacedMethodName = methodName.replaceFirst(newRoute, myRoute);
-
-            ResponseBlock block = new ResponseBlock()
-            {
-                @Override
-                public void perform(Response response, RPCErrorMessage error)
-                {
-                    if (error == null)
-                    {
-                        proxyResponse(response);
-                    }
-                    else
-                    {
-                        proxyError(error);
-                    }
-                }
-
-                private void proxyError(RPCErrorMessage error)
-                {
-                    RPCErrorMessage proxiedError = new RPCErrorMessage(error.getId(), error.getError());
-                    ((Request) message).getResponseBlock().perform(null, proxiedError);
-                }
-
-                private void proxyResponse(Response response)
-                {
-                    Response proxiedResponse = new Response();
-                    proxiedResponse.setIdentifier(((Request) message).getIdentifier());
-                    proxiedResponse.setResult(response.getResult());
-
-                    ((Request) message).getResponseBlock().perform(proxiedResponse, null);
-                }
-            };
-
-            Request proxiedRequest = new Request(replacedMethodName, ((Request) message).getParams()).withResponseBlock(block);
-
-            classRouter.getRootGateway().sendMessage(proxiedRequest);
-
-            return true;
         }
     }
 }
