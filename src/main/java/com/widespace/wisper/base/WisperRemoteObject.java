@@ -14,8 +14,10 @@ import com.widespace.wisper.route.RemoteObjectEventInterface;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 
@@ -172,7 +174,7 @@ public abstract class WisperRemoteObject implements RemoteObjectEventInterface
      */
     public void callInstanceMethod(@NotNull String methodName, Object[] params)
     {
-        callInstanceMethod(methodName, params, null);
+        callInstanceMethod(methodName, sanitizeArray(params), null);
     }
 
     public void callInstanceMethod(@NotNull String methodName)
@@ -310,6 +312,20 @@ public abstract class WisperRemoteObject implements RemoteObjectEventInterface
         params[0] = param;
 
         return params;
+    }
+
+    private static Object[] sanitizeArray(Object[] initialParams)
+    {
+        List<Object> objList = new ArrayList<Object>();
+        for (Object element : initialParams)
+        {
+            if(element != null)
+            {
+                objList.add(element);
+            }
+        }
+
+        return objList.toArray();
     }
 
     @NotNull
