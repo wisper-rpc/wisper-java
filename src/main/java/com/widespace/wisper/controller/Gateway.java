@@ -145,26 +145,27 @@ public class Gateway implements Channel
         if (message.type() == RPCMessageType.REQUEST)
         {
             final Request request = (Request) message;
-            request.setResponseBlock(new ResponseBlock()
-            {
-                @Override
-                public void perform(Response response, RPCErrorMessage error)
-                {
-                    if (response != null)
-                        sendMessage(response);
-                    else if (error != null)
-                        sendMessage(error);
 
-                    request.setResponseBlock(new ResponseBlock()
-                    {
-                        @Override
-                        public void perform(Response response, RPCErrorMessage error)
-                        {
-                            //NO-OP
-                        }
-                    });
-                }
-            });
+            if(request.getResponseBlock() == null) {
+
+                request.setResponseBlock(new ResponseBlock() {
+                    @Override
+                    public void perform(Response response, RPCErrorMessage error) {
+                        if (response != null)
+                            sendMessage(response);
+                        else if (error != null)
+                            sendMessage(error);
+
+                        request.setResponseBlock(new ResponseBlock() {
+                            @Override
+                            public void perform(Response response, RPCErrorMessage error) {
+                                //NO-OP
+                            }
+                        });
+                    }
+                });
+            }
+
         } else if (message.type() == RPCMessageType.RESPONSE)
         {
             respondBackOnMessage(message);
