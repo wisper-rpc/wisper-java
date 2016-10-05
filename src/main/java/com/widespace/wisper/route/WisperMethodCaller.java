@@ -73,6 +73,7 @@ public class WisperMethodCaller
         Object[] messageParams = MessageParser.getParams(message);
         WisperMethod newMethodModel = replaceWisperInstanceParametersWithRealInstances(methodModel, messageParams);
         newMethodModel = replaceAndroidContext(newMethodModel, messageParams);
+        newMethodModel = replaceAsyncReturn(newMethodModel, messageParams);
         callMethodOnInstance(null, newMethodModel);
     }
 
@@ -87,6 +88,7 @@ public class WisperMethodCaller
         Object[] messageParams = MessageParser.getParams(message);
         WisperMethod newMethodModel = replaceWisperInstanceParametersWithRealInstances(methodModel, messageParams);
         newMethodModel = replaceAndroidContext(newMethodModel, messageParams);
+        newMethodModel = replaceAsyncReturn(newMethodModel, messageParams);
         callMethodOnInstance(wisperInstance, newMethodModel);
     }
 
