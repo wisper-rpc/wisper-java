@@ -11,6 +11,7 @@ import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -210,6 +211,47 @@ public class WisperMethodCaller
 
         List<Object> newParams = new ArrayList<Object>(Arrays.asList(messageParams));
         newParams.add(0, router.getGatewayExtra("context"));
+
+        methodModel.setCallParameters(newParams.toArray(new Object[newParams.size()]));
+
+        return methodModel;
+    }
+
+    // TODO: Replaces at the index found in param types. This will not work if we add more replacements at variable indexes :/
+    private WisperMethod replaceAsyncReturn(WisperMethod methodModel, Object[] messageParams)
+    {
+        if (methodModel.getWisperParameterTypes() == null || methodModel.getWisperParameterTypes().isEmpty())
+            return methodModel;
+
+        int asyncParamIndex = getIndexOfWisperParam(WisperParameterType.ASYNC_RETURN, methodModel.getWisperParameterTypes());
+
+        if (asyncParamIndex == -1)
+            return methodModel;
+
+        AsyncReturn asyncReturn = new AsyncReturn() {
+            @Override
+            public void perform(@Nullable Object result, @Nullable Error error) {
+                if (!(message instanceof Request))
+                    return;
+
+                Request request = (Request)message;
+                Response response = ((Request) message).createResponse();
+
+                if (error != null) {
+                    // Respond with error
+                    response.setError(error);
+                } else {
+                    // Respond with null or result
+                    response.setResult(result);
+                }
+
+                if (request.getResponseBlock() != null)
+                    request.getResponseBlock().perform(response, null);
+            }
+        };
+
+        List<Object> newParams = new ArrayList<Object>(Arrays.asList(messageParams));
+        newParams.add(asyncParamIndex, asyncReturn);
 
         methodModel.setCallParameters(newParams.toArray(new Object[newParams.size()]));
 
