@@ -125,6 +125,9 @@ public class WisperMethodCaller
         Class[] parameterTypes = methodModel.getCallParameterTypes();
         Object[] params = methodModel.getCallParameters();
 
+        // Is this an asynchronous method?
+        boolean isAsyncReturn = methodModel.getWisperParameterTypes().contains(WisperParameterType.ASYNC_RETURN);
+
         Method method;
         Object returnedValue;
 
@@ -146,7 +149,7 @@ public class WisperMethodCaller
                 returnedValue = method.invoke(null, params);
             }
 
-            if (message instanceof Request)
+            if (message instanceof Request && !isAsyncReturn)
             {
                 Response response = ((Request) message).createResponse();
                 if (returnedValue != null)
