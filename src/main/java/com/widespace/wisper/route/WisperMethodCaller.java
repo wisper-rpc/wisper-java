@@ -216,6 +216,19 @@ public class WisperMethodCaller
         return methodModel;
     }
 
+    private int getIndexOfWisperParam(WisperParameterType wisperParam, List<WisperParameterType> params)
+    {
+        for (int i = 0; i < params.size(); i++)
+        {
+            WisperParameterType parameterType = params.get(i);
+            if (parameterType.equals(wisperParam))
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     private Method getMethod(Class<?> clasRef, String methodName, Class[] parameterTypes) throws NoSuchMethodException
     {
         nextMethod:
