@@ -255,7 +255,13 @@ public class WisperMethodCaller
             }
         };
 
-        List<Object> newParams = new ArrayList<Object>(Arrays.asList(messageParams));
+
+        List<Object> newParams = null;
+        if (methodModel.getCallParameters() != null)
+            newParams = new ArrayList<Object>(Arrays.asList(methodModel.getCallParameters()));
+        else
+            newParams = new ArrayList<Object>(Arrays.asList(messageParams));
+
         newParams.add(asyncParamIndex, asyncReturn);
 
         methodModel.setCallParameters(newParams.toArray(new Object[newParams.size()]));
