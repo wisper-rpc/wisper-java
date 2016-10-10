@@ -86,6 +86,8 @@ public class Response extends AbstractMessage
         return error;
     }
 
+    public void setError(Error error) { this.error = error; }
+
     /**
      * Sets the desired result in this response.
      * The results could be of any serializable type.

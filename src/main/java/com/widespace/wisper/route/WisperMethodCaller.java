@@ -11,6 +11,7 @@ import com.widespace.wisper.messagetype.Response;
 import com.widespace.wisper.messagetype.error.Error;
 import com.widespace.wisper.messagetype.error.WisperException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -72,6 +73,7 @@ public class WisperMethodCaller
         Object[] messageParams = MessageParser.getParams(message);
         WisperMethod newMethodModel = replaceWisperInstanceParametersWithRealInstances(methodModel, messageParams);
         newMethodModel = replaceAndroidContext(newMethodModel, messageParams);
+        newMethodModel = replaceAsyncReturn(newMethodModel, messageParams);
         callMethodOnInstance(null, newMethodModel);
     }
 
@@ -86,6 +88,7 @@ public class WisperMethodCaller
         Object[] messageParams = MessageParser.getParams(message);
         WisperMethod newMethodModel = replaceWisperInstanceParametersWithRealInstances(methodModel, messageParams);
         newMethodModel = replaceAndroidContext(newMethodModel, messageParams);
+        newMethodModel = replaceAsyncReturn(newMethodModel, messageParams);
         callMethodOnInstance(wisperInstance, newMethodModel);
     }
 
@@ -122,6 +125,9 @@ public class WisperMethodCaller
         Class[] parameterTypes = methodModel.getCallParameterTypes();
         Object[] params = methodModel.getCallParameters();
 
+        // Is this an asynchronous method?
+        boolean isAsyncReturn = methodModel.getWisperParameterTypes().contains(WisperParameterType.ASYNC_RETURN);
+
         Method method;
         Object returnedValue;
 
@@ -143,7 +149,7 @@ public class WisperMethodCaller
                 returnedValue = method.invoke(null, params);
             }
 
-            if (message instanceof Request)
+            if (message instanceof Request && !isAsyncReturn)
             {
                 Response response = ((Request) message).createResponse();
                 if (returnedValue != null)
@@ -214,6 +220,66 @@ public class WisperMethodCaller
         methodModel.setCallParameters(newParams.toArray(new Object[newParams.size()]));
 
         return methodModel;
+    }
+
+    // TODO: Replaces at the index found in param types. This will not work if we add more replacements at variable indexes :/
+    private WisperMethod replaceAsyncReturn(WisperMethod methodModel, Object[] messageParams)
+    {
+        if (methodModel.getWisperParameterTypes() == null || methodModel.getWisperParameterTypes().isEmpty())
+            return methodModel;
+
+        int asyncParamIndex = getIndexOfWisperParam(WisperParameterType.ASYNC_RETURN, methodModel.getWisperParameterTypes());
+
+        if (asyncParamIndex == -1)
+            return methodModel;
+
+        AsyncReturn asyncReturn = new AsyncReturn() {
+            @Override
+            public void perform(@Nullable Object result, @Nullable Error error) {
+                if (!(message instanceof Request))
+                    return;
+
+                Request request = (Request)message;
+                Response response = ((Request) message).createResponse();
+
+                if (error != null) {
+                    // Respond with error
+                    response.setError(error);
+                } else {
+                    // Respond with null or result
+                    response.setResult(result);
+                }
+
+                if (request.getResponseBlock() != null)
+                    request.getResponseBlock().perform(response, null);
+            }
+        };
+
+
+        List<Object> newParams = null;
+        if (methodModel.getCallParameters() != null)
+            newParams = new ArrayList<Object>(Arrays.asList(methodModel.getCallParameters()));
+        else
+            newParams = new ArrayList<Object>(Arrays.asList(messageParams));
+
+        newParams.add(asyncParamIndex, asyncReturn);
+
+        methodModel.setCallParameters(newParams.toArray(new Object[newParams.size()]));
+
+        return methodModel;
+    }
+
+    private int getIndexOfWisperParam(WisperParameterType wisperParam, List<WisperParameterType> params)
+    {
+        for (int i = 0; i < params.size(); i++)
+        {
+            WisperParameterType parameterType = params.get(i);
+            if (parameterType.equals(wisperParam))
+            {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private Method getMethod(Class<?> clasRef, String methodName, Class[] parameterTypes) throws NoSuchMethodException
