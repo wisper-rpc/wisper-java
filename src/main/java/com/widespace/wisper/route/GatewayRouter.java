@@ -79,12 +79,6 @@ public class GatewayRouter extends Router implements GatewayCallback
         gateway.sendMessage(message);
     }
 
-    @Override
-    public ClassRouter getRouter(@NotNull String path)
-    {
-        return (ClassRouter) super.getRouter(path);
-    }
-
     //=====================================================================================
     //region Gateway overrides
     //=====================================================================================
